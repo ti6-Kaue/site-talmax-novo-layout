@@ -152,8 +152,8 @@ const mapTechnicalAssistanceItemToCard = (item) => {
   const details = [];
   const actions = [];
   const primaryActionHref = item.email
-    ? `mailto:${item.email}`
-    : buildTelHref(item.phone) || item.site_url || item.map_url || '';
+    ? item.map_url || `mailto:${item.email}`
+    : item.map_url || buildTelHref(item.phone) || item.site_url || '';
 
   if (item.phone) {
     details.push({
@@ -216,6 +216,7 @@ const mapTechnicalAssistanceItemToCard = (item) => {
     details,
     actions,
     primaryActionHref,
+    mapUrl: item.map_url || '',
     searchText: [
       item.company,
       item.city,
@@ -263,6 +264,35 @@ const renderDetail = (detail, index) => {
       {content}
     </div>
   );
+};
+
+const openMapUrl = (url) => {
+  if (!url) {
+    return;
+  }
+
+  window.open(url, '_blank', 'noopener,noreferrer');
+};
+
+const shouldIgnoreCardClick = (target) => (
+  target.closest('a, button, input, textarea, select, [role="button"]')
+);
+
+const handleMapCardClick = (event, url) => {
+  if (!url || shouldIgnoreCardClick(event.target)) {
+    return;
+  }
+
+  openMapUrl(url);
+};
+
+const handleMapCardKeyDown = (event, url) => {
+  if (!url || (event.key !== 'Enter' && event.key !== ' ')) {
+    return;
+  }
+
+  event.preventDefault();
+  openMapUrl(url);
 };
 
 const TechnicalAssistanceInfoCard = ({ serviceCard }) => {
@@ -534,7 +564,15 @@ const TechnicalAssistance = () => {
                   <p>Nenhuma assist&ecirc;ncia autorizada encontrada para a busca informada.</p>
                 </div>
               ) : paginatedCards.map((card) => (
-                <article key={card.id} className="technical-assistance-card">
+                <article
+                  key={card.id}
+                  className={`technical-assistance-card${card.mapUrl ? ' technical-assistance-card--map-link' : ''}`}
+                  onClick={(event) => handleMapCardClick(event, card.mapUrl)}
+                  onKeyDown={(event) => handleMapCardKeyDown(event, card.mapUrl)}
+                  role={card.mapUrl ? 'link' : undefined}
+                  tabIndex={card.mapUrl ? 0 : undefined}
+                  aria-label={card.mapUrl ? `Abrir mapa da assistencia ${card.title}` : undefined}
+                >
                   <span className="technical-assistance-card-eyebrow">
                     {card.eyebrowPrefix} <strong>{card.eyebrowHighlight}</strong>
                   </span>

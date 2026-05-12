@@ -132,7 +132,7 @@ const HomeServicesSection = ({ services }) => {
     return null;
   }
 
-  if (services.length > 4) {
+  if (services.length > 2) {
     return (
       <section className="service-banners service-banners--carousel">
         <button
@@ -148,8 +148,9 @@ const HomeServicesSection = ({ services }) => {
 
         <Swiper
           modules={[Autoplay, Navigation]}
-          spaceBetween={16}
+          spaceBetween={10}
           slidesPerView={2}
+          slidesPerGroup={2}
           loop={services.length > 1}
           navigation={{
             prevEl: '.service-banners__nav-prev',
@@ -157,9 +158,21 @@ const HomeServicesSection = ({ services }) => {
           }}
           autoplay={{ delay: 3500, disableOnInteraction: false }}
           breakpoints={{
-            640: { slidesPerView: 2 },
-            1024: { slidesPerView: 3 },
-            1400: { slidesPerView: 4 }
+            769: {
+              slidesPerView: 2,
+              slidesPerGroup: 1,
+              spaceBetween: 16
+            },
+            1024: {
+              slidesPerView: 3,
+              slidesPerGroup: 1,
+              spaceBetween: 16
+            },
+            1400: {
+              slidesPerView: 4,
+              slidesPerGroup: 1,
+              spaceBetween: 16
+            }
           }}
         >
           {services.map((service) => (

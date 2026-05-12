@@ -1212,6 +1212,24 @@ body[data-theme='dark'] .service-banner {
     overflow: visible;
   }
 
+  .service-banners--carousel {
+    min-height: var(--service-card-height);
+  }
+
+  .service-banners--carousel .swiper,
+  .service-banners--carousel .swiper-wrapper {
+    min-height: var(--service-card-height);
+  }
+
+  .service-banners--carousel .swiper-slide {
+    height: var(--service-card-height) !important;
+    min-height: var(--service-card-height);
+  }
+
+  .service-banners--carousel .service-banner {
+    width: 100% !important;
+  }
+
   .service-banners__nav {
     display: none;
   }
@@ -1415,6 +1433,15 @@ body[data-theme='dark'] .service-banner {
     margin-top: 2.75rem;
     gap: 0.55rem;
     padding: 0 0.75rem;
+  }
+
+  .service-banners--carousel {
+    min-height: var(--service-card-height);
+  }
+
+  .service-banners--carousel .swiper,
+  .service-banners--carousel .swiper-wrapper {
+    min-height: var(--service-card-height);
   }
 
   .service-banner {

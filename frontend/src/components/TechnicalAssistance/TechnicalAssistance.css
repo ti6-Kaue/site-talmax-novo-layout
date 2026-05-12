@@ -603,6 +603,15 @@
   transition: none;
 }
 
+.technical-assistance-card--map-link {
+  cursor: pointer;
+}
+
+.technical-assistance-card--map-link:focus-visible {
+  outline: 2px solid rgba(55, 76, 146, 0.52);
+  outline-offset: 3px;
+}
+
 .technical-assistance-card:hover {
   box-shadow: none;
   transform: none;
