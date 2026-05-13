@@ -19,6 +19,7 @@ import {
 import { motion } from 'framer-motion';
 import ProductCard from '../ProductCard/ProductCard';
 import API_URL from '../../services/api';
+import { trackProductView, trackQuoteClick, trackWhatsappClick } from '../../services/analytics';
 import { apiAssetPath } from '../../utils/assets';
 import { parseSafeExtraData } from '../../utils/contentSafety';
 import { getVisibleCategoryLabel } from '../../utils/productCategories';
@@ -280,6 +281,7 @@ const ProductDetail = () => {
         };
 
         setProduct(formattedProduct);
+        trackProductView(formattedProduct);
         setActiveImage(formattedProduct.image || (Array.isArray(formattedProduct.images) ? formattedProduct.images[0] : '') || '');
         setIsFeaturesCollapsed(true);
         setActiveTab('description');
@@ -440,6 +442,10 @@ const ProductDetail = () => {
 
   const whatsappMessage = encodeURIComponent(`Ola! Gostaria de mais informacoes sobre o produto: ${product.name}`);
   const whatsappUrl = `https://wa.me/554130123456?text=${whatsappMessage}`;
+  const handleQuoteClick = (source) => {
+    trackQuoteClick(product, source);
+    trackWhatsappClick(source);
+  };
   const descriptionLines = String(product.description || '')
     .split('\n')
     .map((line) => line.trim())
@@ -501,7 +507,13 @@ const ProductDetail = () => {
             {product.is_upcera && <span className="product-hero-brand">UPCERA</span>}
 
             {shouldShowQuoteButton(product.showQuoteButton) && (
-              <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="btn-whatsapp-quote">
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-whatsapp-quote"
+                onClick={() => handleQuoteClick('product_hero')}
+              >
                 <MessageCircle size={20} /> Solicitar Orçamento
               </a>
             )}
@@ -627,7 +639,13 @@ const ProductDetail = () => {
 
             {shouldShowQuoteButton(product.showQuoteButton) && (
               <div className="product-actions">
-                <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="btn-whatsapp-quote">
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-whatsapp-quote"
+                  onClick={() => handleQuoteClick('product_actions')}
+                >
                   <MessageCircle size={20} /> Solicitar Orçamento
                 </a>
               </div>

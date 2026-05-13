@@ -1,101 +1,121 @@
-import { COOKIE_CONSENT_ACCEPTED } from './cookieConsent';
+import API_URL from './api';
+import {
+  COOKIE_CONSENT_ACCEPTED,
+  readCookieConsentStatus
+} from './cookieConsent';
 
-const ANALYTICS_MEASUREMENT_ID = (import.meta.env.VITE_GA_MEASUREMENT_ID || 'G-7K6GMGZT0K').trim();
-const ANALYTICS_SCRIPT_ID = 'talmax-google-analytics';
-const ANALYTICS_CONFIGURED_FLAG = '__talmaxAnalyticsConfigured';
+const VISITOR_STORAGE_KEY = 'talmax-visitor-id';
+const MAX_TEXT_LENGTH = 180;
 
-const buildAnalyticsConsentState = (isEnabled) => ({
-  analytics_storage: isEnabled ? 'granted' : 'denied',
-  ad_storage: 'denied',
-  ad_user_data: 'denied',
-  ad_personalization: 'denied'
-});
+const isBrowser = () => typeof window !== 'undefined';
 
-const getAnalyticsDisableFlagKey = () => `ga-disable-${ANALYTICS_MEASUREMENT_ID}`;
-
-const ensureAnalyticsBootstrap = () => {
-  if (typeof window === 'undefined') {
-    return false;
+const createVisitorId = () => {
+  if (isBrowser() && window.crypto?.randomUUID) {
+    return window.crypto.randomUUID();
   }
 
-  window.dataLayer = window.dataLayer || [];
-
-  if (typeof window.gtag !== 'function') {
-    window.gtag = function gtag() {
-      window.dataLayer.push(arguments);
-    };
-  }
-
-  return true;
+  return `visitor-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 };
 
-const configureAnalytics = () => {
-  if (!ANALYTICS_MEASUREMENT_ID || typeof window === 'undefined' || window[ANALYTICS_CONFIGURED_FLAG]) {
-    return false;
+const getVisitorId = () => {
+  if (!isBrowser()) {
+    return '';
   }
 
-  ensureAnalyticsBootstrap();
-  window.gtag('js', new Date());
-  window.gtag('config', ANALYTICS_MEASUREMENT_ID, {
-    anonymize_ip: true
-  });
-  window[ANALYTICS_CONFIGURED_FLAG] = true;
+  try {
+    const storedId = window.localStorage.getItem(VISITOR_STORAGE_KEY);
 
-  return true;
-};
-
-const ensureAnalyticsScript = () => {
-  if (!ANALYTICS_MEASUREMENT_ID || typeof document === 'undefined') {
-    return false;
-  }
-
-  ensureAnalyticsBootstrap();
-
-  const existingScript = document.getElementById(ANALYTICS_SCRIPT_ID);
-
-  if (existingScript) {
-    if (existingScript.dataset.loaded === 'true') {
-      configureAnalytics();
+    if (storedId) {
+      return storedId;
     }
 
-    return true;
+    const nextId = createVisitorId();
+    window.localStorage.setItem(VISITOR_STORAGE_KEY, nextId);
+    return nextId;
+  } catch {
+    return createVisitorId();
   }
-
-  const script = document.createElement('script');
-  script.id = ANALYTICS_SCRIPT_ID;
-  script.async = true;
-  script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(ANALYTICS_MEASUREMENT_ID)}`;
-  script.addEventListener('load', () => {
-    script.dataset.loaded = 'true';
-    configureAnalytics();
-  }, { once: true });
-
-  document.head.appendChild(script);
-  return true;
 };
 
-const setAnalyticsEnabled = (isEnabled) => {
-  if (!ANALYTICS_MEASUREMENT_ID || typeof window === 'undefined') {
+const normalizeText = (value, maxLength = MAX_TEXT_LENGTH) => (
+  String(value || '').replace(/\s+/g, ' ').trim().slice(0, maxLength)
+);
+
+const canTrackAnalytics = () => (
+  isBrowser() && readCookieConsentStatus() === COOKIE_CONSENT_ACCEPTED
+);
+
+export const trackAnalyticsEvent = (eventType, payload = {}) => {
+  if (!canTrackAnalytics()) {
     return false;
   }
 
-  ensureAnalyticsBootstrap();
-  window[getAnalyticsDisableFlagKey()] = !isEnabled;
+  const eventPayload = {
+    visitor_id: getVisitorId(),
+    event_type: normalizeText(eventType, 40),
+    path: normalizeText(payload.path || window.location.pathname, 255),
+    search_term: normalizeText(payload.searchTerm || payload.search_term, 160),
+    product_id: payload.productId || payload.product_id || null,
+    product_name: normalizeText(payload.productName || payload.product_name, 255),
+    result_count: Number.isInteger(payload.resultCount) ? payload.resultCount : payload.result_count,
+    metadata: payload.metadata || {}
+  };
 
-  const consentMode = window[ANALYTICS_CONFIGURED_FLAG] ? 'update' : 'default';
-  window.gtag('consent', consentMode, buildAnalyticsConsentState(isEnabled));
+  const body = JSON.stringify(eventPayload);
+  const endpoint = `${API_URL}/analytics/events`;
 
-  if (isEnabled) {
-    ensureAnalyticsScript();
+  if (navigator.sendBeacon) {
+    const blob = new Blob([body], { type: 'application/json' });
+    return navigator.sendBeacon(endpoint, blob);
   }
+
+  fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body,
+    keepalive: true
+  }).catch(() => {});
 
   return true;
 };
 
-export const syncAnalyticsWithConsent = ({ consentStatus, enabled }) => {
-  if (!ANALYTICS_MEASUREMENT_ID) {
-    return false;
-  }
+export const trackPageView = (path) => trackAnalyticsEvent('page_view', { path });
 
-  return setAnalyticsEnabled(Boolean(enabled) && consentStatus === COOKIE_CONSENT_ACCEPTED);
-};
+export const trackSearch = ({ searchTerm, resultCount, source } = {}) => (
+  trackAnalyticsEvent('search', {
+    searchTerm,
+    resultCount,
+    metadata: { source }
+  })
+);
+
+export const trackProductView = (product) => (
+  trackAnalyticsEvent('product_view', {
+    productId: product?.id,
+    productName: product?.name
+  })
+);
+
+export const trackProductClick = (product, source = 'product_card') => (
+  trackAnalyticsEvent('product_click', {
+    productId: product?.id,
+    productName: product?.name,
+    metadata: { source }
+  })
+);
+
+export const trackQuoteClick = (product, source = 'product_detail') => (
+  trackAnalyticsEvent('quote_click', {
+    productId: product?.id,
+    productName: product?.name,
+    metadata: { source }
+  })
+);
+
+export const trackWhatsappClick = (source = 'footer') => (
+  trackAnalyticsEvent('whatsapp_click', {
+    metadata: { source }
+  })
+);

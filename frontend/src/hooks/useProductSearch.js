@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import API_URL from '../services/api';
+import { trackProductClick, trackSearch } from '../services/analytics';
 import { apiAssetPath } from '../utils/assets';
 import { parseSafeExtraData } from '../utils/contentSafety';
 import { getNormalizedCategoryNames } from '../utils/productCategories';
@@ -343,6 +344,7 @@ export const useProductSearch = ({ isAdmin, onNavigateComplete } = {}) => {
   };
 
   const handleProductSuggestionSelect = (product) => {
+    trackProductClick(product, 'search_suggestion');
     finishSearchNavigation(`/produto/${product.id}`);
   };
 
@@ -354,6 +356,12 @@ export const useProductSearch = ({ isAdmin, onNavigateComplete } = {}) => {
     if (!destination) {
       return;
     }
+
+    trackSearch({
+      searchTerm,
+      resultCount: productSearchMatches.length,
+      source: 'header'
+    });
 
     const nextSearchTerm = destination.includes('?busca=') ? searchTerm.trim() : '';
     finishSearchNavigation(destination, { nextSearchTerm });

@@ -28,6 +28,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { AdminProvider } from '../../context/AdminContext';
 import { useAdmin } from '../../context/useAdmin';
 import { logoutAdmin } from '../../services/adminAuth';
+import AdminDashboardHome from './AdminDashboardHome/AdminDashboardHome';
 import './AdminBase.css';
 
 const AdminProducts = lazy(() => import('./AdminProducts/AdminProducts'));
@@ -67,47 +68,6 @@ const withAdminSectionLoader = (element, label) => (
     {element}
   </AdminSectionLoader>
 );
-
-const DashboardHome = ({ onOpenTab }) => {
-  const { products, categories, banners } = useAdmin();
-
-  const stats = [
-    { title: 'Produtos', value: products.length, icon: <Package />, color: 'blue', tabId: 'products' },
-    { title: 'Categorias', value: categories.length, icon: <Layers />, color: 'green', tabId: 'categories' },
-    { title: 'Banners', value: banners.length, icon: <ImageIcon />, color: 'orange', tabId: 'banners' }
-  ];
-
-  return (
-    <div className="admin-dashboard-home">
-      <div className="stats-grid">
-        {stats.map((stat, idx) => (
-          <button
-            key={idx}
-            type="button"
-            className="stat-card"
-            onClick={() => onOpenTab(stat.tabId)}
-            style={{ cursor: 'pointer', textAlign: 'left', border: '1px solid var(--admin-border)' }}
-          >
-            <div className={`stat-icon ${stat.color}`}>{stat.icon}</div>
-            <div className="stat-info">
-              <h3>{stat.title}</h3>
-              <p>{stat.value}</p>
-            </div>
-          </button>
-        ))}
-      </div>
-
-      <div className="admin-card">
-        <div className="card-header">
-          <h2><LayoutDashboard size={20} /> Bem-vindo ao Painel Administrativo</h2>
-        </div>
-        <div className="card-body">
-          <p>Utilize o menu lateral para gerenciar os produtos, categorias, banners e acessos do painel Talmax.</p>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const AdminDashboardContent = () => {
   const navigate = useNavigate();
@@ -173,7 +133,7 @@ const AdminDashboardContent = () => {
   const renderActiveTab = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <DashboardHome onOpenTab={setActiveTab} />;
+        return <AdminDashboardHome onOpenTab={setActiveTab} />;
       case 'products':
         return withAdminSectionLoader(
           <AdminProducts
@@ -225,7 +185,7 @@ const AdminDashboardContent = () => {
       case 'support':
         return withAdminSectionLoader(<AdminSupport />, 'Carregando suporte...');
       default:
-        return <DashboardHome onOpenTab={setActiveTab} />;
+        return <AdminDashboardHome onOpenTab={setActiveTab} />;
     }
   };
 

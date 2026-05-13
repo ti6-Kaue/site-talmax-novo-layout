@@ -24,7 +24,7 @@ import PagePlaceholder from './components/PagePlaceholder/PagePlaceholder';
 import SearchBar from './components/SearchBar/SearchBar';
 import { useProductSearch } from './hooks/useProductSearch';
 import { validateAdminSession } from './services/adminAuth';
-import { syncAnalyticsWithConsent } from './services/analytics';
+import { trackPageView, trackWhatsappClick } from './services/analytics';
 import homeContentBlockService from './services/homeContentBlockService';
 import {
   readCookieConsentStatus,
@@ -344,11 +344,10 @@ const AppContent = ({ appReady, menuOpen, setMenuOpen, theme, onToggleTheme }) =
   }, []);
 
   useEffect(() => {
-    syncAnalyticsWithConsent({
-      consentStatus: cookieConsentStatus,
-      enabled: !isAdmin
-    });
-  }, [cookieConsentStatus, isAdmin]);
+    if (!isAdmin) {
+      trackPageView(`${location.pathname}${location.search}`);
+    }
+  }, [cookieConsentStatus, isAdmin, location.pathname, location.search]);
 
   useEffect(() => {
     if (isAdmin) {
@@ -834,7 +833,13 @@ const AppContent = ({ appReady, menuOpen, setMenuOpen, theme, onToggleTheme }) =
                 <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
                   <Instagram size={28} />
                   </a>
-                  <a href="https://wa.me/554130123456" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+                  <a
+                    href="https://wa.me/554130123456"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="WhatsApp"
+                    onClick={() => trackWhatsappClick('footer')}
+                  >
                     <WhatsAppIcon size={28} />
                   </a>
                 <a href="https://www.linkedin.com/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">

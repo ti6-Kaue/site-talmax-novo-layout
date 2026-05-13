@@ -6,6 +6,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
+import { trackProductClick } from '../../services/analytics';
 import './ProductCard.css';
 
 const FIXED_SEGMENT_NAMES = ['talmax digital', 'protese dentaria', 'nail e podologia'];
@@ -70,6 +71,7 @@ const ProductCard = ({ product, imageLoading = 'lazy', imageFetchPriority = 'aut
   }, [product]);
 
   const handleCardClick = () => {
+    trackProductClick(product, 'product_card');
     navigate(`/produto/${product.id}`);
     window.scrollTo(0, 0);
   };
@@ -127,7 +129,10 @@ const ProductCard = ({ product, imageLoading = 'lazy', imageFetchPriority = 'aut
             to={`/produto/${product.id}`}
             className="btn-quote-lux"
             aria-label={`Ver detalhes de ${product.name}`}
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              trackProductClick(product, 'product_card_button');
+            }}
           >
             <ChevronRight size={22} strokeWidth={2.15} />
           </Link>

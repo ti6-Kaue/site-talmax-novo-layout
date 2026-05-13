@@ -16,6 +16,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import ProductCard from '../ProductCard/ProductCard';
 import API_URL from '../../services/api';
+import { trackSearch } from '../../services/analytics';
 import { apiAssetPath } from '../../utils/assets';
 import { parseSafeExtraData } from '../../utils/contentSafety';
 import { getNormalizedCategoryNames, getVisibleCategoryLabel } from '../../utils/productCategories';
@@ -273,6 +274,26 @@ const ProductCatalog = () => {
   }, [searchTerm, activeCategories, products, allCategories]);
 
   // Paginação
+  useEffect(() => {
+    const normalizedTerm = searchTerm.trim();
+
+    if (normalizedTerm.length < 2) {
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      trackSearch({
+        searchTerm: normalizedTerm,
+        resultCount: filteredProducts.length,
+        source: 'catalog'
+      });
+    }, 900);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [filteredProducts.length, searchTerm]);
+
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
   const paginatedProducts = useMemo(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;

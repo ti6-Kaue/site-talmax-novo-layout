@@ -15,12 +15,7 @@ const applySecurityHeaders = (app) => {
       directives: {
         defaultSrc: ["'self'"],
         baseUri: ["'self'"],
-        connectSrc: [
-          "'self'",
-          'https://www.google-analytics.com',
-          'https://region1.google-analytics.com',
-          'https://www.googletagmanager.com'
-        ],
+        connectSrc: ["'self'"],
         fontSrc: [
           "'self'",
           'data:',
@@ -38,10 +33,7 @@ const applySecurityHeaders = (app) => {
           'https:'
         ],
         objectSrc: ["'none'"],
-        scriptSrc: [
-          "'self'",
-          'https://www.googletagmanager.com'
-        ],
+        scriptSrc: ["'self'"],
         styleSrc: [
           "'self'",
           "'unsafe-inline'",

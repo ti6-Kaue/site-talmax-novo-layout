@@ -17,6 +17,7 @@ const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 
 const db = require('./src/config/database');
+const { hasUncaughtExceptionCaptureCallback } = require('process');
 
 const hashPassword = (password) => {
   const salt = crypto.randomBytes(16).toString('hex');
@@ -39,7 +40,7 @@ const main = async () => {
     );
 
     if (users.length === 0) {
-      console.error(`Usuario "${username}" nao encontrado na tabela users.`);
+      console.error(`Usuario "${username}" não encontrado na tabela users.`);
       console.log('\nUsuarios existentes:');
       const [allUsers] = await db.query('SELECT id, username, role FROM users');
       allUsers.forEach((u) => console.log(`  id=${u.id}  username=${u.username}  role=${u.role || '(sem role)'}`));
@@ -56,7 +57,7 @@ const main = async () => {
 
     console.log(`Senha do usuario "${user.username}" (id=${user.id}) atualizada com sucesso!`);
     console.log(`Role: ${user.role || 'master (definido agora)'}`);
-    console.log('\nVoce ja pode fazer login no painel.');
+    console.log('\nVocê ja pode fazer login no painel.');
     console.log('APAGUE este script apos o uso: del reset-admin-password.js');
   } catch (error) {
     console.error('Erro:', error.message);
@@ -68,3 +69,4 @@ const main = async () => {
 };
 
 main();
+

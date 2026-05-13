@@ -26,7 +26,7 @@ const CookieBanner = () => {
       <div className="cookie-banner-content">
         <h3>Privacidade e Cookies</h3>
         <p>
-          Usamos cookies essenciais para o funcionamento do site e so ativamos analytics apos o seu aceite.
+          Usamos cookies essenciais e, com seu aceite, metricas anonimas do proprio site para melhorar produtos e buscas.
           Consulte nossa <Link to="/privacidade">Politica de Privacidade</Link>.
         </p>
       </div>
