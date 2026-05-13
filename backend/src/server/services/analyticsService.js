@@ -150,60 +150,50 @@ const getAnalyticsSummary = async ({ days = 30 } = {}) => {
   const boundedDays = Math.min(Math.max(Number.parseInt(days, 10) || 30, 1), 90);
   const rangeExpression = 'created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)';
 
-  const [
-    [todayVisitorsRows],
-    [periodVisitorsRows],
-    [pageViewRows],
-    [searchRows],
-    [quoteRows],
-    [whatsappRows],
-    [topPages],
-    [topProductsViewed],
-    [topProductsClicked],
-    [topQuoteProducts],
-    [topSearchTerms],
-    [searchesWithoutResults],
-    [recentInterests]
-  ] = await Promise.all([
-    db.query(`
+  const connection = await db.getConnection();
+
+  try {
+    const [todayVisitorsRows] = await connection.query(`
       SELECT COUNT(DISTINCT visitor_id) AS total
       FROM site_analytics_events
-      WHERE event_type = 'page_view' AND DATE(created_at) = CURDATE()
-    `),
-    db.query(`
+      WHERE event_type = 'page_view'
+        AND created_at >= CURDATE()
+        AND created_at < DATE_ADD(CURDATE(), INTERVAL 1 DAY)
+    `);
+    const [periodVisitorsRows] = await connection.query(`
       SELECT COUNT(DISTINCT visitor_id) AS total
       FROM site_analytics_events
       WHERE event_type = 'page_view' AND ${rangeExpression}
-    `, [boundedDays]),
-    db.query(`
+    `, [boundedDays]);
+    const [pageViewRows] = await connection.query(`
       SELECT COUNT(*) AS total
       FROM site_analytics_events
       WHERE event_type = 'page_view' AND ${rangeExpression}
-    `, [boundedDays]),
-    db.query(`
+    `, [boundedDays]);
+    const [searchRows] = await connection.query(`
       SELECT COUNT(*) AS total
       FROM site_analytics_events
       WHERE event_type = 'search' AND ${rangeExpression}
-    `, [boundedDays]),
-    db.query(`
+    `, [boundedDays]);
+    const [quoteRows] = await connection.query(`
       SELECT COUNT(*) AS total
       FROM site_analytics_events
       WHERE event_type = 'quote_click' AND ${rangeExpression}
-    `, [boundedDays]),
-    db.query(`
+    `, [boundedDays]);
+    const [whatsappRows] = await connection.query(`
       SELECT COUNT(*) AS total
       FROM site_analytics_events
       WHERE event_type = 'whatsapp_click' AND ${rangeExpression}
-    `, [boundedDays]),
-    db.query(`
+    `, [boundedDays]);
+    const [topPages] = await connection.query(`
       SELECT COALESCE(NULLIF(path, ''), '/') AS label, COUNT(*) AS total
       FROM site_analytics_events
       WHERE event_type = 'page_view' AND ${rangeExpression}
       GROUP BY label
       ORDER BY total DESC, label ASC
       LIMIT 5
-    `, [boundedDays]),
-    db.query(`
+    `, [boundedDays]);
+    const [topProductsViewed] = await connection.query(`
       SELECT
         COALESCE(NULLIF(product_name, ''), CONCAT('Produto #', product_id)) AS label,
         product_id,
@@ -213,8 +203,8 @@ const getAnalyticsSummary = async ({ days = 30 } = {}) => {
       GROUP BY product_id, label
       ORDER BY total DESC, label ASC
       LIMIT 5
-    `, [boundedDays]),
-    db.query(`
+    `, [boundedDays]);
+    const [topProductsClicked] = await connection.query(`
       SELECT
         COALESCE(NULLIF(product_name, ''), CONCAT('Produto #', product_id)) AS label,
         product_id,
@@ -224,8 +214,8 @@ const getAnalyticsSummary = async ({ days = 30 } = {}) => {
       GROUP BY product_id, label
       ORDER BY total DESC, label ASC
       LIMIT 5
-    `, [boundedDays]),
-    db.query(`
+    `, [boundedDays]);
+    const [topQuoteProducts] = await connection.query(`
       SELECT
         COALESCE(NULLIF(product_name, ''), CONCAT('Produto #', product_id)) AS label,
         product_id,
@@ -235,16 +225,16 @@ const getAnalyticsSummary = async ({ days = 30 } = {}) => {
       GROUP BY product_id, label
       ORDER BY total DESC, label ASC
       LIMIT 5
-    `, [boundedDays]),
-    db.query(`
+    `, [boundedDays]);
+    const [topSearchTerms] = await connection.query(`
       SELECT search_term AS label, COUNT(*) AS total
       FROM site_analytics_events
       WHERE event_type = 'search' AND search_term IS NOT NULL AND search_term <> '' AND ${rangeExpression}
       GROUP BY search_term
       ORDER BY total DESC, label ASC
       LIMIT 8
-    `, [boundedDays]),
-    db.query(`
+    `, [boundedDays]);
+    const [searchesWithoutResults] = await connection.query(`
       SELECT search_term AS label, COUNT(*) AS total
       FROM site_analytics_events
       WHERE event_type = 'search'
@@ -255,8 +245,8 @@ const getAnalyticsSummary = async ({ days = 30 } = {}) => {
       GROUP BY search_term
       ORDER BY total DESC, label ASC
       LIMIT 8
-    `, [boundedDays]),
-    db.query(`
+    `, [boundedDays]);
+    const [recentInterests] = await connection.query(`
       SELECT
         event_type,
         path,
@@ -269,27 +259,29 @@ const getAnalyticsSummary = async ({ days = 30 } = {}) => {
       WHERE event_type IN ('quote_click', 'whatsapp_click', 'product_view', 'product_click', 'search') AND ${rangeExpression}
       ORDER BY created_at DESC
       LIMIT 8
-    `, [boundedDays])
-  ]);
+    `, [boundedDays]);
 
-  return {
-    period_days: boundedDays,
-    totals: {
-      visitors_today: getCountValue(todayVisitorsRows),
-      visitors_period: getCountValue(periodVisitorsRows),
-      page_views: getCountValue(pageViewRows),
-      searches: getCountValue(searchRows),
-      quote_clicks: getCountValue(quoteRows),
-      whatsapp_clicks: getCountValue(whatsappRows)
-    },
-    top_pages: topPages,
-    top_products_viewed: topProductsViewed,
-    top_products_clicked: topProductsClicked,
-    top_quote_products: topQuoteProducts,
-    top_search_terms: topSearchTerms,
-    searches_without_results: searchesWithoutResults,
-    recent_interests: recentInterests
-  };
+    return {
+      period_days: boundedDays,
+      totals: {
+        visitors_today: getCountValue(todayVisitorsRows),
+        visitors_period: getCountValue(periodVisitorsRows),
+        page_views: getCountValue(pageViewRows),
+        searches: getCountValue(searchRows),
+        quote_clicks: getCountValue(quoteRows),
+        whatsapp_clicks: getCountValue(whatsappRows)
+      },
+      top_pages: topPages,
+      top_products_viewed: topProductsViewed,
+      top_products_clicked: topProductsClicked,
+      top_quote_products: topQuoteProducts,
+      top_search_terms: topSearchTerms,
+      searches_without_results: searchesWithoutResults,
+      recent_interests: recentInterests
+    };
+  } finally {
+    connection.release();
+  }
 };
 
 module.exports = {

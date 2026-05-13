@@ -61,6 +61,14 @@ const getRequestSourceOrigin = (req) => {
   };
 };
 
+const isSameSiteBrowserWrite = (req) => {
+  const fetchSite = typeof req.headers['sec-fetch-site'] === 'string'
+    ? req.headers['sec-fetch-site'].trim().toLowerCase()
+    : '';
+
+  return ['same-origin', 'same-site'].includes(fetchSite);
+};
+
 const requireTrustedWriteOrigin = (req, _res, next) => {
   if (!UNSAFE_HTTP_METHODS.has(req.method)) {
     return next();
@@ -70,6 +78,10 @@ const requireTrustedWriteOrigin = (req, _res, next) => {
   const sourceOrigin = getRequestSourceOrigin(req);
 
   if (!sourceOrigin.value) {
+    if (isSameSiteBrowserWrite(req)) {
+      return next();
+    }
+
     return next(createHttpError(403, 'Requisicao bloqueada por politica de origem confiavel.', {
       code: 'TRUSTED_ORIGIN_MISSING',
       expose: true,
