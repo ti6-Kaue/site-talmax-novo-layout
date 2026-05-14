@@ -3,6 +3,7 @@
  * Registra middlewares globais, arquivos estaticos e todas as rotas da API.
  */
 const express = require('express');
+const fs = require('fs');
 const path = require('path');
 const corsMiddleware = require('./config/cors');
 const {
@@ -36,6 +37,31 @@ const technicalAssistanceRoutes = require('./routes/technicalAssistanceRoutes');
 const supportRoutes = require('./routes/supportRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
 
+const normalizeBasePath = (value = '/') => {
+  const trimmed = String(value || '/').trim();
+
+  if (!trimmed || trimmed === '/') {
+    return '/';
+  }
+
+  return `/${trimmed.replace(/^\/+|\/+$/g, '')}`;
+};
+
+const inferFrontendBasePath = (frontendDistPath) => {
+  try {
+    const indexHtml = fs.readFileSync(path.join(frontendDistPath, 'index.html'), 'utf8');
+    const assetMatch = indexHtml.match(/(?:src|href)=["'](\/[^"']*\/assets\/)/);
+
+    if (!assetMatch) {
+      return '/';
+    }
+
+    return normalizeBasePath(assetMatch[1].replace(/\/assets\/$/, ''));
+  } catch (error) {
+    return '/';
+  }
+};
+
 const INLINE_IMAGE_PLACEHOLDER = [
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="Talmax">',
   '<defs>',
@@ -55,6 +81,11 @@ const INLINE_IMAGE_PLACEHOLDER = [
 const createApp = () => {
   const app = express();
   const frontendDistPath = path.resolve(__dirname, '../../../frontend/dist');
+  const frontendBasePath = normalizeBasePath(
+    process.env.PUBLIC_BASE_PATH
+    || process.env.VITE_PUBLIC_BASE_PATH
+    || inferFrontendBasePath(frontendDistPath)
+  );
   const imageDirectories = getServedImageDirs();
   const primaryImageDir = getPrimaryImageDir();
 
@@ -75,6 +106,9 @@ const createApp = () => {
     applyPlaceholderImageCache(res);
     return res.send(INLINE_IMAGE_PLACEHOLDER);
   });
+  if (frontendBasePath !== '/') {
+    app.use(frontendBasePath, express.static(frontendDistPath));
+  }
   app.use(express.static(frontendDistPath));
 
   app.use('/api/admin', adminAuthRoutes);
@@ -99,6 +133,10 @@ const createApp = () => {
 
     if (req.method !== 'GET' && req.method !== 'HEAD') {
       return next();
+    }
+
+    if (path.extname(req.path)) {
+      return res.status(404).type('text/plain').send('Arquivo estatico nao encontrado.');
     }
 
     return res.sendFile(path.join(frontendDistPath, 'index.html'));
