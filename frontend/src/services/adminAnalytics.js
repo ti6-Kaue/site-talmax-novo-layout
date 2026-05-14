@@ -11,6 +11,6 @@ export const getAdminAnalyticsSummary = async ({ days = 30 } = {}) => {
     createAdminRequestOptions()
   );
 
-  await ensureAdminResponse(response, 'Nao foi possivel carregar as metricas do dashboard.');
+  await ensureAdminResponse(response, 'Não foi possivel carregar as metricas do dashboard.');
   return response.json();
 };

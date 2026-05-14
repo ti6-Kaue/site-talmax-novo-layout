@@ -54,7 +54,7 @@ export const productService = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ showQuoteButton })
     }));
-    await ensureAdminResponse(res, 'Erro ao atualizar botao de orcamento');
+    await ensureAdminResponse(res, 'Erro ao atualizar botão de orçamento');
     return res.json();
   },
 

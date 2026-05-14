@@ -144,6 +144,43 @@ const recordAnalyticsEvent = async (input = {}) => {
 
 const getCountValue = (rows) => Number(rows?.[0]?.total || 0);
 
+const buildDateKey = (date) => date.toISOString().slice(0, 10);
+
+const buildDailyActivitySeries = (rows = [], days = 14) => {
+  const rowsByDate = new Map(
+    rows.map((row) => [
+      row.activity_date,
+      {
+        date: row.activity_date,
+        label: String(row.activity_date || '').slice(5).split('-').reverse().join('/'),
+        visitors: Number(row.visitors || 0),
+        page_views: Number(row.page_views || 0),
+        product_views: Number(row.product_views || 0),
+        searches: Number(row.searches || 0),
+        quote_clicks: Number(row.quote_clicks || 0),
+        whatsapp_clicks: Number(row.whatsapp_clicks || 0)
+      }
+    ])
+  );
+
+  return Array.from({ length: days }, (_, index) => {
+    const date = new Date();
+    date.setDate(date.getDate() - (days - 1 - index));
+    const dateKey = buildDateKey(date);
+
+    return rowsByDate.get(dateKey) || {
+      date: dateKey,
+      label: dateKey.slice(5).split('-').reverse().join('/'),
+      visitors: 0,
+      page_views: 0,
+      product_views: 0,
+      searches: 0,
+      quote_clicks: 0,
+      whatsapp_clicks: 0
+    };
+  });
+};
+
 const getAnalyticsSummary = async ({ days = 30 } = {}) => {
   await ensureAnalyticsEventsTable();
 
@@ -175,6 +212,11 @@ const getAnalyticsSummary = async ({ days = 30 } = {}) => {
       FROM site_analytics_events
       WHERE event_type = 'search' AND ${rangeExpression}
     `, [boundedDays]);
+    const [productViewRows] = await connection.query(`
+      SELECT COUNT(*) AS total
+      FROM site_analytics_events
+      WHERE event_type = 'product_view' AND ${rangeExpression}
+    `, [boundedDays]);
     const [quoteRows] = await connection.query(`
       SELECT COUNT(*) AS total
       FROM site_analytics_events
@@ -186,9 +228,18 @@ const getAnalyticsSummary = async ({ days = 30 } = {}) => {
       WHERE event_type = 'whatsapp_click' AND ${rangeExpression}
     `, [boundedDays]);
     const [topPages] = await connection.query(`
-      SELECT COALESCE(NULLIF(path, ''), '/') AS label, COUNT(*) AS total
-      FROM site_analytics_events
-      WHERE event_type = 'page_view' AND ${rangeExpression}
+      SELECT
+        COALESCE(
+          CONCAT('Produto / ', NULLIF(products.name, '')),
+          NULLIF(events.path, ''),
+          '/'
+        ) AS label,
+        COUNT(*) AS total
+      FROM site_analytics_events events
+      LEFT JOIN products
+        ON events.path LIKE '/produto/%'
+        AND products.id = CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(events.path, '?', 1), '/', -1) AS UNSIGNED)
+      WHERE events.event_type = 'page_view' AND events.${rangeExpression}
       GROUP BY label
       ORDER BY total DESC, label ASC
       LIMIT 5
@@ -202,7 +253,7 @@ const getAnalyticsSummary = async ({ days = 30 } = {}) => {
       WHERE event_type = 'product_view' AND product_id IS NOT NULL AND ${rangeExpression}
       GROUP BY product_id, label
       ORDER BY total DESC, label ASC
-      LIMIT 5
+      LIMIT 10
     `, [boundedDays]);
     const [topProductsClicked] = await connection.query(`
       SELECT
@@ -260,6 +311,20 @@ const getAnalyticsSummary = async ({ days = 30 } = {}) => {
       ORDER BY created_at DESC
       LIMIT 8
     `, [boundedDays]);
+    const [dailyActivityRows] = await connection.query(`
+      SELECT
+        DATE_FORMAT(created_at, '%Y-%m-%d') AS activity_date,
+        COUNT(DISTINCT CASE WHEN event_type = 'page_view' THEN visitor_id END) AS visitors,
+        SUM(CASE WHEN event_type = 'page_view' THEN 1 ELSE 0 END) AS page_views,
+        SUM(CASE WHEN event_type = 'product_view' THEN 1 ELSE 0 END) AS product_views,
+        SUM(CASE WHEN event_type = 'search' THEN 1 ELSE 0 END) AS searches,
+        SUM(CASE WHEN event_type = 'quote_click' THEN 1 ELSE 0 END) AS quote_clicks,
+        SUM(CASE WHEN event_type = 'whatsapp_click' THEN 1 ELSE 0 END) AS whatsapp_clicks
+      FROM site_analytics_events
+      WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 13 DAY)
+      GROUP BY activity_date
+      ORDER BY activity_date ASC
+    `);
 
     return {
       period_days: boundedDays,
@@ -268,6 +333,7 @@ const getAnalyticsSummary = async ({ days = 30 } = {}) => {
         visitors_period: getCountValue(periodVisitorsRows),
         page_views: getCountValue(pageViewRows),
         searches: getCountValue(searchRows),
+        product_views: getCountValue(productViewRows),
         quote_clicks: getCountValue(quoteRows),
         whatsapp_clicks: getCountValue(whatsappRows)
       },
@@ -277,7 +343,8 @@ const getAnalyticsSummary = async ({ days = 30 } = {}) => {
       top_quote_products: topQuoteProducts,
       top_search_terms: topSearchTerms,
       searches_without_results: searchesWithoutResults,
-      recent_interests: recentInterests
+      recent_interests: recentInterests,
+      daily_activity: buildDailyActivitySeries(dailyActivityRows, 14)
     };
   } finally {
     connection.release();

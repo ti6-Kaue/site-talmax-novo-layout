@@ -5,7 +5,7 @@ const customPageService = {
   async getAll() {
     const response = await fetch(`${API_URL}/custom-pages`, createAdminRequestOptions());
 
-    await ensureAdminResponse(response, 'Erro ao buscar paginas personalizadas');
+    await ensureAdminResponse(response, 'Erro ao buscar páginas personalizadas');
     return response.json();
   },
 
@@ -13,7 +13,7 @@ const customPageService = {
     const response = await fetch(`${API_URL}/custom-pages/public/${slug}`);
 
     if (!response.ok) {
-      throw new Error('Pagina personalizada nao encontrada');
+      throw new Error('Página personalizada não encontrada');
     }
 
     return response.json();
@@ -25,7 +25,7 @@ const customPageService = {
       body: formData
     }));
 
-    await ensureAdminResponse(response, 'Erro ao criar pagina personalizada');
+    await ensureAdminResponse(response, 'Erro ao criar página personalizada');
     return response.json();
   },
 
@@ -35,14 +35,14 @@ const customPageService = {
       body: formData
     }));
 
-    await ensureAdminResponse(response, 'Erro ao atualizar pagina personalizada');
+    await ensureAdminResponse(response, 'Erro ao atualizar página personalizada');
     return response.json();
   },
 
   async remove(id) {
     const response = await fetch(`${API_URL}/custom-pages/${id}`, createAdminRequestOptions({ method: 'DELETE' }));
 
-    await ensureAdminResponse(response, 'Erro ao excluir pagina personalizada');
+    await ensureAdminResponse(response, 'Erro ao excluir página personalizada');
     return response.json();
   }
 };

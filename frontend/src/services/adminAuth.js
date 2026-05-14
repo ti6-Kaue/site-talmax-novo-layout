@@ -19,7 +19,7 @@ const createAdminApiError = (response, data, fallbackMessage) => {
 const normalizeAdminRequestError = (error) => {
   if (error instanceof TypeError) {
     return new Error(
-      'Falha de conexao com a API do painel. Verifique se o backend publicado liberou CORS para este dominio.'
+      'Falha de conexão com a API do painel. Verifique se o backend publicado liberou CORS para este dominio.'
     );
   }
 
@@ -31,13 +31,13 @@ const parseApiResponse = async (response) => {
   const contentType = response.headers.get('content-type') || '';
 
   if (!contentType.includes('application/json')) {
-    throw new Error(`A API de login nao respondeu em JSON. Verifique se o backend esta rodando em ${API_BASE_URL}.`);
+    throw new Error(`A API de login não respondeu em JSON. Verifique se o backend esta rodando em ${API_BASE_URL}.`);
   }
 
   try {
     return JSON.parse(responseText);
   } catch {
-    throw new Error('A resposta da API de login veio invalida. Confira o backend do admin.');
+    throw new Error('A resposta da API de login veio inválida. Confira o backend do admin.');
   }
 };
 
@@ -59,7 +59,7 @@ export const loginAdmin = async (credentials) => {
   const data = await parseApiResponse(response);
 
   if (!response.ok) {
-    throw createAdminApiError(response, data, 'Nao foi possivel entrar no painel.');
+    throw createAdminApiError(response, data, 'Não foi possível entrar no painel.');
   }
 
   return data;
@@ -112,7 +112,7 @@ export const unlockAdminLoginByUser = async (username) => {
     throw normalizeAdminRequestError(error);
   }
 
-  await ensureAdminResponse(response, 'Nao foi possivel liberar uma nova tentativa de login.');
+  await ensureAdminResponse(response, 'Não foi possível liberar uma nova tentativa de login.');
   return parseApiResponse(response);
 };
 

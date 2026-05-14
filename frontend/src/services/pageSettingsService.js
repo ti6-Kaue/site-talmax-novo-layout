@@ -9,7 +9,7 @@ export const DEFAULT_SPECIAL_PAGE_SETTINGS = {
     page_name: 'talmax-digital',
     label: 'Talmax Digital',
     overline: 'TECNOLOGIA ODONTOLOGICA',
-    title: 'Talmax Digital',
+    
     description: 'O futuro da protese dentaria com tecnologia de ponta e precisao absoluta.',
     logo_url: '/img/logo-talmax-digital-pos.png'
   },

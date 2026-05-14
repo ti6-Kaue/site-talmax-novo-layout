@@ -21,7 +21,7 @@ const digitalGroupService = {
     const response = await fetch(`${API_URL}/digital-groups/public/${encodeURIComponent(slug)}`);
 
     if (!response.ok) {
-      throw new Error('Grupo digital nao encontrado');
+      throw new Error('Grupo digital não encontrado');
     }
 
     return response.json();

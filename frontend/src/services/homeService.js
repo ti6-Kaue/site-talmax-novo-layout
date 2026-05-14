@@ -12,9 +12,9 @@ const homeService = {
     );
 
     if (admin) {
-      await ensureAdminResponse(response, 'Erro ao buscar servicos da home');
+      await ensureAdminResponse(response, 'Erro ao buscar serviços da home');
     } else if (!response.ok) {
-      throw new Error('Erro ao buscar servicos da home');
+      throw new Error('Erro ao buscar serviços da home');
     }
 
     return response.json();
@@ -25,7 +25,7 @@ const homeService = {
       method: 'POST',
       body: formData
     }));
-    await ensureAdminResponse(response, 'Erro ao criar servico');
+    await ensureAdminResponse(response, 'Erro ao criar serviço');
     return response.json();
   },
 
@@ -34,7 +34,7 @@ const homeService = {
       method: 'PUT',
       body: formData
     }));
-    await ensureAdminResponse(response, 'Erro ao atualizar servico');
+    await ensureAdminResponse(response, 'Erro ao atualizar serviço');
     return response.json();
   },
 
@@ -46,7 +46,7 @@ const homeService = {
       },
       body: JSON.stringify({ active }),
     }));
-    await ensureAdminResponse(response, 'Erro ao atualizar status do servico');
+    await ensureAdminResponse(response, 'Erro ao atualizar status do serviço');
     return response.json();
   },
 
@@ -54,7 +54,7 @@ const homeService = {
     const response = await fetch(`${API_URL}/home-services/${id}`, createAdminRequestOptions({
       method: 'DELETE',
     }));
-    await ensureAdminResponse(response, 'Erro ao excluir servico');
+    await ensureAdminResponse(response, 'Erro ao excluir serviço');
     return response.json();
   }
 };

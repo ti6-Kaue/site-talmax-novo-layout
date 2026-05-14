@@ -8,7 +8,7 @@ const technicalAssistanceService = {
     const response = await fetch(TECHNICAL_ASSISTANCE_API_URL);
 
     if (!response.ok) {
-      throw new Error('Erro ao buscar cards da assistencia tecnica');
+      throw new Error('Erro ao buscar cards da assistencia técnica');
     }
 
     return response.json();
@@ -21,9 +21,9 @@ const technicalAssistanceService = {
     );
 
     if (includeInactive) {
-      await ensureAdminResponse(response, 'Erro ao buscar cards de conteudo da assistencia tecnica');
+      await ensureAdminResponse(response, 'Erro ao buscar cards de conteudo da assistencia técnica');
     } else if (!response.ok) {
-      throw new Error('Erro ao buscar cards de conteudo da assistencia tecnica');
+      throw new Error('Erro ao buscar cards de conteudo da assistencia técnica');
     }
 
     return response.json();
@@ -38,7 +38,7 @@ const technicalAssistanceService = {
       body: JSON.stringify(payload)
     }));
 
-    await ensureAdminResponse(response, 'Erro ao criar card de conteudo da assistencia tecnica');
+    await ensureAdminResponse(response, 'Erro ao criar card de conteudo da assistencia técnica');
     return response.json();
   },
 
@@ -51,7 +51,7 @@ const technicalAssistanceService = {
       body: JSON.stringify(payload)
     }));
 
-    await ensureAdminResponse(response, 'Erro ao atualizar card de conteudo da assistencia tecnica');
+    await ensureAdminResponse(response, 'Erro ao atualizar card de conteudo da assistencia técnica');
     return response.json();
   },
 
@@ -60,7 +60,7 @@ const technicalAssistanceService = {
       method: 'DELETE'
     }));
 
-    await ensureAdminResponse(response, 'Erro ao remover card de conteudo da assistencia tecnica');
+    await ensureAdminResponse(response, 'Erro ao remover card de conteudo da assistencia técnica');
     return response.json();
   },
 
@@ -73,7 +73,7 @@ const technicalAssistanceService = {
       body: JSON.stringify(payload)
     }));
 
-    await ensureAdminResponse(response, 'Erro ao criar card da assistencia tecnica');
+    await ensureAdminResponse(response, 'Erro ao criar card da assistencia técnica');
     return response.json();
   },
 
@@ -86,7 +86,7 @@ const technicalAssistanceService = {
       body: JSON.stringify(payload)
     }));
 
-    await ensureAdminResponse(response, 'Erro ao atualizar card da assistencia tecnica');
+    await ensureAdminResponse(response, 'Erro ao atualizar card da assistencia técnica');
     return response.json();
   },
 
@@ -95,7 +95,7 @@ const technicalAssistanceService = {
       method: 'DELETE'
     }));
 
-    await ensureAdminResponse(response, 'Erro ao remover card da assistencia tecnica');
+    await ensureAdminResponse(response, 'Erro ao remover card da assistencia técnica');
     return response.json();
   }
 };

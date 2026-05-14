@@ -5,7 +5,7 @@ const API_BASE_URL = `${API_URL}/admin/users`;
 
 const normalizeAdminRequestError = (error) => {
   if (error instanceof TypeError) {
-    return new Error('Falha de conexao com a API do painel. Verifique se o backend esta acessivel para o admin.');
+    return new Error('Falha de conexão com a API do painel. Verifique se o backend esta acessível para o admin.');
   }
 
   return error;
@@ -35,8 +35,8 @@ export const listAdminUsers = async () => {
     throw normalizeAdminRequestError(error);
   }
 
-  await ensureAdminResponse(response, 'Nao foi possivel carregar os usuarios do painel.');
-  return parseApiResponse(response, 'A lista de usuarios do painel veio invalida.');
+  await ensureAdminResponse(response, 'Não foi possível carregar os usuários do painel.');
+  return parseApiResponse(response, 'A lista de usuários do painel veio inválida.');
 };
 
 export const createAdminUser = async (payload) => {
@@ -54,8 +54,8 @@ export const createAdminUser = async (payload) => {
     throw normalizeAdminRequestError(error);
   }
 
-  await ensureAdminResponse(response, 'Nao foi possivel criar o usuario do painel.');
-  return parseApiResponse(response, 'A resposta de criacao do usuario veio invalida.');
+  await ensureAdminResponse(response, 'Não foi possível criar o usuário do painel.');
+  return parseApiResponse(response, 'A resposta de criação do usuário veio inválida.');
 };
 
 export const updateAdminUser = async (adminUserId, payload) => {
@@ -73,6 +73,6 @@ export const updateAdminUser = async (adminUserId, payload) => {
     throw normalizeAdminRequestError(error);
   }
 
-  await ensureAdminResponse(response, 'Nao foi possivel atualizar o usuario do painel.');
-  return parseApiResponse(response, 'A resposta de atualizacao do usuario veio invalida.');
+  await ensureAdminResponse(response, 'Não foi possível atualizar o usuário do painel.');
+  return parseApiResponse(response, 'A resposta de atualização do usuário veio inválida.');
 };
