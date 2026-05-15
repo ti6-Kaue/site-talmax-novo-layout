@@ -325,9 +325,10 @@ const resolveIncludeInactiveAccess = async (req, res) => {
 router.get('/', async (req, res, next) => {
   const shouldPaginate = shouldUseProductPagination(req.query);
   const publicPagination = buildPublicProductPagination(req.query);
+  let includeInactive = false;
 
   try {
-    const includeInactive = await resolveIncludeInactiveAccess(req, res);
+    includeInactive = await resolveIncludeInactiveAccess(req, res);
 
     if (includeInactive === null) {
       return undefined;
