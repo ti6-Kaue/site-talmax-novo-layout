@@ -50,9 +50,9 @@ Se a duvida for "quero mudar tal coisa, por onde comeco?", use este mapa:
 | Usuarios admin | painel admin master + tabela `users` | `frontend/src/pages/Admin/AdminUsers/`, `backend/src/server/routes/adminAuthRoutes.js`, tabela `users` |
 | Banner da home | painel admin > Banners | `frontend/src/pages/Admin/AdminBanners/`, `backend/src/server/routes/bannerRoutes.js`, tabela `banners` |
 | Cards da home | painel admin > Home Segmentos | `frontend/src/pages/Admin/AdminSegments/`, `backend/src/server/routes/homeServiceRoutes.js`, tabela `home_services` |
-| Produtos em destaque da home | painel admin > Home Destaques | `frontend/src/pages/Admin/AdminFeatured/`, `backend/src/server/routes/specialSectionRoutes.js`, tabela `products` + `extra_data` |
+| Produtos em destaque da home | painel admin > Home Destaques | `frontend/src/pages/Admin/AdminFeatured/`, `backend/src/server/routes/specialSectionRoutes.js`, tabela `produtos` + `extra_data` |
 | Categorias e subcategorias | painel admin > Categorias | `frontend/src/pages/Admin/AdminCategories/`, `backend/src/server/routes/categoryRoutes.js`, tabelas `categorias` e `sub_categorias` |
-| Produto completo | painel admin > Cadastro de Produtos | `frontend/src/pages/Admin/AdminProducts/`, `backend/src/server/routes/productRoutes.js`, tabelas `products`, `product_categorias`, `product_sub_categorias`, `product_tabs` |
+| Produto completo | painel admin > Cadastro de Produtos | `frontend/src/pages/Admin/AdminProducts/`, `backend/src/server/routes/productRoutes.js`, tabelas `produtos`, `produto_categorias`, `produto_sub_categorias`, `abas_produto` |
 | Lista de produtos | painel admin > Lista de Produtos | `frontend/src/pages/Admin/AdminProducts/AdminProductsList.jsx`, `backend/src/server/routes/productRoutes.js` |
 | Talmax Digital | painel admin > Talmax Digital | `frontend/src/pages/Admin/AdminTalmaxDigital/AdminTalmaxDigital.jsx`, `backend/src/server/routes/homeServiceRoutes.js`, tabela `home_services` |
 | Upcera | painel admin > Upcera | `frontend/src/pages/Admin/AdminUpcera/`, `backend/src/server/routes/pageSettingsRoutes.js`, `backend/src/server/routes/specialSectionRoutes.js` |
@@ -177,7 +177,7 @@ Se quiser mudar links do menu, footer, placeholders ou estrutura geral do site, 
 
 | URL | O que e | Componente | Origem do conteudo | Onde editar |
 | --- | --- | --- | --- | --- |
-| `/` | Home | `frontend/src/components/Home/Home.jsx` | API + banco | hero via `HeroSlider`, cards via `home_services`, destaques via `products`, categorias via `categorias` |
+| `/` | Home | `frontend/src/components/Home/Home.jsx` | API + banco | hero via `HeroSlider`, cards via `home_services`, destaques via `produtos`, categorias via `categorias` |
 | `/privacidade` | Politica de privacidade | `frontend/src/components/PrivacyPolicy/PrivacyPolicy.jsx` | fixo no codigo | editar JSX/CSS da pasta |
 | `/quem-somos` | Institucional | `frontend/src/components/QuemSomos/QuemSomos.jsx` | fixo no codigo | editar JSX/CSS da pasta |
 | `/historia-diretoria` | Institucional | `frontend/src/components/HistoriaDiretoria/HistoriaDiretoria.jsx` | fixo no codigo | editar JSX/CSS da pasta |
@@ -231,7 +231,7 @@ Origem dos dados:
 
 - banner: tabela `banners`
 - cards/servicos da home: tabela `home_services`
-- destaques: tabela `products` com flag `is_featured` e ordem em `extra_data`
+- destaques: tabela `produtos` com flag `is_featured` e ordem em `extra_data`
 - categorias visiveis: tabela `categorias`
 
 Onde mexer:
@@ -249,11 +249,11 @@ Arquivos principais:
 
 Os produtos usam:
 
-- tabela `products`
-- tabela `product_categorias`
-- tabela `product_sub_categorias`
-- tabela `product_tabs`
-- campo `extra_data` dentro de `products`
+- tabela `produtos`
+- tabela `produto_categorias`
+- tabela `produto_sub_categorias`
+- tabela `abas_produto`
+- campo `extra_data` dentro de `produtos`
 
 Observacao importante:
 
@@ -272,7 +272,7 @@ As paginas especiais usam dois tipos de configuracao:
 1. textos/logo gerais
    tabela `page_settings`
 2. quais produtos aparecem nelas
-   flags em `products`
+   flags em `produtos`
 
 Arquivos principais:
 
@@ -330,17 +330,17 @@ E troca de tela por estado local dentro de:
 | Categorias | criar, editar e excluir categorias e subcategorias | `AdminCategories/` | `/api/categories` | `categorias`, `sub_categorias` |
 | Usuarios Admin | criar e editar usuarios do painel | `AdminUsers/` | `/api/admin/users` | `users` |
 | Seguranca do Login | desbloquear usuario travado | `AdminSecurity/` | `/api/admin/login-unlock` | `users` + rate limit |
-| Cadastro de Produtos | cadastro completo do produto | `AdminProducts/` | `/api/products` | `products`, `product_*`, `product_tabs` |
-| Lista de Produtos | listar e abrir para edicao | `AdminProducts/AdminProductsList.jsx` | `/api/products` | `products` |
+| Cadastro de Produtos | cadastro completo do produto | `AdminProducts/` | `/api/products` | `produtos`, `produto_*`, `abas_produto` |
+| Lista de Produtos | listar e abrir para edicao | `AdminProducts/AdminProductsList.jsx` | `/api/products` | `produtos` |
 | Banners | cadastrar banners da home | `AdminBanners/` | `/api/banners` | `banners` |
-| Home Destaques | escolher produtos em destaque | `AdminFeatured/` | `/api/featured-products` | `products` |
+| Home Destaques | escolher produtos em destaque | `AdminFeatured/` | `/api/featured-products` | `produtos` |
 | Paginas Personalizadas | criar `/pagina/:slug` | `AdminCustomPages/` | `/api/custom-pages` | `custom_pages` |
 | Grupo de Segmentos | criar `/grupo-digital/:slug` | `AdminTalmaxDigital/AdminDigitalGroups.jsx` | `/api/digital-groups` | `digital_groups`, `digital_group_cards` |
 | Home Segmentos | cards da home | `AdminSegments/` | `/api/home-services` | `home_services` |
 | Talmax Digital | conteudo da pagina Talmax Digital | `AdminTalmaxDigital/AdminTalmaxDigital.jsx` | `/api/home-services` e `/api/page-settings` | `home_services`, `page_settings` |
-| Upcera | texto/logo + produtos da pagina Upcera | `AdminUpcera/` | `/api/page-settings`, `/api/upcera/products` | `page_settings`, `products` |
-| Scanners | texto/logo + produtos da pagina Scanners | `AdminScanners/` | `/api/page-settings`, `/api/scanners/products` | `page_settings`, `products` |
-| Impressoras 3D | texto/logo + produtos da pagina Impressoras 3D | `AdminPrinters/` | `/api/page-settings`, `/api/3d-printers/products` | `page_settings`, `products` |
+| Upcera | texto/logo + produtos da pagina Upcera | `AdminUpcera/` | `/api/page-settings`, `/api/upcera/products` | `page_settings`, `produtos` |
+| Scanners | texto/logo + produtos da pagina Scanners | `AdminScanners/` | `/api/page-settings`, `/api/scanners/products` | `page_settings`, `produtos` |
+| Impressoras 3D | texto/logo + produtos da pagina Impressoras 3D | `AdminPrinters/` | `/api/page-settings`, `/api/3d-printers/products` | `page_settings`, `produtos` |
 
 ### 7.4 Permissoes de usuario admin
 
@@ -536,10 +536,10 @@ Esse arquivo cria o banco e as tabelas principais.
 | --- | --- |
 | `categorias` | categorias principais do catalogo |
 | `sub_categorias` | subcategorias ligadas a uma categoria principal |
-| `products` | cadastro principal dos produtos |
-| `product_categorias` | relacao produto x categorias |
-| `product_sub_categorias` | relacao produto x subcategorias |
-| `product_tabs` | abas tecnicas e conteudo adicional do produto |
+| `produtos` | cadastro principal dos produtos |
+| `produto_categorias` | relacao produto x categorias |
+| `produto_sub_categorias` | relacao produto x subcategorias |
+| `abas_produto` | abas tecnicas e conteudo adicional do produto |
 | `banners` | banners da home |
 | `users` | usuarios do painel admin |
 | `page_settings` | textos e logos das paginas especiais |

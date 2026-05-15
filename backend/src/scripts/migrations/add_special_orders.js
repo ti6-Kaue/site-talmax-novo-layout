@@ -9,9 +9,9 @@ async function addOrderColumns() {
         console.log("Adicionando colunas de ordenação especial...");
         
         const columns = [
-            'ALTER TABLE products ADD COLUMN upcera_order INT DEFAULT 0',
-            'ALTER TABLE products ADD COLUMN scanner_order INT DEFAULT 0',
-            'ALTER TABLE products ADD COLUMN printer_order INT DEFAULT 0'
+            'ALTER TABLE produtos ADD COLUMN upcera_order INT DEFAULT 0',
+            'ALTER TABLE produtos ADD COLUMN scanner_order INT DEFAULT 0',
+            'ALTER TABLE produtos ADD COLUMN printer_order INT DEFAULT 0'
         ];
 
         for (const sql of columns) {

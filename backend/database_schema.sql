@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS sub_categorias (
         FOREIGN KEY (category_id) REFERENCES categorias(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS products (
+CREATE TABLE IF NOT EXISTS produtos (
     id INT NOT NULL AUTO_INCREMENT,
     category_id INT DEFAULT NULL,
     sub_category_id INT DEFAULT NULL,
@@ -61,37 +61,37 @@ CREATE TABLE IF NOT EXISTS products (
     scanner_order INT DEFAULT 0,
     printer_order INT DEFAULT 0,
     PRIMARY KEY (id),
-    KEY idx_products_category_id (category_id),
-    KEY idx_products_sub_category_id (sub_category_id),
-    CONSTRAINT fk_products_categoria
+    KEY idx_produtos_category_id (category_id),
+    KEY idx_produtos_sub_category_id (sub_category_id),
+    CONSTRAINT fk_produtos_categoria
         FOREIGN KEY (category_id) REFERENCES categorias(id) ON DELETE SET NULL,
-    CONSTRAINT fk_products_sub_categoria
+    CONSTRAINT fk_produtos_sub_categoria
         FOREIGN KEY (sub_category_id) REFERENCES sub_categorias(id) ON DELETE SET NULL
 );
 
-CREATE TABLE IF NOT EXISTS product_categorias (
+CREATE TABLE IF NOT EXISTS produto_categorias (
     product_id INT NOT NULL,
     category_id INT NOT NULL,
     PRIMARY KEY (product_id, category_id),
-    KEY idx_product_categorias_category_id (category_id),
-    CONSTRAINT fk_product_categorias_product
-        FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
-    CONSTRAINT fk_product_categorias_categoria
+    KEY idx_produto_categorias_category_id (category_id),
+    CONSTRAINT fk_produto_categorias_product
+        FOREIGN KEY (product_id) REFERENCES produtos(id) ON DELETE CASCADE,
+    CONSTRAINT fk_produto_categorias_categoria
         FOREIGN KEY (category_id) REFERENCES categorias(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS product_sub_categorias (
+CREATE TABLE IF NOT EXISTS produto_sub_categorias (
     product_id INT NOT NULL,
     sub_category_id INT NOT NULL,
     PRIMARY KEY (product_id, sub_category_id),
-    KEY idx_product_sub_categorias_sub_category_id (sub_category_id),
-    CONSTRAINT fk_product_sub_categorias_product
-        FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
-    CONSTRAINT fk_product_sub_categorias_sub_categoria
+    KEY idx_produto_sub_categorias_sub_category_id (sub_category_id),
+    CONSTRAINT fk_produto_sub_categorias_product
+        FOREIGN KEY (product_id) REFERENCES produtos(id) ON DELETE CASCADE,
+    CONSTRAINT fk_produto_sub_categorias_sub_categoria
         FOREIGN KEY (sub_category_id) REFERENCES sub_categorias(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS product_tabs (
+CREATE TABLE IF NOT EXISTS abas_produto (
     id INT NOT NULL AUTO_INCREMENT,
     product_id INT NOT NULL,
     title VARCHAR(255) NOT NULL,
@@ -104,10 +104,10 @@ CREATE TABLE IF NOT EXISTS product_tabs (
     created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
-    KEY idx_product_tabs_product_id (product_id),
-    KEY idx_product_tabs_display_order (display_order),
-    CONSTRAINT fk_product_tabs_product
-        FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+    KEY idx_abas_produto_product_id (product_id),
+    KEY idx_abas_produto_display_order (display_order),
+    CONSTRAINT fk_abas_produto_product
+        FOREIGN KEY (product_id) REFERENCES produtos(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS banners (

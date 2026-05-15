@@ -8,20 +8,29 @@ const {
 } = require('../utils/inputSanitization');
 const { normalizeStoredProductExtraData } = require('../validation/productSchemas');
 
+const PRODUCTS_TABLE_NAME = 'produtos';
+const PRODUCT_CATEGORIES_TABLE_NAME = 'produto_categorias';
+const PRODUCT_SUB_CATEGORIES_TABLE_NAME = 'produto_sub_categorias';
+const PRODUCT_TABS_TABLE_NAME = 'abas_produto';
+const LEGACY_PRODUCTS_TABLE_NAME = 'products';
+const LEGACY_PRODUCT_CATEGORIES_TABLE_NAME = 'product_categorias';
+const LEGACY_PRODUCT_SUB_CATEGORIES_TABLE_NAME = 'product_sub_categorias';
+const LEGACY_PRODUCT_TABS_TABLE_NAME = 'product_tabs';
+
 const PRODUCT_SELECT_QUERY = `
   SELECT p.*,
          (SELECT GROUP_CONCAT(name SEPARATOR ', ') FROM (
-             SELECT name, product_id FROM categorias c JOIN product_categorias pc ON c.id = pc.category_id
+             SELECT name, product_id FROM categorias c JOIN ${PRODUCT_CATEGORIES_TABLE_NAME} pc ON c.id = pc.category_id
              UNION ALL
-             SELECT name, product_id FROM sub_categorias sc JOIN product_sub_categorias psc ON sc.id = psc.sub_category_id
+             SELECT name, product_id FROM sub_categorias sc JOIN ${PRODUCT_SUB_CATEGORIES_TABLE_NAME} psc ON sc.id = psc.sub_category_id
          ) as combined WHERE combined.product_id = p.id) as category_names,
-         (SELECT GROUP_CONCAT(category_id) FROM product_categorias WHERE product_id = p.id) as main_category_ids,
-         (SELECT GROUP_CONCAT(sub_category_id) FROM product_sub_categorias WHERE product_id = p.id) as sub_category_ids
-  FROM products p
+         (SELECT GROUP_CONCAT(category_id) FROM ${PRODUCT_CATEGORIES_TABLE_NAME} WHERE product_id = p.id) as main_category_ids,
+         (SELECT GROUP_CONCAT(sub_category_id) FROM ${PRODUCT_SUB_CATEGORIES_TABLE_NAME} WHERE product_id = p.id) as sub_category_ids
+  FROM ${PRODUCTS_TABLE_NAME} p
 `;
 
 const PRODUCT_TABS_TABLE_QUERY = `
-  CREATE TABLE IF NOT EXISTS product_tabs (
+  CREATE TABLE IF NOT EXISTS ${PRODUCT_TABS_TABLE_NAME} (
     id INT NOT NULL AUTO_INCREMENT,
     product_id INT NOT NULL,
     title VARCHAR(255) NOT NULL,
@@ -34,14 +43,67 @@ const PRODUCT_TABS_TABLE_QUERY = `
     created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
-    KEY idx_product_tabs_product_id (product_id),
-    KEY idx_product_tabs_display_order (display_order),
-    CONSTRAINT fk_product_tabs_product
-      FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+    KEY idx_abas_produto_product_id (product_id),
+    KEY idx_abas_produto_display_order (display_order),
+    CONSTRAINT fk_abas_produto_product
+      FOREIGN KEY (product_id) REFERENCES ${PRODUCTS_TABLE_NAME}(id) ON DELETE CASCADE
   )
 `;
 
+let productTablesReady = false;
 let productTabsTableReady = false;
+
+const renameTableIfNeeded = async (db, legacyTableName, tableName) => {
+  try {
+    await db.query(`RENAME TABLE ${legacyTableName} TO ${tableName}`);
+  } catch {
+    // Legacy table is absent or canonical table already exists.
+  }
+};
+
+const ensureProductDatabaseTables = async (db) => {
+  if (productTablesReady) {
+    return;
+  }
+
+  await renameTableIfNeeded(db, LEGACY_PRODUCTS_TABLE_NAME, PRODUCTS_TABLE_NAME);
+  await renameTableIfNeeded(db, LEGACY_PRODUCT_CATEGORIES_TABLE_NAME, PRODUCT_CATEGORIES_TABLE_NAME);
+  await renameTableIfNeeded(db, LEGACY_PRODUCT_SUB_CATEGORIES_TABLE_NAME, PRODUCT_SUB_CATEGORIES_TABLE_NAME);
+
+  productTablesReady = true;
+};
+
+const renameLegacyProductTabsTable = async (db) => {
+  await renameTableIfNeeded(db, LEGACY_PRODUCT_TABS_TABLE_NAME, PRODUCT_TABS_TABLE_NAME);
+};
+
+const ensureProductTabsRuntimeColumns = async (db, tableName) => {
+  try {
+    await db.query(`ALTER TABLE ${tableName} ADD COLUMN video_url VARCHAR(2048) DEFAULT NULL AFTER content_as_list`);
+  } catch {
+    // Column already exists or legacy table is absent
+  }
+
+  try {
+    await db.query(`ALTER TABLE ${tableName} ADD COLUMN show_content_with_video BOOLEAN DEFAULT TRUE AFTER video_url`);
+  } catch {
+    // Column already exists or legacy table is absent
+  }
+};
+
+const migrateLegacyProductTabs = async (db) => {
+  try {
+    await ensureProductTabsRuntimeColumns(db, LEGACY_PRODUCT_TABS_TABLE_NAME);
+    await db.query(`
+      INSERT IGNORE INTO ${PRODUCT_TABS_TABLE_NAME}
+        (id, product_id, title, content, content_as_list, video_url, show_content_with_video, display_order, is_active, created_at, updated_at)
+      SELECT id, product_id, title, content, content_as_list, video_url, show_content_with_video, display_order, is_active, created_at, updated_at
+      FROM ${LEGACY_PRODUCT_TABS_TABLE_NAME}
+    `);
+  } catch {
+    // Legacy table does not exist or cannot be copied; the canonical table remains ready.
+  }
+};
 
 const normalizeProductTabRow = (row) => ({
   id: Number(row.id),
@@ -60,19 +122,11 @@ const ensureProductTabsTable = async (db) => {
     return;
   }
 
+  await ensureProductDatabaseTables(db);
+  await renameLegacyProductTabsTable(db);
   await db.query(PRODUCT_TABS_TABLE_QUERY);
-
-  try {
-    await db.query('ALTER TABLE product_tabs ADD COLUMN video_url VARCHAR(2048) DEFAULT NULL AFTER content_as_list');
-  } catch {
-    // Column already exists
-  }
-
-  try {
-    await db.query('ALTER TABLE product_tabs ADD COLUMN show_content_with_video BOOLEAN DEFAULT TRUE AFTER video_url');
-  } catch {
-    // Column already exists
-  }
+  await ensureProductTabsRuntimeColumns(db, PRODUCT_TABS_TABLE_NAME);
+  await migrateLegacyProductTabs(db);
 
   productTabsTableReady = true;
 };
@@ -107,7 +161,7 @@ const listProductTabsByProductIds = async (db, productIds = []) => {
     `
       SELECT id, product_id, title, content, content_as_list, video_url, display_order, is_active
            , show_content_with_video
-      FROM product_tabs
+      FROM ${PRODUCT_TABS_TABLE_NAME}
       WHERE product_id IN (?) AND is_active = 1
       ORDER BY product_id ASC, display_order ASC, id ASC
     `,
@@ -194,14 +248,14 @@ const buildProductListWhereClause = (options = {}) => {
         OR EXISTS (
           SELECT 1
           FROM categorias c
-          JOIN product_categorias pc ON c.id = pc.category_id
+          JOIN ${PRODUCT_CATEGORIES_TABLE_NAME} pc ON c.id = pc.category_id
           WHERE pc.product_id = p.id
             AND LOWER(TRIM(c.name)) LIKE ?
         )
         OR EXISTS (
           SELECT 1
           FROM sub_categorias sc
-          JOIN product_sub_categorias psc ON sc.id = psc.sub_category_id
+          JOIN ${PRODUCT_SUB_CATEGORIES_TABLE_NAME} psc ON sc.id = psc.sub_category_id
           WHERE psc.product_id = p.id
             AND LOWER(TRIM(sc.name)) LIKE ?
         )
@@ -217,14 +271,14 @@ const buildProductListWhereClause = (options = {}) => {
         EXISTS (
           SELECT 1
           FROM categorias c
-          JOIN product_categorias pc ON c.id = pc.category_id
+          JOIN ${PRODUCT_CATEGORIES_TABLE_NAME} pc ON c.id = pc.category_id
           WHERE pc.product_id = p.id
             AND c.slug IN (?)
         )
         OR EXISTS (
           SELECT 1
           FROM sub_categorias sc
-          JOIN product_sub_categorias psc ON sc.id = psc.sub_category_id
+          JOIN ${PRODUCT_SUB_CATEGORIES_TABLE_NAME} psc ON sc.id = psc.sub_category_id
           WHERE psc.product_id = p.id
             AND sc.slug IN (?)
         )
@@ -242,6 +296,7 @@ const buildProductListWhereClause = (options = {}) => {
 };
 
 const listProducts = async (db, options = {}) => {
+  await ensureProductDatabaseTables(db);
   const { includeInactive = false } = options;
   const whereClause = includeInactive ? '' : ' WHERE p.is_active = 1';
   const [rows] = await db.query(`${PRODUCT_SELECT_QUERY}${whereClause} ORDER BY p.id DESC`);
@@ -249,6 +304,7 @@ const listProducts = async (db, options = {}) => {
 };
 
 const listProductsPage = async (db, options = {}) => {
+  await ensureProductDatabaseTables(db);
   const requestedPage = Number(options.page) || 1;
   const requestedLimit = Number(options.limit) || 12;
   const page = Math.max(1, requestedPage);
@@ -256,7 +312,7 @@ const listProductsPage = async (db, options = {}) => {
   const { normalizedSearch, whereClause, params } = buildProductListWhereClause(options);
 
   const [countRows] = await db.query(
-    `SELECT COUNT(DISTINCT p.id) AS total FROM products p${whereClause}`,
+    `SELECT COUNT(DISTINCT p.id) AS total FROM ${PRODUCTS_TABLE_NAME} p${whereClause}`,
     params
   );
 
@@ -290,6 +346,7 @@ const listProductsPage = async (db, options = {}) => {
 };
 
 const findProductById = async (db, productId, options = {}) => {
+  await ensureProductDatabaseTables(db);
   const { includeInactive = false } = options;
   const [rows] = await db.query(
     `${PRODUCT_SELECT_QUERY} WHERE p.id = ?${includeInactive ? '' : ' AND p.is_active = 1'}`,
@@ -304,17 +361,18 @@ const findProductById = async (db, productId, options = {}) => {
 };
 
 const attachProductCategories = async (connection, productId, mainCategoryIds, subCategoryIds) => {
+  await ensureProductDatabaseTables(connection);
   const validMainIds = Array.isArray(mainCategoryIds) ? mainCategoryIds : [];
   const validSubIds = Array.isArray(subCategoryIds) ? subCategoryIds : [];
 
-  await connection.query('DELETE FROM product_categorias WHERE product_id = ?', [productId]);
-  await connection.query('DELETE FROM product_sub_categorias WHERE product_id = ?', [productId]);
+  await connection.query(`DELETE FROM ${PRODUCT_CATEGORIES_TABLE_NAME} WHERE product_id = ?`, [productId]);
+  await connection.query(`DELETE FROM ${PRODUCT_SUB_CATEGORIES_TABLE_NAME} WHERE product_id = ?`, [productId]);
 
   if (validMainIds.length > 0) {
     const [categories] = await connection.query('SELECT id FROM categorias WHERE id IN (?)', [validMainIds]);
     const categoryValues = categories.map((category) => [productId, category.id]);
     if (categoryValues.length > 0) {
-      await connection.query('INSERT INTO product_categorias (product_id, category_id) VALUES ?', [categoryValues]);
+      await connection.query(`INSERT INTO ${PRODUCT_CATEGORIES_TABLE_NAME} (product_id, category_id) VALUES ?`, [categoryValues]);
     }
   }
 
@@ -322,14 +380,14 @@ const attachProductCategories = async (connection, productId, mainCategoryIds, s
     const [subCategories] = await connection.query('SELECT id FROM sub_categorias WHERE id IN (?)', [validSubIds]);
     const subCategoryValues = subCategories.map((subCategory) => [productId, subCategory.id]);
     if (subCategoryValues.length > 0) {
-      await connection.query('INSERT INTO product_sub_categorias (product_id, sub_category_id) VALUES ?', [subCategoryValues]);
+      await connection.query(`INSERT INTO ${PRODUCT_SUB_CATEGORIES_TABLE_NAME} (product_id, sub_category_id) VALUES ?`, [subCategoryValues]);
     }
   }
 };
 
 const replaceProductTabs = async (connection, productId, tabs = []) => {
   await ensureProductTabsTable(connection);
-  await connection.query('DELETE FROM product_tabs WHERE product_id = ?', [productId]);
+  await connection.query(`DELETE FROM ${PRODUCT_TABS_TABLE_NAME} WHERE product_id = ?`, [productId]);
 
   const normalizedTabs = normalizeIncomingTabs(tabs);
 
@@ -350,7 +408,7 @@ const replaceProductTabs = async (connection, productId, tabs = []) => {
 
   await connection.query(
     `
-      INSERT INTO product_tabs (product_id, title, content, content_as_list, video_url, show_content_with_video, display_order, is_active)
+      INSERT INTO ${PRODUCT_TABS_TABLE_NAME} (product_id, title, content, content_as_list, video_url, show_content_with_video, display_order, is_active)
       VALUES ?
     `,
     [values]
@@ -364,5 +422,7 @@ module.exports = {
   findProductById,
   attachProductCategories,
   replaceProductTabs,
+  ensureProductDatabaseTables,
+  PRODUCTS_TABLE_NAME,
   ensureProductTabsTable
 };

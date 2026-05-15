@@ -257,7 +257,7 @@ Explicacao leiga:
 | 4 | Pool de conexao MySQL | Reaproveita conexoes com o banco | Menos custo por requisicao |
 | 5 | `keepAlive` no pool | Mantem conexoes prontas | Ajuda estabilidade e tempo de resposta |
 | 6 | Indices em tabelas de relacao e controle | Acelera campos usados com frequencia | Menos tempo para localizar dado |
-| 7 | Indices em rate limit e `product_tabs` | Acelera leituras comuns dessas areas | Melhora consulta recorrente |
+| 7 | Indices em rate limit e `abas_produto` | Acelera leituras comuns dessas areas | Melhora consulta recorrente |
 
 Explicacao leiga:
 - Aqui a ideia e nao pedir para o banco procurar tudo "na unha" toda vez.

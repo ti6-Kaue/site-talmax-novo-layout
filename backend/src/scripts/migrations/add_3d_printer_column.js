@@ -1,13 +1,13 @@
 /**
- * Adiciona a coluna is_3d_printer na tabela products.
+ * Adiciona a coluna is_3d_printer na tabela produtos.
  * Essa flag marca os produtos que devem aparecer na secao de impressoras 3D.
  */
 const db = require('./db');
 
 async function updateTable() {
     try {
-        console.log("Adicionando coluna is_3d_printer à tabela products...");
-        await db.query('ALTER TABLE products ADD COLUMN is_3d_printer BOOLEAN DEFAULT FALSE');
+        console.log("Adicionando coluna is_3d_printer à tabela produtos...");
+        await db.query('ALTER TABLE produtos ADD COLUMN is_3d_printer BOOLEAN DEFAULT FALSE');
         console.log("Coluna adicionada com sucesso!");
         process.exit(0);
     } catch (err) {

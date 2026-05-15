@@ -181,10 +181,10 @@ Tabelas ja presentes no schema base:
 
 - `categorias`
 - `sub_categorias`
-- `products`
-- `product_categorias`
-- `product_sub_categorias`
-- `product_tabs`
+- `produtos`
+- `produto_categorias`
+- `produto_sub_categorias`
+- `abas_produto`
 - `banners`
 - `users`
 - `page_settings`
@@ -195,7 +195,7 @@ Tambem existem evolucoes adicionais por migration ou runtime:
 - `home_services`
 - `digital_groups`
 - `digital_group_cards`
-- colunas extras em `products`, `users` e `home_services`
+- colunas extras em `produtos`, `users` e `home_services`
 
 Os scripts de apoio ficam em:
 

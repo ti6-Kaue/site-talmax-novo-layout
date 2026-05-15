@@ -11,6 +11,10 @@ const {
 } = require('../utils/inputSanitization');
 const logger = require('../utils/logger');
 const { normalizeStoredProductExtraData } = require('../validation/productSchemas');
+const {
+  ensureProductDatabaseTables,
+  PRODUCTS_TABLE_NAME
+} = require('../services/productService');
 
 const router = express.Router();
 
@@ -139,10 +143,11 @@ const listProductsByIds = async (productIds = []) => {
     return [];
   }
 
+  await ensureProductDatabaseTables(db);
   const [rows] = await db.query(
     `
       SELECT id, name, description, main_image, extra_data
-      FROM products
+      FROM ${PRODUCTS_TABLE_NAME}
       WHERE id IN (?)
     `,
     [validIds]

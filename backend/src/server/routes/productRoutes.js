@@ -27,6 +27,8 @@ const {
   findProductById,
   attachProductCategories,
   replaceProductTabs,
+  ensureProductDatabaseTables,
+  PRODUCTS_TABLE_NAME,
   ensureProductTabsTable
 } = require('../services/productService');
 const { persistUploadedFilesByType } = require('../services/fileStorageService');
@@ -148,9 +150,10 @@ const releaseIfPossible = (connection) => {
 };
 
 const findDuplicateProductByName = async (connection, name, excludeId = null) => {
+  await ensureProductDatabaseTables(connection);
   const query = `
     SELECT id
-    FROM products
+    FROM ${PRODUCTS_TABLE_NAME}
     WHERE LOWER(TRIM(name)) = LOWER(TRIM(?))
       ${excludeId ? 'AND id <> ?' : ''}
     LIMIT 1
@@ -403,6 +406,7 @@ router.post('/', requireAdminSession, productUpload, async (req, res, next) => {
   const connection = await db.getConnection();
 
   try {
+    await ensureProductDatabaseTables(connection);
     await connection.beginTransaction();
 
     const payload = parseProductWriteRequest(req.body);
@@ -452,7 +456,7 @@ router.post('/', requireAdminSession, productUpload, async (req, res, next) => {
     const isActive = payload.is_active === false ? 0 : 1;
 
     const [result] = await connection.query(
-      'INSERT INTO products (name, description, main_image, extra_data, is_active) VALUES (?, ?, ?, ?, ?)',
+      `INSERT INTO ${PRODUCTS_TABLE_NAME} (name, description, main_image, extra_data, is_active) VALUES (?, ?, ?, ?, ?)`,
       [normalizedName, normalizedDescription, safe(mergedImagePaths[0]), JSON.stringify(extra), isActive]
     );
 
@@ -479,6 +483,7 @@ router.put('/:id', requireAdminSession, productUpload, async (req, res, next) =>
       return res.status(400).json({ error: 'Produto invalido.' });
     }
 
+    await ensureProductDatabaseTables(connection);
     await connection.beginTransaction();
 
     const payload = parseProductWriteRequest(req.body);
@@ -543,7 +548,7 @@ router.put('/:id', requireAdminSession, productUpload, async (req, res, next) =>
     extra.images = mergedImagePaths;
     applyProductBannerToExtraData(extra, newBannerPaths);
 
-    let query = 'UPDATE products SET name=?, description=?, extra_data=?, main_image=?, is_active=?';
+    let query = `UPDATE ${PRODUCTS_TABLE_NAME} SET name=?, description=?, extra_data=?, main_image=?, is_active=?`;
     const params = [name, description, JSON.stringify(extra), safe(mergedImagePaths[0]), isActive];
 
     query += ' WHERE id=?';
@@ -565,7 +570,8 @@ router.put('/:id', requireAdminSession, productUpload, async (req, res, next) =>
 
 router.delete('/:id', requireAdminSession, async (req, res, next) => {
   try {
-    await db.query('DELETE FROM products WHERE id = ?', [req.params.id]);
+    await ensureProductDatabaseTables(db);
+    await db.query(`DELETE FROM ${PRODUCTS_TABLE_NAME} WHERE id = ?`, [req.params.id]);
     return res.json({ message: 'Produto excluido!' });
   } catch (err) {
     return next(wrapError(err, { publicMessage: 'Erro ao excluir produto.' }));
@@ -575,7 +581,8 @@ router.delete('/:id', requireAdminSession, async (req, res, next) => {
 router.put('/:id/active', requireAdminSession, async (req, res, next) => {
   try {
     const isActive = parseBooleanFlag(req.body?.is_active) ? 1 : 0;
-    await db.query('UPDATE products SET is_active = ? WHERE id = ?', [isActive, req.params.id]);
+    await ensureProductDatabaseTables(db);
+    await db.query(`UPDATE ${PRODUCTS_TABLE_NAME} SET is_active = ? WHERE id = ?`, [isActive, req.params.id]);
     return res.json({ message: `Produto ${isActive ? 'ativado' : 'inativado'}!` });
   } catch (err) {
     return next(wrapError(err, { publicMessage: 'Erro ao atualizar status do produto.' }));
@@ -601,7 +608,7 @@ router.put('/:id/quote-button', requireAdminSession, async (req, res, next) => {
     const extra = normalizeStoredProductExtraData(product.extra_data);
     extra.showQuoteButton = payload.showQuoteButton;
 
-    await connection.query('UPDATE products SET extra_data = ? WHERE id = ?', [JSON.stringify(extra), productId]);
+    await connection.query(`UPDATE ${PRODUCTS_TABLE_NAME} SET extra_data = ? WHERE id = ?`, [JSON.stringify(extra), productId]);
 
     return res.json({ message: 'Botao de orcamento atualizado!' });
   } catch (err) {

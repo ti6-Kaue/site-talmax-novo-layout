@@ -9,6 +9,10 @@ const {
   normalizeStoredProductExtraData,
   validateSpecialSectionPayload
 } = require('../validation/productSchemas');
+const {
+  ensureProductDatabaseTables,
+  PRODUCTS_TABLE_NAME
+} = require('../services/productService');
 const { wrapError } = require('../utils/errorHandling');
 
 const router = express.Router();
@@ -40,11 +44,12 @@ const saveSpecialSectionProducts = async (req, res, next, config) => {
     const selectedIdSet = new Set(selectedIds);
     const selectedIdPlaceholders = selectedIds.map(() => '?').join(', ');
 
+    await ensureProductDatabaseTables(connection);
     await connection.beginTransaction();
 
     const [affectedProducts] = await connection.query(
       `SELECT id, extra_data
-       FROM products
+       FROM ${PRODUCTS_TABLE_NAME}
        WHERE ${config.flagColumn} = TRUE${selectedIds.length > 0 ? ` OR id IN (${selectedIdPlaceholders})` : ''}`,
       selectedIds
     );
@@ -59,9 +64,9 @@ const saveSpecialSectionProducts = async (req, res, next, config) => {
     }
 
     if (config.orderColumn) {
-      await connection.query(`UPDATE products SET ${config.flagColumn} = FALSE, ${config.orderColumn} = 0`);
+      await connection.query(`UPDATE ${PRODUCTS_TABLE_NAME} SET ${config.flagColumn} = FALSE, ${config.orderColumn} = 0`);
     } else {
-      await connection.query(`UPDATE products SET ${config.flagColumn} = FALSE`);
+      await connection.query(`UPDATE ${PRODUCTS_TABLE_NAME} SET ${config.flagColumn} = FALSE`);
     }
 
     for (const product of affectedProducts) {
@@ -83,7 +88,7 @@ const saveSpecialSectionProducts = async (req, res, next, config) => {
         delete extra[config.extraOrderKey];
       }
 
-      await connection.query('UPDATE products SET extra_data = ? WHERE id = ?', [JSON.stringify(extra), product.id]);
+      await connection.query(`UPDATE ${PRODUCTS_TABLE_NAME} SET extra_data = ? WHERE id = ?`, [JSON.stringify(extra), product.id]);
     }
 
     for (const item of normalizedProducts) {
@@ -101,12 +106,12 @@ const saveSpecialSectionProducts = async (req, res, next, config) => {
 
       if (config.orderColumn) {
         await connection.query(
-          `UPDATE products SET ${config.flagColumn} = TRUE, ${config.orderColumn} = ?, extra_data = ? WHERE id = ?`,
+          `UPDATE ${PRODUCTS_TABLE_NAME} SET ${config.flagColumn} = TRUE, ${config.orderColumn} = ?, extra_data = ? WHERE id = ?`,
           [item.order, JSON.stringify(extra), item.id]
         );
       } else {
         await connection.query(
-          `UPDATE products SET ${config.flagColumn} = TRUE, extra_data = ? WHERE id = ?`,
+          `UPDATE ${PRODUCTS_TABLE_NAME} SET ${config.flagColumn} = TRUE, extra_data = ? WHERE id = ?`,
           [JSON.stringify(extra), item.id]
         );
       }

@@ -1,5 +1,9 @@
 const db = require('../../config/database');
 const { sanitizeTextInput } = require('../utils/inputSanitization');
+const {
+  ensureProductDatabaseTables,
+  PRODUCTS_TABLE_NAME
+} = require('./productService');
 
 const ANALYTICS_EVENTS_TABLE_QUERY = `
   CREATE TABLE IF NOT EXISTS site_analytics_events (
@@ -183,6 +187,7 @@ const buildDailyActivitySeries = (rows = [], days = 14) => {
 
 const getAnalyticsSummary = async ({ days = 30 } = {}) => {
   await ensureAnalyticsEventsTable();
+  await ensureProductDatabaseTables(db);
 
   const boundedDays = Math.min(Math.max(Number.parseInt(days, 10) || 30, 1), 90);
   const rangeExpression = 'created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)';
@@ -230,15 +235,15 @@ const getAnalyticsSummary = async ({ days = 30 } = {}) => {
     const [topPages] = await connection.query(`
       SELECT
         COALESCE(
-          CONCAT('Produto / ', NULLIF(products.name, '')),
+          CONCAT('Produto / ', NULLIF(${PRODUCTS_TABLE_NAME}.name, '')),
           NULLIF(events.path, ''),
           '/'
         ) AS label,
         COUNT(*) AS total
       FROM site_analytics_events events
-      LEFT JOIN products
+      LEFT JOIN ${PRODUCTS_TABLE_NAME}
         ON events.path LIKE '/produto/%'
-        AND products.id = CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(events.path, '?', 1), '/', -1) AS UNSIGNED)
+        AND ${PRODUCTS_TABLE_NAME}.id = CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(events.path, '?', 1), '/', -1) AS UNSIGNED)
       WHERE events.event_type = 'page_view' AND events.${rangeExpression}
       GROUP BY label
       ORDER BY total DESC, label ASC

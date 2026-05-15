@@ -1,13 +1,13 @@
 /**
- * Adiciona a coluna is_upcera na tabela products.
+ * Adiciona a coluna is_upcera na tabela produtos.
  * Essa flag marca quais produtos aparecem na secao especial da Upcera.
  */
 const db = require('./db');
 
 async function updateTable() {
     try {
-        console.log("Adicionando coluna is_upcera à tabela products...");
-        await db.query('ALTER TABLE products ADD COLUMN is_upcera BOOLEAN DEFAULT FALSE');
+        console.log("Adicionando coluna is_upcera à tabela produtos...");
+        await db.query('ALTER TABLE produtos ADD COLUMN is_upcera BOOLEAN DEFAULT FALSE');
         console.log("Coluna adicionada com sucesso!");
         process.exit(0);
     } catch (err) {
