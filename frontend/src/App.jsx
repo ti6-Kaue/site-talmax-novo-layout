@@ -263,9 +263,12 @@ const AppContent = ({ appReady, menuOpen, setMenuOpen, theme, onToggleTheme }) =
   const showGlobalLoader = !appReady && !isAdmin;
   const [navVisible, setNavVisible] = useState(true);
   const [activeMobileSection, setActiveMobileSection] = useState(null);
+  const [desktopSearchExpanded, setDesktopSearchExpanded] = useState(false);
   const [cookieConsentStatus, setCookieConsentStatus] = useState(() => readCookieConsentStatus());
   const [footerAds, setFooterAds] = useState([]);
   const headerRef = useRef(null);
+  const desktopSearchRef = useRef(null);
+  const desktopSearchExpandedRef = useRef(false);
   const lastScrollYRef = useRef(0);
   const tickingScrollRef = useRef(false);
 
@@ -305,8 +308,43 @@ const AppContent = ({ appReady, menuOpen, setMenuOpen, theme, onToggleTheme }) =
     toggleSearch
   } = useProductSearch({
     isAdmin,
-    onNavigateComplete: closeMobileMenu
+    onNavigateComplete: () => {
+      closeMobileMenu();
+      setDesktopSearchExpanded(false);
+    }
   });
+
+  useEffect(() => {
+    if (desktopSearchExpanded) {
+      window.requestAnimationFrame(() => {
+        searchInputRef.current?.focus();
+      });
+    }
+  }, [desktopSearchExpanded, searchInputRef]);
+
+  useEffect(() => {
+    desktopSearchExpandedRef.current = desktopSearchExpanded;
+  }, [desktopSearchExpanded]);
+
+  useEffect(() => {
+    if (!desktopSearchExpanded) {
+      return undefined;
+    }
+
+    const handleDocumentPointerDown = (event) => {
+      if (event.target instanceof Element && desktopSearchRef.current?.contains(event.target)) {
+        return;
+      }
+
+      setDesktopSearchExpanded(false);
+    };
+
+    document.addEventListener('pointerdown', handleDocumentPointerDown);
+
+    return () => {
+      document.removeEventListener('pointerdown', handleDocumentPointerDown);
+    };
+  }, [desktopSearchExpanded]);
 
   const sharedSearchBarProps = {
     onInputChange: handleSearchInputChange,
@@ -393,6 +431,10 @@ const AppContent = ({ appReady, menuOpen, setMenuOpen, theme, onToggleTheme }) =
       window.requestAnimationFrame(() => {
         const currentScrollY = window.scrollY;
         const delta = currentScrollY - lastScrollYRef.current;
+
+        if (delta > 8 && desktopSearchExpandedRef.current) {
+          setDesktopSearchExpanded(false);
+        }
 
         if (currentScrollY <= 24) {
           setNavVisible(true);
@@ -511,15 +553,76 @@ const AppContent = ({ appReady, menuOpen, setMenuOpen, theme, onToggleTheme }) =
       {!isAdmin && (
         <header
           ref={headerRef}
-          className={`header ${navVisible ? 'nav-expanded' : 'nav-collapsed'} ${menuOpen ? 'menu-active' : ''}`}
+          className={`header ${navVisible ? 'nav-expanded' : 'nav-collapsed'} ${menuOpen ? 'menu-active' : ''} ${desktopSearchExpanded ? 'desktop-search-active' : ''}`}
         >
           <div className="header-top">
             <Link to="/" className="logo">
               <img src={assetPath('img/Talmaxlogo.logo.webp')} alt="TALMAX" />
             </Link>
 
-            <div className="header-search-desktop hide-mobile">
-              <SearchBar variant="desktop" {...sharedSearchBarProps} />
+            <nav className="nav-desktop header-nav-desktop hide-mobile">
+              <div className={navItemClassName(activeNavItems.home)}>
+                <Link to="/">Home</Link>
+              </div>
+
+              <div className={navItemClassName(activeNavItems.institucional)}>
+                <span>Institucional <ChevronDown className="nav-dropdown-arrow" size={14} /></span>
+                <div className="dropdown">
+                  <Link to="/quem-somos">Quem Somos</Link>
+                  <Link to="/historia-diretoria">História & Diretoria</Link>
+                  <Link to="/depoimentos">Depoimentos</Link>
+                </div>
+              </div>
+
+              <div className={navItemClassName(activeNavItems.produtos)}>
+                <span>Produtos <ChevronDown className="nav-dropdown-arrow" size={14} /></span>
+                <div className="dropdown">
+                  <Link to="/produtos" className="highlight-link">Todos os produtos</Link>
+                  <hr />
+                  <Link to="/categoria/talmax-digital">Talmax Digital</Link>
+                  <Link to="/categoria/protese-dentaria">Prótese Dentária</Link>
+                  <Link to="/categoria/nail-e-podologia">Nail e Podologia</Link>
+                </div>
+              </div>
+
+              <div className={navItemClassName(activeNavItems.servicos)}>
+                <span>Serviços <ChevronDown className="nav-dropdown-arrow" size={14} /></span>
+                <div className="dropdown">
+                  <Link to="/suporte">Suporte</Link>
+                  <Link to="/assistencia-tecnica">Assistência Técnica</Link>
+                </div>
+              </div>
+
+              <div className={navItemClassName(activeNavItems.contato)}>
+                <span>Contato <ChevronDown className="nav-dropdown-arrow" size={14} /></span>
+                <div className="dropdown">
+                  <Link to="/contato">Formulário de Contato</Link>
+                  <Link to="/comercial-comex">Comercial / Comex</Link>
+                  <a href="https://www.bne.com.br/talmax" target="_blank" rel="noopener noreferrer">Trabalhe Conosco</a>
+                </div>
+              </div>
+            </nav>
+
+            <div
+              ref={desktopSearchRef}
+              className={`header-search-desktop hide-mobile ${desktopSearchExpanded ? 'is-expanded' : 'is-collapsed'}`}
+            >
+              {desktopSearchExpanded ? (
+                <SearchBar
+                  variant="desktop"
+                  inputRef={searchInputRef}
+                  {...sharedSearchBarProps}
+                />
+              ) : (
+                <button
+                  type="button"
+                  className="desktop-search-icon-button"
+                  onClick={() => setDesktopSearchExpanded(true)}
+                  aria-label="Abrir busca"
+                >
+                  <Search size={18} />
+                </button>
+              )}
             </div>
 
             <div className="header-socials hide-mobile">

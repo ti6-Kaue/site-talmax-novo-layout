@@ -124,7 +124,7 @@ const SearchBar = ({
   const isMobile = variant === 'mobile';
   const formClassName = isMobile ? 'header-search-input-wrap' : 'header-search-inline';
   const shellClassName = `site-search-shell ${isMobile ? 'site-search-shell-mobile' : 'site-search-shell-desktop'}`;
-  const placeholder = isMobile ? 'Digite o nome do produto...' : 'Buscar produtos pelo nome...';
+  const placeholder = isMobile ? 'Digite o nome do produto...' : 'Buscar por produto, serviço...';
 
   const content = (
     <div className={shellClassName} data-site-search-root="true">
@@ -151,9 +151,7 @@ const SearchBar = ({
           >
             <X size={16} />
           </button>
-        ) : (
-          <button type="submit">Buscar</button>
-        )}
+        ) : null}
       </form>
 
       {shouldShowDropdown && (
