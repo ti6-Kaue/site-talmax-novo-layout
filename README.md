@@ -182,8 +182,6 @@ Tabelas ja presentes no schema base:
 - `categorias`
 - `sub_categorias`
 - `produtos`
-- `produto_categorias`
-- `produto_sub_categorias`
 - `abas_produto`
 - `banners`
 - `users`

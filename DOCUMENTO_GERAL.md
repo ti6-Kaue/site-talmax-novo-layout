@@ -52,7 +52,7 @@ Se a duvida for "quero mudar tal coisa, por onde comeco?", use este mapa:
 | Cards da home | painel admin > Home Segmentos | `frontend/src/pages/Admin/AdminSegments/`, `backend/src/server/routes/homeServiceRoutes.js`, tabela `home_services` |
 | Produtos em destaque da home | painel admin > Home Destaques | `frontend/src/pages/Admin/AdminFeatured/`, `backend/src/server/routes/specialSectionRoutes.js`, tabela `produtos` + `extra_data` |
 | Categorias e subcategorias | painel admin > Categorias | `frontend/src/pages/Admin/AdminCategories/`, `backend/src/server/routes/categoryRoutes.js`, tabelas `categorias` e `sub_categorias` |
-| Produto completo | painel admin > Cadastro de Produtos | `frontend/src/pages/Admin/AdminProducts/`, `backend/src/server/routes/productRoutes.js`, tabelas `produtos`, `produto_categorias`, `produto_sub_categorias`, `abas_produto` |
+| Produto completo | painel admin > Cadastro de Produtos | `frontend/src/pages/Admin/AdminProducts/`, `backend/src/server/routes/productRoutes.js`, tabelas `produtos`, `abas_produto` |
 | Lista de produtos | painel admin > Lista de Produtos | `frontend/src/pages/Admin/AdminProducts/AdminProductsList.jsx`, `backend/src/server/routes/productRoutes.js` |
 | Talmax Digital | painel admin > Talmax Digital | `frontend/src/pages/Admin/AdminTalmaxDigital/AdminTalmaxDigital.jsx`, `backend/src/server/routes/homeServiceRoutes.js`, tabela `home_services` |
 | Upcera | painel admin > Upcera | `frontend/src/pages/Admin/AdminUpcera/`, `backend/src/server/routes/pageSettingsRoutes.js`, `backend/src/server/routes/specialSectionRoutes.js` |
@@ -250,8 +250,6 @@ Arquivos principais:
 Os produtos usam:
 
 - tabela `produtos`
-- tabela `produto_categorias`
-- tabela `produto_sub_categorias`
 - tabela `abas_produto`
 - campo `extra_data` dentro de `produtos`
 
@@ -536,9 +534,7 @@ Esse arquivo cria o banco e as tabelas principais.
 | --- | --- |
 | `categorias` | categorias principais do catalogo |
 | `sub_categorias` | subcategorias ligadas a uma categoria principal |
-| `produtos` | cadastro principal dos produtos |
-| `produto_categorias` | relacao produto x categorias |
-| `produto_sub_categorias` | relacao produto x subcategorias |
+| `produtos` | cadastro principal dos produtos, incluindo categoria e subcategoria |
 | `abas_produto` | abas tecnicas e conteudo adicional do produto |
 | `banners` | banners da home |
 | `users` | usuarios do painel admin |

@@ -69,28 +69,6 @@ CREATE TABLE IF NOT EXISTS produtos (
         FOREIGN KEY (sub_category_id) REFERENCES sub_categorias(id) ON DELETE SET NULL
 );
 
-CREATE TABLE IF NOT EXISTS produto_categorias (
-    product_id INT NOT NULL,
-    category_id INT NOT NULL,
-    PRIMARY KEY (product_id, category_id),
-    KEY idx_produto_categorias_category_id (category_id),
-    CONSTRAINT fk_produto_categorias_product
-        FOREIGN KEY (product_id) REFERENCES produtos(id) ON DELETE CASCADE,
-    CONSTRAINT fk_produto_categorias_categoria
-        FOREIGN KEY (category_id) REFERENCES categorias(id) ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS produto_sub_categorias (
-    product_id INT NOT NULL,
-    sub_category_id INT NOT NULL,
-    PRIMARY KEY (product_id, sub_category_id),
-    KEY idx_produto_sub_categorias_sub_category_id (sub_category_id),
-    CONSTRAINT fk_produto_sub_categorias_product
-        FOREIGN KEY (product_id) REFERENCES produtos(id) ON DELETE CASCADE,
-    CONSTRAINT fk_produto_sub_categorias_sub_categoria
-        FOREIGN KEY (sub_category_id) REFERENCES sub_categorias(id) ON DELETE CASCADE
-);
-
 CREATE TABLE IF NOT EXISTS abas_produto (
     id INT NOT NULL AUTO_INCREMENT,
     product_id INT NOT NULL,
