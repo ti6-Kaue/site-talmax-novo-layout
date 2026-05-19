@@ -3,7 +3,7 @@
  * Rota: /produtos e /categoria/:slug
  * Responsabilidade: listar produtos e aplicar filtros por busca e categoria
  */
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   Search,
@@ -115,12 +115,14 @@ const ProductCatalog = () => {
   const [products, setProducts] = useState([]);
   const [allCategories, setAllCategories] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [activeSubcategorySlug, setActiveSubcategorySlug] = useState('');
 
   // Sincroniza o estado inicial e as mudanças de URL
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     const searchQuery = queryParams.get('busca') || '';
     const categoryQuery = queryParams.get('categoria');
+    const subcategoryQuery = queryParams.get('subcategoria') || '';
 
     // Sincroniza o termo de busca local com a URL
     setSearchTerm(searchQuery);
@@ -128,15 +130,28 @@ const ProductCatalog = () => {
     if (categoryQuery && allCategories.length > 0) {
       const category = allCategories.find((item) => item.slug === categoryQuery);
       if (category) {
-        setActiveCategories([category.name]);
+        const parentCategory = category.parent_id
+          ? allCategories.find((item) => Number(item.id) === Number(category.parent_id))
+          : category;
+
+        setActiveCategories(parentCategory ? [parentCategory.name] : [category.name]);
+        setActiveSubcategorySlug(category.parent_id ? category.slug : subcategoryQuery);
       }
     } else if (slug && allCategories.length > 0) {
       const category = allCategories.find((item) => item.slug === slug);
       if (category) {
-        setActiveCategories([category.name]);
+        const parentCategory = category.parent_id
+          ? allCategories.find((item) => Number(item.id) === Number(category.parent_id))
+          : category;
+
+        setActiveCategories(parentCategory ? [parentCategory.name] : [category.name]);
+        setActiveSubcategorySlug(category.parent_id ? category.slug : subcategoryQuery);
       }
     } else if (!categoryQuery && !slug) {
       setActiveCategories([]);
+      setActiveSubcategorySlug('');
+    } else {
+      setActiveSubcategorySlug(subcategoryQuery);
     }
     
     // Sempre volta para a primeira página ao mudar busca ou categoria na URL
@@ -186,6 +201,8 @@ const ProductCatalog = () => {
             name: product.name,
             allCategoryNames: productCatNames,
             category_names: product.category_names || '',
+            categoryIds: Array.isArray(product.category_ids) ? product.category_ids.map(Number) : [],
+            subCategoryIds: Array.isArray(product.sub_category_ids) ? product.sub_category_ids.map(Number) : [],
             is_upcera: product.is_upcera === true || Number(product.is_upcera) === 1,
             category: getVisibleCategoryLabel(productCatNames, segmentNames),
             image: product.main_image ? apiAssetPath(product.main_image) : '',
@@ -218,6 +235,83 @@ const ProductCatalog = () => {
     return `${activeCategories.length} categorias selecionadas`;
   }, [activeCategories]);
 
+  const routeCategory = useMemo(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const routeCategorySlug = queryParams.get('categoria') || slug || '';
+
+    if (!routeCategorySlug) {
+      return null;
+    }
+
+    return allCategories.find((category) => category.slug === routeCategorySlug) || null;
+  }, [allCategories, location.search, slug]);
+
+  const activeRouteCategory = useMemo(() => {
+    if (!routeCategory) {
+      return null;
+    }
+
+    if (!routeCategory.parent_id) {
+      return routeCategory;
+    }
+
+    return allCategories.find((category) => Number(category.id) === Number(routeCategory.parent_id)) || routeCategory;
+  }, [allCategories, routeCategory]);
+
+  const activeRouteSubcategories = useMemo(() => {
+    if (!activeRouteCategory || activeRouteCategory.parent_id) {
+      return [];
+    }
+
+    return allCategories.filter((category) => (
+      Number(category.parent_id) === Number(activeRouteCategory.id)
+      && category.is_visible !== false
+      && Number(category.is_visible ?? 1) !== 0
+    ));
+  }, [activeRouteCategory, allCategories]);
+
+  const activeRouteSubcategory = useMemo(() => (
+    activeRouteSubcategories.find((category) => category.slug === activeSubcategorySlug) || null
+  ), [activeRouteSubcategories, activeSubcategorySlug]);
+
+  const categoryMatchesProduct = useCallback((product, category) => {
+    if (!category) {
+      return true;
+    }
+
+    const categoryId = Number(category.id);
+    const productCategoryIds = Array.isArray(product.categoryIds) ? product.categoryIds.map(Number) : [];
+    const productSubCategoryIds = Array.isArray(product.subCategoryIds) ? product.subCategoryIds.map(Number) : [];
+    const allCategoryNames = Array.isArray(product.allCategoryNames) ? product.allCategoryNames : [];
+
+    if (category.parent_id) {
+      return (
+        productSubCategoryIds.includes(categoryId)
+        || allCategoryNames.some((name) => normalizeSearchText(String(name)) === normalizeSearchText(String(category.name)))
+      );
+    }
+
+    const childIds = allCategories
+      .filter((item) => Number(item.parent_id) === categoryId)
+      .map((item) => Number(item.id));
+    const namesToMatch = [
+      category.name,
+      ...allCategories
+        .filter((item) => Number(item.parent_id) === categoryId)
+        .map((item) => item.name)
+    ];
+
+    return (
+      productCategoryIds.includes(categoryId)
+      || productSubCategoryIds.some((id) => childIds.includes(Number(id)))
+      || allCategoryNames.some((name) =>
+        namesToMatch.some((catToMatch) =>
+          normalizeSearchText(String(name)) === normalizeSearchText(String(catToMatch))
+        )
+      )
+    );
+  }, [allCategories]);
+
   const categoriesTree = useMemo(() => {
     const filteredCategories = allCategories.filter((category) =>
       normalizedFeaturedCategoryOrder.includes(normalizeSearchText(category.name))
@@ -233,45 +327,33 @@ const ProductCatalog = () => {
   const filteredProducts = useMemo(() => {
     const normalizedTerm = normalizeSearchText(searchTerm);
 
-    if (!normalizedTerm && activeCategories.length === 0) {
+    if (!normalizedTerm && activeCategories.length === 0 && !activeRouteSubcategory) {
       return products;
     }
 
     const results = products.filter((product) => {
       const productName = String(product.name || '');
-      const allCategoryNames = Array.isArray(product.allCategoryNames) ? product.allCategoryNames : [];
 
       const normName = normalizeSearchText(productName);
       const matchesSearch = !normalizedTerm || normName.includes(normalizedTerm);
 
-      if (activeCategories.length === 0) {
+      if (activeCategories.length === 0 && !activeRouteSubcategory) {
         return matchesSearch;
       }
 
-      // Lógica de categorias ativas (Filtro Lateral)
-      const categoriesToMatch = activeCategories.flatMap((selectedCategoryName) => {
-        const currentCategory = allCategories.find((category) => category.name === selectedCategoryName);
-        if (!currentCategory) return [];
+      const selectedCategoryObjects = activeRouteSubcategory
+        ? [activeRouteSubcategory]
+        : activeCategories
+          .map((selectedCategoryName) => allCategories.find((category) => category.name === selectedCategoryName))
+          .filter(Boolean);
 
-        const matchedNames = [currentCategory.name];
-        if (!currentCategory.parent_id) {
-          const children = allCategories.filter((category) => category.parent_id === currentCategory.id);
-          children.forEach((child) => matchedNames.push(child.name));
-        }
-
-        return matchedNames;
-      });
-
-      const matchesCategory = allCategoryNames.some((name) =>
-        categoriesToMatch.some(catToMatch => 
-          normalizeSearchText(String(name)) === normalizeSearchText(String(catToMatch))
-        )
-      );
+      const matchesCategory = selectedCategoryObjects.length === 0
+        || selectedCategoryObjects.some((category) => categoryMatchesProduct(product, category));
 
       return matchesSearch && matchesCategory;
     });
     return results;
-  }, [searchTerm, activeCategories, products, allCategories]);
+  }, [searchTerm, activeCategories, activeRouteSubcategory, products, allCategories, categoryMatchesProduct]);
 
   // Paginação
   useEffect(() => {
@@ -327,6 +409,23 @@ const ProductCatalog = () => {
     }
   };
 
+  const handleSubcategorySelect = (subcategorySlug) => {
+    const params = new URLSearchParams(location.search);
+    const nextSlug = activeSubcategorySlug === subcategorySlug ? '' : subcategorySlug;
+
+    if (nextSlug) {
+      params.set('subcategoria', nextSlug);
+    } else {
+      params.delete('subcategoria');
+    }
+
+    setActiveSubcategorySlug(nextSlug);
+    setCurrentPage(1);
+    const queryString = params.toString();
+    const targetPath = activeRouteCategory?.slug ? `/categoria/${activeRouteCategory.slug}` : location.pathname;
+    navigate(`${targetPath}${queryString ? `?${queryString}` : ''}`, { replace: true });
+  };
+
   const resetFilters = () => {
     setSearchTerm('');
     setActiveCategories([]);
@@ -335,8 +434,55 @@ const ProductCatalog = () => {
     navigate('/produtos');
   };
 
+  const activeRouteCategoryBannerUrl = activeRouteCategory?.page_banner_categorias_url || '';
+
   return (
     <div className="catalog-container">
+      {activeRouteCategory && (
+        <>
+          {activeRouteCategoryBannerUrl && (
+            <section className="category-page-banner" aria-label={`Banner de ${activeRouteCategory.name}`}>
+              <img
+                src={apiAssetPath(activeRouteCategoryBannerUrl)}
+                alt=""
+                aria-hidden="true"
+                className="category-page-banner__image"
+              />
+            </section>
+          )}
+
+          <section className={`category-page-intro ${!activeRouteCategoryBannerUrl ? 'category-page-intro--no-banner' : ''}`}>
+            <div className="category-page-intro__inner">
+              <h1>{activeRouteCategory.name}</h1>
+
+              {activeRouteSubcategories.length > 0 && (
+                <nav className="category-subnav" aria-label={`Subcategorias de ${activeRouteCategory.name}`}>
+                  <button
+                    type="button"
+                    className={!activeSubcategorySlug ? 'active' : ''}
+                    onClick={() => handleSubcategorySelect('')}
+                  >
+                    Todas
+                    <ChevronRight size={18} />
+                  </button>
+                  {activeRouteSubcategories.map((category) => (
+                    <button
+                      key={`${category.parent_id}-${category.id}`}
+                      type="button"
+                      className={activeSubcategorySlug === category.slug ? 'active' : ''}
+                      onClick={() => handleSubcategorySelect(category.slug)}
+                    >
+                      {category.name}
+                      <ChevronRight size={18} />
+                    </button>
+                  ))}
+                </nav>
+              )}
+            </div>
+          </section>
+        </>
+      )}
+
       {activeCategories.length === 1 && activeCategories[0] === 'Talmax Digital' && (
         <section className="digital-quick-nav">
           <div className="quick-nav-grid">

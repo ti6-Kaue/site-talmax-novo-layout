@@ -21,6 +21,81 @@ body {
   background: #f1f4f9;
 }
 
+.category-page-banner {
+  width: 100%;
+  overflow: hidden;
+  background: #000000;
+  border-radius: 0 0 clamp(2.4rem, 7vw, 5.5rem) clamp(2.4rem, 7vw, 5.5rem);
+}
+
+.category-page-banner__image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.category-page-intro {
+  background: #f1f4f9;
+  padding: clamp(3rem, 7vw, 5.5rem) 0 clamp(1.8rem, 4vw, 3.2rem);
+}
+
+.category-page-intro--no-banner {
+  padding-top: clamp(5rem, 11vw, 8rem);
+}
+
+.category-page-intro__inner {
+  width: min(1400px, 100%);
+  margin: 0 auto;
+  padding: 0;
+}
+
+.category-page-intro h1 {
+  margin: 0;
+  color: #1d1d1f;
+  font-size: clamp(2.7rem, 5.8vw, 4.9rem);
+  line-height: 1;
+  font-weight: 100;
+  letter-spacing: 0;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+}
+
+.category-subnav {
+  display: flex;
+  justify-content: flex-start;
+  gap: clamp(0.8rem, 3.4vw, 2.8rem);
+  flex-wrap: wrap;
+  margin-top: clamp(1.2rem, 3vw, 2rem);
+}
+
+.category-subnav button {
+  min-width: min(214px, 100%);
+  height: 50px;
+  padding: 0 1.55rem;
+  border: 1px solid #0f172a;
+  border-radius: 999px;
+  background: transparent;
+  color: #0f172a;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.6rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  transition: 0.22s ease;
+}
+
+.category-subnav button.active,
+.category-subnav button:hover {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #ffffff;
+  box-shadow: 0 14px 26px rgba(55, 76, 146, 0.16);
+  transform: translateY(-1px);
+}
+
 /* --- HERO SECTION --- */
 .catalog-hero-minimal {
   padding: 80px 5% 40px;
@@ -530,6 +605,15 @@ body {
 @media (max-width: 600px) {
   .catalog-grid-lux { grid-template-columns: 1fr; }
   .catalog-grid-lux.five-cols { grid-template-columns: 1fr; }
+  .category-page-banner {
+    border-radius: 0 0 2rem 2rem;
+  }
+  .category-subnav {
+    flex-direction: column;
+  }
+  .category-subnav button {
+    width: 100%;
+  }
   .catalog-viewport { padding-right: 1rem; padding-left: 1rem; }
   .top-nav-inner { flex-direction: column; gap: 15px; align-items: stretch; }
   .catalog-actions { flex-direction: column; align-items: stretch; }

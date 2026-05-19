@@ -31,6 +31,17 @@ const CATEGORY_BACKGROUND_FILE_FIELDS = [
   'categoryBackground',
   'category_background'
 ];
+const CATEGORY_PAGE_BANNER_FILE_FIELDS = [
+  'page_banner',
+  'page_banner_categorias_url',
+  'page_banner_url',
+  'pageBanner',
+  'page_banner_image',
+  'categoryPageBanner',
+  'category_page_banner'
+];
+const CATEGORY_PAGE_BANNER_COLUMN = 'page_banner_categorias_url';
+const LEGACY_CATEGORY_PAGE_BANNER_COLUMN = 'page_banner_url';
 
 const categoryUpload = upload.any();
 
@@ -67,11 +78,35 @@ const getCategorySchemaState = async () => {
     }
   }
 
+  if (!categoryColumns.has(CATEGORY_PAGE_BANNER_COLUMN)) {
+    try {
+      await db.query(`ALTER TABLE categorias ADD COLUMN ${CATEGORY_PAGE_BANNER_COLUMN} VARCHAR(500) DEFAULT NULL AFTER background_url`);
+      categoryColumns.add(CATEGORY_PAGE_BANNER_COLUMN);
+
+      if (categoryColumns.has(LEGACY_CATEGORY_PAGE_BANNER_COLUMN)) {
+        await db.query(`UPDATE categorias SET ${CATEGORY_PAGE_BANNER_COLUMN} = ${LEGACY_CATEGORY_PAGE_BANNER_COLUMN} WHERE ${CATEGORY_PAGE_BANNER_COLUMN} IS NULL AND ${LEGACY_CATEGORY_PAGE_BANNER_COLUMN} IS NOT NULL`);
+      }
+    } catch (err) {
+      logger.warn({ err }, `Nao foi possivel garantir a coluna ${CATEGORY_PAGE_BANNER_COLUMN} em categorias.`);
+    }
+  }
+
+  if (!subCategoryColumns.has('background_url')) {
+    try {
+      await db.query('ALTER TABLE sub_categorias ADD COLUMN background_url VARCHAR(500) DEFAULT NULL AFTER slug');
+      subCategoryColumns.add('background_url');
+    } catch (err) {
+      logger.warn({ err }, 'Nao foi possivel garantir a coluna background_url em sub_categorias.');
+    }
+  }
+
   cachedCategorySchemaState = {
     categoryHasIconUrl: categoryColumns.has('icon_url'),
     categoryHasBackgroundUrl: categoryColumns.has('background_url'),
+    categoryHasPageBannerUrl: categoryColumns.has(CATEGORY_PAGE_BANNER_COLUMN),
     categoryHasDisplayOrder: categoryColumns.has('display_order'),
     categoryHasIsVisible: categoryColumns.has('is_visible'),
+    subCategoryHasBackgroundUrl: subCategoryColumns.has('background_url'),
     subCategoryHasDisplayOrder: subCategoryColumns.has('display_order'),
     subCategoryHasIsVisible: subCategoryColumns.has('is_visible')
   };
@@ -82,16 +117,20 @@ const getCategorySchemaState = async () => {
 const buildCategoryListQuery = (schemaState) => {
   const categoryIconSelect = schemaState.categoryHasIconUrl ? 'icon_url' : 'NULL AS icon_url';
   const categoryBackgroundSelect = schemaState.categoryHasBackgroundUrl ? 'background_url' : 'NULL AS background_url';
+  const categoryPageBannerSelect = schemaState.categoryHasPageBannerUrl
+    ? `${CATEGORY_PAGE_BANNER_COLUMN} AS page_banner_categorias_url`
+    : 'NULL AS page_banner_categorias_url';
   const categoryDisplayOrderSelect = schemaState.categoryHasDisplayOrder ? 'display_order' : '0 AS display_order';
   const categoryVisibleSelect = schemaState.categoryHasIsVisible ? 'is_visible' : '1 AS is_visible';
+  const subCategoryBackgroundSelect = schemaState.subCategoryHasBackgroundUrl ? 'background_url' : 'NULL AS background_url';
   const subCategoryDisplayOrderSelect = schemaState.subCategoryHasDisplayOrder ? 'display_order' : '0 AS display_order';
   const subCategoryVisibleSelect = schemaState.subCategoryHasIsVisible ? 'IFNULL(is_visible, 1)' : '1';
 
   return `
-    SELECT id, name, slug, ${categoryIconSelect}, ${categoryBackgroundSelect}, ${categoryDisplayOrderSelect}, ${categoryVisibleSelect}, NULL as parent_id
+    SELECT id, name, slug, ${categoryIconSelect}, ${categoryBackgroundSelect}, ${categoryPageBannerSelect}, ${categoryDisplayOrderSelect}, ${categoryVisibleSelect}, NULL as parent_id
     FROM categorias
     UNION ALL
-    SELECT id, name, slug, NULL as icon_url, NULL as background_url, ${subCategoryDisplayOrderSelect}, ${subCategoryVisibleSelect} as is_visible, category_id as parent_id
+    SELECT id, name, slug, NULL as icon_url, ${subCategoryBackgroundSelect}, NULL AS page_banner_categorias_url, ${subCategoryDisplayOrderSelect}, ${subCategoryVisibleSelect} as is_visible, category_id as parent_id
     FROM sub_categorias
     ORDER BY display_order, id
   `;
@@ -123,7 +162,8 @@ router.get('/', async (req, res) => {
       name: sanitizeTextInput(row.name || '', { preserveNewlines: false }),
       slug: sanitizeTextInput(row.slug || '', { preserveNewlines: false }),
       icon_url: sanitizeAssetReference(sanitizeServedImageUrl(row.icon_url) || ''),
-      background_url: sanitizeAssetReference(sanitizeServedImageUrl(row.background_url) || '')
+      background_url: sanitizeAssetReference(sanitizeServedImageUrl(row.background_url) || ''),
+      page_banner_categorias_url: sanitizeAssetReference(sanitizeServedImageUrl(row.page_banner_categorias_url) || '')
     })));
   } catch (err) {
     if (shouldUseBackupFallback) {
@@ -132,7 +172,8 @@ router.get('/', async (req, res) => {
         name: sanitizeTextInput(category.name || '', { preserveNewlines: false }),
         slug: sanitizeTextInput(category.slug || '', { preserveNewlines: false }),
         icon_url: sanitizeAssetReference(sanitizeServedImageUrl(category.icon_url) || ''),
-        background_url: sanitizeAssetReference(sanitizeServedImageUrl(category.background_url) || '')
+        background_url: sanitizeAssetReference(sanitizeServedImageUrl(category.background_url) || ''),
+        page_banner_categorias_url: sanitizeAssetReference(sanitizeServedImageUrl(category.page_banner_categorias_url) || '')
       })));
       return;
     }
@@ -154,20 +195,39 @@ router.post('/', requireAdminSession, categoryUpload, async (req, res, next) => 
     const visible = payload.is_visible === false ? 0 : 1;
 
     if (payload.parent_id) {
+      const backgroundFile = getUploadedFieldFile(req.files, CATEGORY_BACKGROUND_FILE_FIELDS);
+      const background_url = schemaState.subCategoryHasBackgroundUrl && backgroundFile
+        ? await persistUploadedFile(backgroundFile, { resourceType: 'categorias' })
+        : null;
+      const fields = ['category_id', 'name', 'slug'];
+      const values = [payload.parent_id, safe(payload.name) || '', safe(payload.slug) || ''];
+
+      if (schemaState.subCategoryHasBackgroundUrl) {
+        fields.push('background_url');
+        values.push(safe(sanitizeAssetReference(background_url || '') || null));
+      }
+
+      fields.push('display_order');
+      values.push(0);
+
       await db.query(
-        'INSERT INTO sub_categorias (category_id, name, slug, display_order) VALUES (?, ?, ?, ?)',
-        [payload.parent_id, safe(payload.name) || '', safe(payload.slug) || '', 0]
+        `INSERT INTO sub_categorias (${fields.join(', ')}) VALUES (${fields.map(() => '?').join(', ')})`,
+        values
       );
       return res.status(201).json({ message: 'Subcategoria criada!' });
     }
 
     const iconFile = getUploadedFieldFile(req.files, CATEGORY_ICON_FILE_FIELDS);
     const backgroundFile = getUploadedFieldFile(req.files, CATEGORY_BACKGROUND_FILE_FIELDS);
+    const pageBannerFile = getUploadedFieldFile(req.files, CATEGORY_PAGE_BANNER_FILE_FIELDS);
     const icon_url = iconFile
       ? await persistUploadedFile(iconFile, { resourceType: 'categorias' })
       : null;
     const background_url = schemaState.categoryHasBackgroundUrl && backgroundFile
       ? await persistUploadedFile(backgroundFile, { resourceType: 'categorias' })
+      : null;
+    const page_banner_categorias_url = schemaState.categoryHasPageBannerUrl && pageBannerFile
+      ? await persistUploadedFile(pageBannerFile, { resourceType: 'categorias' })
       : null;
 
     const fields = ['name', 'slug', 'icon_url'];
@@ -180,6 +240,11 @@ router.post('/', requireAdminSession, categoryUpload, async (req, res, next) => 
     if (schemaState.categoryHasBackgroundUrl) {
       fields.push('background_url');
       values.push(safe(sanitizeAssetReference(background_url || '') || null));
+    }
+
+    if (schemaState.categoryHasPageBannerUrl) {
+      fields.push(CATEGORY_PAGE_BANNER_COLUMN);
+      values.push(safe(sanitizeAssetReference(page_banner_categorias_url || '') || null));
     }
 
     fields.push('display_order', 'is_visible');
@@ -208,10 +273,19 @@ router.put('/:id', requireAdminSession, categoryUpload, async (req, res, next) =
     const { id } = req.params;
 
     if (payload.parent_id) {
-      await db.query(
-        'UPDATE sub_categorias SET name = ?, slug = ?, category_id = ?, is_visible = ? WHERE id = ?',
-        [safe(payload.name) || '', safe(payload.slug) || '', payload.parent_id, visible, id]
-      );
+      let query = 'UPDATE sub_categorias SET name = ?, slug = ?, category_id = ?, is_visible = ?';
+      const params = [safe(payload.name) || '', safe(payload.slug) || '', payload.parent_id, visible];
+      const backgroundFile = getUploadedFieldFile(req.files, CATEGORY_BACKGROUND_FILE_FIELDS);
+
+      if (schemaState.subCategoryHasBackgroundUrl && backgroundFile) {
+        query += ', background_url = ?';
+        params.push(sanitizeAssetReference(await persistUploadedFile(backgroundFile, { resourceType: 'categorias' })) || null);
+      }
+
+      query += ' WHERE id = ?';
+      params.push(id);
+
+      await db.query(query, params.map(safe));
       return res.json({ message: 'Subcategoria atualizada!' });
     }
 
@@ -219,6 +293,7 @@ router.put('/:id', requireAdminSession, categoryUpload, async (req, res, next) =
     const params = [safe(payload.name) || '', safe(payload.slug) || '', visible];
     const iconFile = getUploadedFieldFile(req.files, CATEGORY_ICON_FILE_FIELDS);
     const backgroundFile = getUploadedFieldFile(req.files, CATEGORY_BACKGROUND_FILE_FIELDS);
+    const pageBannerFile = getUploadedFieldFile(req.files, CATEGORY_PAGE_BANNER_FILE_FIELDS);
 
     if (iconFile) {
       query += ', icon_url = ?';
@@ -228,6 +303,11 @@ router.put('/:id', requireAdminSession, categoryUpload, async (req, res, next) =
     if (schemaState.categoryHasBackgroundUrl && backgroundFile) {
       query += ', background_url = ?';
       params.push(sanitizeAssetReference(await persistUploadedFile(backgroundFile, { resourceType: 'categorias' })) || null);
+    }
+
+    if (schemaState.categoryHasPageBannerUrl && pageBannerFile) {
+      query += `, ${CATEGORY_PAGE_BANNER_COLUMN} = ?`;
+      params.push(sanitizeAssetReference(await persistUploadedFile(pageBannerFile, { resourceType: 'categorias' })) || null);
     }
 
     query += ' WHERE id = ?';

@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useEffect, useRef, useState } from 'react';
+import React, { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
@@ -23,6 +23,7 @@ import CookieBanner from './components/CookieBanner/CookieBanner';
 import PagePlaceholder from './components/PagePlaceholder/PagePlaceholder';
 import SearchBar from './components/SearchBar/SearchBar';
 import { useProductSearch } from './hooks/useProductSearch';
+import API_URL from './services/api';
 import { validateAdminSession } from './services/adminAuth';
 import { trackPageView, trackWhatsappClick } from './services/analytics';
 import homeContentBlockService from './services/homeContentBlockService';
@@ -53,6 +54,28 @@ const Admin = lazy(() => import('./pages/Admin/AdminDashboard'));
 
 const THEME_STORAGE_KEY = 'talmax-theme';
 const LOADER_DELAY_MS = 1000;
+const PRODUCTS_NAV_CATEGORY_ORDER = [
+  'Fresadoras',
+  'Scanners',
+  'Ligas Metalicas',
+  'Ligas Metálicas',
+  'Revestimentos',
+  'Blocos',
+  'Fresas',
+  'Equipamentos',
+  'Talmax Digital',
+  'Prótese Dentária',
+  'Nail e Podologia'
+];
+
+const normalizeNavCategoryText = (value = '') => (
+  String(value)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+);
+
+const normalizedProductsNavOrder = PRODUCTS_NAV_CATEGORY_ORDER.map(normalizeNavCategoryText);
 
 const FullScreenLoader = ({ label = 'Carregando...' }) => (
   <div className="app-loader-overlay" role="status" aria-live="polite" aria-label={label}>
@@ -266,6 +289,7 @@ const AppContent = ({ appReady, menuOpen, setMenuOpen, theme, onToggleTheme }) =
   const [desktopSearchExpanded, setDesktopSearchExpanded] = useState(false);
   const [cookieConsentStatus, setCookieConsentStatus] = useState(() => readCookieConsentStatus());
   const [footerAds, setFooterAds] = useState([]);
+  const [productNavCategories, setProductNavCategories] = useState([]);
   const headerRef = useRef(null);
   const desktopSearchRef = useRef(null);
   const desktopSearchExpandedRef = useRef(false);
@@ -359,6 +383,37 @@ const AppContent = ({ appReady, menuOpen, setMenuOpen, theme, onToggleTheme }) =
     suggestions: productSuggestions,
     totalMatches: searchMatchesTotal
   };
+
+  useEffect(() => {
+    if (isAdmin) {
+      setProductNavCategories([]);
+      return undefined;
+    }
+
+    const controller = new AbortController();
+
+    fetch(`${API_URL}/categories`, { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Erro ao carregar categorias do menu');
+        }
+
+        return response.json();
+      })
+      .then((items) => {
+        setProductNavCategories(Array.isArray(items) ? items : []);
+      })
+      .catch((error) => {
+        if (error.name !== 'AbortError') {
+          console.error('Erro ao carregar categorias do menu:', error);
+          setProductNavCategories([]);
+        }
+      });
+
+    return () => {
+      controller.abort();
+    };
+  }, [isAdmin]);
 
   useEffect(() => {
     const unsubscribe = subscribeToAdminSessionExpired(() => {
@@ -531,6 +586,44 @@ const AppContent = ({ appReady, menuOpen, setMenuOpen, theme, onToggleTheme }) =
     cursos: isPathActive(['/cursos']),
     sac: isPathActive(['/sac', '/politicas-troca'])
   };
+  const visibleProductNavCategories = useMemo(() => {
+    const visibleItems = productNavCategories.filter((category) => (
+      category?.slug
+      && category.is_visible !== false
+      && Number(category.is_visible ?? 1) !== 0
+    ));
+
+    const orderedItems = visibleItems
+      .filter((category) => normalizedProductsNavOrder.includes(normalizeNavCategoryText(category.name)))
+      .sort((a, b) => (
+        normalizedProductsNavOrder.indexOf(normalizeNavCategoryText(a.name))
+        - normalizedProductsNavOrder.indexOf(normalizeNavCategoryText(b.name))
+      ));
+
+    return orderedItems.length > 0 ? orderedItems : visibleItems.filter((category) => !category.parent_id);
+  }, [productNavCategories]);
+
+  const renderProductCategoryLinks = (onClick) => {
+    if (visibleProductNavCategories.length === 0) {
+      return (
+        <>
+          <Link to="/categoria/talmax-digital" onClick={onClick}>Talmax Digital</Link>
+          <Link to="/categoria/protese-dentaria" onClick={onClick}>Prótese Dentária</Link>
+          <Link to="/categoria/nail-e-podologia" onClick={onClick}>Nail e Podologia</Link>
+        </>
+      );
+    }
+
+    return visibleProductNavCategories.map((category) => (
+      <Link
+        key={`${category.parent_id || 'main'}-${category.id}-${category.slug}`}
+        to={`/categoria/${category.slug}`}
+        onClick={onClick}
+      >
+        {category.name}
+      </Link>
+    ));
+  };
 
   return (
     <div className="app">
@@ -579,9 +672,7 @@ const AppContent = ({ appReady, menuOpen, setMenuOpen, theme, onToggleTheme }) =
                 <div className="dropdown">
                   <Link to="/produtos" className="highlight-link">Todos os produtos</Link>
                   <hr />
-                  <Link to="/categoria/talmax-digital">Talmax Digital</Link>
-                  <Link to="/categoria/protese-dentaria">Prótese Dentária</Link>
-                  <Link to="/categoria/nail-e-podologia">Nail e Podologia</Link>
+                  {renderProductCategoryLinks()}
                 </div>
               </div>
 
@@ -669,9 +760,7 @@ const AppContent = ({ appReady, menuOpen, setMenuOpen, theme, onToggleTheme }) =
                   <div className="dropdown">
                     <Link to="/produtos" className="highlight-link">Todos os produtos</Link>
                     <hr />
-                    <Link to="/categoria/talmax-digital">Talmax Digital</Link>
-                    <Link to="/categoria/protese-dentaria">Prótese Dentária</Link>
-                    <Link to="/categoria/nail-e-podologia">Nail e Podologia</Link>
+                    {renderProductCategoryLinks()}
                   </div>
                 </div>
 
@@ -761,9 +850,7 @@ const AppContent = ({ appReady, menuOpen, setMenuOpen, theme, onToggleTheme }) =
               <div className={`nav-mobile-sub ${activeMobileSection === 'produtos' ? 'is-open' : ''}`}>
                 <Link to="/produtos" onClick={closeMobileMenu} style={{ fontWeight: 'bold', color: '#374c92' }}>Ver Todos os Produtos</Link>
                 <hr style={{ border: '0', borderTop: '1px solid rgba(255, 255, 255, 0.2)', margin: '5px 0' }} />
-                <Link to="/categoria/talmax-digital" onClick={closeMobileMenu} style={{ fontWeight: '700' }}>Talmax Digital</Link>
-                <Link to="/categoria/protese-dentaria" onClick={closeMobileMenu} style={{ fontWeight: '700' }}>Prótese Dentária</Link>
-                <Link to="/categoria/nail-e-podologia" onClick={closeMobileMenu} style={{ fontWeight: '700' }}>Nail e Podologia</Link>
+                {renderProductCategoryLinks(closeMobileMenu)}
               </div>
             </div>
 

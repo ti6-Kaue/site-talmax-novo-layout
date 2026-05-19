@@ -34,6 +34,7 @@ import './AdminBase.css';
 const AdminProducts = lazy(() => import('./AdminProducts/AdminProducts'));
 const AdminProductsList = lazy(() => import('./AdminProducts/AdminProductsList'));
 const AdminCategories = lazy(() => import('./AdminCategories/AdminCategories'));
+const AdminCategoryPages = lazy(() => import('./AdminCategoryPages/AdminCategoryPages'));
 const AdminBanners = lazy(() => import('./AdminBanners/AdminBanners'));
 const AdminFeatured = lazy(() => import('./AdminFeatured/AdminFeatured'));
 const AdminUpcera = lazy(() => import('./AdminUpcera/AdminUpcera'));
@@ -116,6 +117,7 @@ const AdminDashboardContent = () => {
     { id: 'home-content', label: 'Cards e Propagandas', icon: <Megaphone size={18} /> }
   ];
   const editPageItems = [
+    { id: 'category-pages', label: 'Pagina de Categoria', icon: <ImageIcon size={18} /> },
     { id: 'custom-pages', label: 'Paginas Personalizadas', icon: <LayoutDashboard size={18} /> },
     { id: 'digital-groups', label: 'Grupo de Segmentos', icon: <Layers size={18} /> }
   ];
@@ -170,6 +172,8 @@ const AdminDashboardContent = () => {
         return withAdminSectionLoader(<AdminSegments />, 'Carregando segmentos...');
       case 'custom-pages':
         return withAdminSectionLoader(<AdminCustomPages />, 'Carregando paginas personalizadas...');
+      case 'category-pages':
+        return withAdminSectionLoader(<AdminCategoryPages />, 'Carregando paginas de categoria...');
       case 'talmax-digital':
         return withAdminSectionLoader(<AdminTalmaxDigital />, 'Carregando pagina Talmax Digital...');
       case 'digital-groups':

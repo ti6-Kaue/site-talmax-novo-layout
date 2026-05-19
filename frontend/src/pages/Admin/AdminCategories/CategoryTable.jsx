@@ -36,8 +36,20 @@ const CategoryTable = ({ mainCategories, subCategories, products, searchTerm, fi
     setExpandedCategories((prev) => ({ ...prev, [id]: !resolvedExpandedCategories[id] }));
   };
 
-  const getProductCount = (categoryId) => {
-    return products.filter((p) => p.category_ids && p.category_ids.includes(categoryId)).length;
+  const getProductCount = (category) => {
+    const categoryId = Number(category.id);
+
+    if (category.parent_id) {
+      return products.filter((p) => (
+        Array.isArray(p.sub_category_ids)
+        && p.sub_category_ids.map(Number).includes(categoryId)
+      )).length;
+    }
+
+    return products.filter((p) => (
+      Array.isArray(p.category_ids)
+      && p.category_ids.map(Number).includes(categoryId)
+    )).length;
   };
 
   const filteredAndSortedCategories = useMemo(() => {
@@ -127,7 +139,7 @@ const CategoryTable = ({ mainCategories, subCategories, products, searchTerm, fi
                         <div className="category-icon-cell" title="Logo da categoria">
                           {cat.icon_url ? <img src={apiAssetPath(cat.icon_url)} alt={cat.name} /> : <ImageIcon size={20} color="#94a3b8" />}
                         </div>
-                        <div className="category-background-cell" title="Foto de fundo da categoria">
+                        <div className="category-background-cell" title="Foto de fundo do card da categoria">
                           {cat.background_url ? <img src={apiAssetPath(cat.background_url)} alt="" /> : <GalleryHorizontal size={18} color="#94a3b8" />}
                         </div>
                       </div>
@@ -144,7 +156,7 @@ const CategoryTable = ({ mainCategories, subCategories, products, searchTerm, fi
                       {cat.is_visible ? 'Visível' : 'Oculta'}
                     </span>
                   </td>
-                  <td>{getProductCount(cat.id)}</td>
+                  <td>{getProductCount(cat)}</td>
                   <td className="actions-cell">
                     <button className="btn-icon edit" onClick={() => onEdit(cat)}><Edit size={16} /></button>
                     <button className="btn-icon delete" onClick={() => onDelete(cat)}><Trash2 size={16} /></button>
@@ -156,6 +168,9 @@ const CategoryTable = ({ mainCategories, subCategories, products, searchTerm, fi
                       <td style={{ paddingLeft: '60px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                           <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--admin-primary)' }} />
+                          <div className="category-background-cell" title="Foto de fundo do card da subcategoria">
+                            {subCat.background_url ? <img src={apiAssetPath(subCat.background_url)} alt="" /> : <GalleryHorizontal size={18} color="#94a3b8" />}
+                          </div>
                           {subCat.name}
                         </div>
                       </td>
@@ -169,7 +184,7 @@ const CategoryTable = ({ mainCategories, subCategories, products, searchTerm, fi
                           {subCat.is_visible ? 'Visível' : 'Oculta'}
                         </span>
                       </td>
-                      <td>{getProductCount(subCat.id)}</td>
+                      <td>{getProductCount(subCat)}</td>
                       <td className="actions-cell">
                         <button className="btn-icon edit" onClick={() => onEdit(subCat)}><Edit size={16} /></button>
                         <button className="btn-icon delete" onClick={() => onDelete(subCat)}><Trash2 size={16} /></button>

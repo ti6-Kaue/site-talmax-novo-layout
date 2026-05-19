@@ -62,6 +62,8 @@ const CategoryForm = ({ initialData, mainCategories, onSubmit, onCancel, isSubmi
     onSubmit(data);
   };
 
+  const isSubcategory = Boolean(formData.parent_id);
+
   return (
     <form onSubmit={handleSubmit}>
       <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '15px', textAlign: 'left' }}>
@@ -113,7 +115,7 @@ const CategoryForm = ({ initialData, mainCategories, onSubmit, onCancel, isSubmi
           <label htmlFor="catVisible" style={{ marginBottom: 0, cursor: 'pointer', fontWeight: 600 }}>Exibir categoria no site</label>
         </div>
 
-        {!formData.parent_id && (
+        {!isSubcategory && (
           <>
             <div className="form-group">
               <label>Logo da Categoria</label>
@@ -139,31 +141,32 @@ const CategoryForm = ({ initialData, mainCategories, onSubmit, onCancel, isSubmi
               )}
             </div>
 
-            <div className="form-group">
-              <label>Foto de fundo da Categoria</label>
-              <div className="file-upload-area" style={{ padding: '15px' }}>
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/gif"
-                  onChange={(e) => {
-                    const file = e.target.files[0];
-                    if (file) {
-                      setFormData({ ...formData, background: file });
-                      setBackgroundPreview(URL.createObjectURL(file));
-                    }
-                  }}
-                />
-                <UploadCloud size={32} color="var(--admin-primary)" style={{ marginBottom: '5px' }} />
-                <p style={{ fontSize: '0.85rem' }}>Clique para enviar a foto de fundo</p>
-              </div>
-              {backgroundPreview && (
-                <div className="category-background-preview">
-                  <img src={backgroundPreview} alt="Preview da foto de fundo" />
-                </div>
-              )}
-            </div>
           </>
         )}
+
+        <div className="form-group">
+          <label>{isSubcategory ? 'Foto de fundo do card da subcategoria' : 'Foto de fundo do card da categoria'}</label>
+          <div className="file-upload-area" style={{ padding: '15px' }}>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              onChange={(e) => {
+                const file = e.target.files[0];
+                if (file) {
+                  setFormData({ ...formData, background: file });
+                  setBackgroundPreview(URL.createObjectURL(file));
+                }
+              }}
+            />
+            <UploadCloud size={32} color="var(--admin-primary)" style={{ marginBottom: '5px' }} />
+            <p style={{ fontSize: '0.85rem' }}>Clique para enviar a foto usada nos cards</p>
+          </div>
+          {backgroundPreview && (
+            <div className="category-background-preview">
+              <img src={backgroundPreview} alt="Preview do banner" />
+            </div>
+          )}
+        </div>
       </div>
       <div className="modal-footer">
         <button type="button" className="btn-secondary" onClick={onCancel} disabled={isSubmitting}>Cancelar</button>
