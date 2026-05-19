@@ -226,7 +226,7 @@ body {
 }
 
 .btn-filter-toggle {
-  background: var(--dark);
+  background: var(--primary);
   color: white;
   border: none;
   padding: 10px 22px;
@@ -241,8 +241,12 @@ body {
 }
 
 .btn-filter-toggle:hover {
-  background: #000;
+  background: var(--primary-hover);
   transform: translateY(-1px);
+}
+
+.btn-filter-toggle.has-filters {
+  background: var(--primary-hover);
 }
 
 /* --- GRID --- */

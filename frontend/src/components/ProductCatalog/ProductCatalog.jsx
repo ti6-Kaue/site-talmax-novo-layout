@@ -337,31 +337,6 @@ const ProductCatalog = () => {
 
   return (
     <div className="catalog-container">
-      <div className="catalog-hero-minimal">
-        <div className="container-inner">
-          <span className="top-tag">Tecnologia Odontológica</span>
-          {activeCategories.length === 1 && activeCategories[0] === 'Talmax Digital' ? (
-            <div className="digital-standard-header">
-              <div className="digital-title-standard">
-                <div className="line"></div>
-                <h1>
-                  TALMAX <strong>DIGITAL</strong>
-                </h1>
-                <div className="line"></div>
-              </div>
-              <p>O futuro da prótese dentária com tecnologia de ponta e precisão absoluta.</p>
-            </div>
-          ) : (
-            <>
-              <h1>
-                Catálogo <span className="thin">Digital</span>
-              </h1>
-              <p>Explore nossa linha completa de soluções para prótese e estética dental.</p>
-            </>
-          )}
-        </div>
-      </div>
-
       {activeCategories.length === 1 && activeCategories[0] === 'Talmax Digital' && (
         <section className="digital-quick-nav">
           <div className="quick-nav-grid">
