@@ -199,6 +199,7 @@ const ProductCatalog = () => {
           return {
             id: product.id,
             name: product.name,
+            description: product.description || extra.description || extra.features?.[0] || '',
             allCategoryNames: productCatNames,
             category_names: product.category_names || '',
             categoryIds: Array.isArray(product.category_ids) ? product.category_ids.map(Number) : [],
@@ -422,8 +423,7 @@ const ProductCatalog = () => {
     setActiveSubcategorySlug(nextSlug);
     setCurrentPage(1);
     const queryString = params.toString();
-    const targetPath = activeRouteCategory?.slug ? `/categoria/${activeRouteCategory.slug}` : location.pathname;
-    navigate(`${targetPath}${queryString ? `?${queryString}` : ''}`, { replace: true });
+    navigate(`${location.pathname}${queryString ? `?${queryString}` : ''}`, { replace: true });
   };
 
   const resetFilters = () => {
@@ -435,6 +435,31 @@ const ProductCatalog = () => {
   };
 
   const activeRouteCategoryBannerUrl = activeRouteCategory?.page_banner_categorias_url || '';
+  const shouldShowCatalogTopNav = !(activeCategories.length === 1 && activeCategories[0] === 'Talmax Digital');
+  const renderCatalogTopNav = () => (
+    <header className="catalog-top-nav catalog-top-nav--actions-only">
+      <div className="top-nav-inner">
+        <div className="catalog-actions">
+          <div className="search-minimalist">
+            <Search size={18} color="#86868b" />
+            <input
+              type="text"
+              placeholder="O que você procura?"
+              value={searchTerm}
+              onChange={(event) => handleSearchChange(event.target.value)}
+            />
+          </div>
+          <button
+            className={`btn-filter-toggle ${activeCategories.length > 0 ? 'has-filters' : ''}`}
+            onClick={() => setIsDrawerOpen(true)}
+          >
+            <SlidersHorizontal size={18} />
+            <span>Filtrar</span>
+          </button>
+        </div>
+      </div>
+    </header>
+  );
 
   return (
     <div className="catalog-container">
@@ -453,7 +478,9 @@ const ProductCatalog = () => {
 
           <section className={`category-page-intro ${!activeRouteCategoryBannerUrl ? 'category-page-intro--no-banner' : ''}`}>
             <div className="category-page-intro__inner">
-              <h1>{activeRouteCategory.name}</h1>
+              <div className="category-page-title-row">
+                <h1>{activeRouteCategory.name}</h1>
+              </div>
 
               {activeRouteSubcategories.length > 0 && (
                 <nav className="category-subnav" aria-label={`Subcategorias de ${activeRouteCategory.name}`}>
@@ -517,7 +544,7 @@ const ProductCatalog = () => {
         </section>
       )}
 
-      {!(activeCategories.length === 1 && activeCategories[0] === 'Talmax Digital') && (
+      {shouldShowCatalogTopNav && !activeRouteCategory && (
         <header className="catalog-top-nav">
           <div className="top-nav-inner">
             <div className="category-quick-info">

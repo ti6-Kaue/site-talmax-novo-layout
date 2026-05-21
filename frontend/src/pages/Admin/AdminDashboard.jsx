@@ -107,7 +107,8 @@ const AdminDashboardContent = () => {
   ];
   const catalogItems = [
     { id: 'products', label: 'Cadastro de Produtos', icon: <Package size={18} /> },
-    { id: 'products-list', label: 'Lista de Produtos', icon: <Search size={18} /> }
+    { id: 'products-list', label: 'Lista de Produtos', icon: <Search size={18} /> },
+    { id: 'category-pages', label: 'Pagina de Categoria', icon: <ImageIcon size={18} /> },
   ];
   const homeItems = [
     { id: 'banners', label: 'Banners', icon: <ImageIcon size={18} /> },
@@ -117,9 +118,9 @@ const AdminDashboardContent = () => {
     { id: 'home-content', label: 'Cards e Propagandas', icon: <Megaphone size={18} /> }
   ];
   const editPageItems = [
-    { id: 'category-pages', label: 'Pagina de Categoria', icon: <ImageIcon size={18} /> },
+    
     { id: 'custom-pages', label: 'Paginas Personalizadas', icon: <LayoutDashboard size={18} /> },
-    { id: 'digital-groups', label: 'Grupo de Segmentos', icon: <Layers size={18} /> }
+    { id: 'digital-groups', label: 'Grupo de Segmentos', icon: <Layers size={18} /> },
   ];
   const pageItems = [
     { id: 'talmax-digital', label: 'Talmax Digital', icon: <ImageIcon size={18} /> },

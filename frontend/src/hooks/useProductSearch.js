@@ -124,6 +124,7 @@ export const useProductSearch = ({ isAdmin, onNavigateComplete } = {}) => {
   const location = useLocation();
   const navigate = useNavigate();
   const searchInputRef = useRef(null);
+  const previousPathnameRef = useRef(location.pathname);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState(() => getSearchTermFromLocation(location.search));
   const [searchProducts, setSearchProducts] = useState([]);
@@ -132,7 +133,7 @@ export const useProductSearch = ({ isAdmin, onNavigateComplete } = {}) => {
   const [searchPreviewId, setSearchPreviewId] = useState(null);
 
   const normalizedSearchTerm = normalizeSearchText(searchTerm);
-  const shouldShowDropdown = searchDropdownOpen && normalizedSearchTerm.length >= MIN_SEARCH_TERM_LENGTH;
+  const shouldShowDropdown = normalizedSearchTerm.length >= MIN_SEARCH_TERM_LENGTH;
 
   const productSearchMatches = useMemo(() => {
     if (isAdmin || normalizedSearchTerm.length < MIN_SEARCH_TERM_LENGTH) {
@@ -266,10 +267,22 @@ export const useProductSearch = ({ isAdmin, onNavigateComplete } = {}) => {
   }, []);
 
   useEffect(() => {
-    setSearchDropdownOpen(false);
-    setSearchPreviewId(null);
-
+    const pathnameChanged = previousPathnameRef.current !== location.pathname;
+    previousPathnameRef.current = location.pathname;
     const nextSearchTerm = getSearchTermFromLocation(location.search);
+
+    if (pathnameChanged) {
+      setSearchDropdownOpen(false);
+      setSearchPreviewId(null);
+    } else if (isCatalogPath(location.pathname)) {
+      const shouldKeepDropdownOpen = normalizeSearchText(nextSearchTerm).length >= MIN_SEARCH_TERM_LENGTH;
+      setSearchDropdownOpen(shouldKeepDropdownOpen);
+
+      if (!shouldKeepDropdownOpen) {
+        setSearchPreviewId(null);
+      }
+    }
+
     setSearchTerm((currentSearchTerm) => (
       currentSearchTerm === nextSearchTerm ? currentSearchTerm : nextSearchTerm
     ));
@@ -348,6 +361,10 @@ export const useProductSearch = ({ isAdmin, onNavigateComplete } = {}) => {
     finishSearchNavigation(`/produto/${product.id}`);
   };
 
+  const handleViewAllProducts = () => {
+    finishSearchNavigation('/produtos');
+  };
+
   const handleSearchSubmit = (event) => {
     event.preventDefault();
 
@@ -374,6 +391,7 @@ export const useProductSearch = ({ isAdmin, onNavigateComplete } = {}) => {
     handleSearchInputFocus,
     handleSearchInputKeyDown,
     handleSearchSubmit,
+    handleViewAllProducts,
     previewProduct,
     productSuggestions,
     searchInputRef,

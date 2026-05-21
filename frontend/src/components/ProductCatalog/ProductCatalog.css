@@ -49,6 +49,13 @@ body {
   padding: 0;
 }
 
+.category-page-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: clamp(0.9rem, 2vw, 1.4rem);
+}
+
 .category-page-intro h1 {
   margin: 0;
   color: #1d1d1f;
@@ -240,6 +247,7 @@ body {
   top: var(--site-header-current-height, 0px);
   z-index: 900;
   transition: top 0.22s ease;
+  overflow: visible;
 }
 
 .top-nav-inner {
@@ -249,6 +257,11 @@ body {
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 4%;
+  overflow: visible;
+}
+
+.catalog-top-nav--actions-only .top-nav-inner {
+  justify-content: flex-end;
 }
 
 .category-quick-info {
@@ -609,6 +622,10 @@ body {
     border-radius: 0 0 2rem 2rem;
   }
   .category-subnav {
+    flex-direction: column;
+  }
+  .category-page-title-row {
+    align-items: flex-start;
     flex-direction: column;
   }
   .category-subnav button {
