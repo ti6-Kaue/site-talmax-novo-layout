@@ -61,6 +61,7 @@ const getProductCategory = (product, brand) => {
 const ProductCard = ({ product, imageLoading = 'lazy', imageFetchPriority = 'auto' }) => {
   const availableImages = getAvailableImages(product);
   const [activeImage, setActiveImage] = React.useState(availableImages[0] || '');
+  const [shouldLoadThumbnails, setShouldLoadThumbnails] = React.useState(false);
   const navigate = useNavigate();
   const productBrand = getProductBrand(product);
   const productCategory = getProductCategory(product, productBrand);
@@ -68,6 +69,7 @@ const ProductCard = ({ product, imageLoading = 'lazy', imageFetchPriority = 'aut
   // Sincroniza a imagem ativa quando o produto muda
   React.useEffect(() => {
     setActiveImage(getAvailableImages(product)[0] || '');
+    setShouldLoadThumbnails(false);
   }, [product]);
 
   const handleCardClick = () => {
@@ -80,6 +82,8 @@ const ProductCard = ({ product, imageLoading = 'lazy', imageFetchPriority = 'aut
     <div
       className="premium-product-card"
       onClick={handleCardClick}
+      onMouseEnter={() => setShouldLoadThumbnails(true)}
+      onFocus={() => setShouldLoadThumbnails(true)}
       style={{ cursor: 'pointer' }}
     >
       <div className={`card-image-box${activeImage ? '' : ' is-empty'}`}>
@@ -96,7 +100,7 @@ const ProductCard = ({ product, imageLoading = 'lazy', imageFetchPriority = 'aut
           />
         )}
         
-        {availableImages.length > 1 && (
+        {shouldLoadThumbnails && availableImages.length > 1 && (
           <div className="product-thumbnails">
             {availableImages.map((img, idx) => (
               <img 

@@ -12,6 +12,7 @@ const {
 } = require('./config/imageStorage');
 const {
   applyPlaceholderImageCache,
+  buildFrontendStaticOptions,
   buildImageStaticOptions,
   createCompressionMiddleware
 } = require('./config/performance');
@@ -106,10 +107,11 @@ const createApp = () => {
     applyPlaceholderImageCache(res);
     return res.send(INLINE_IMAGE_PLACEHOLDER);
   });
+  const frontendStaticOptions = buildFrontendStaticOptions();
   if (frontendBasePath !== '/') {
-    app.use(frontendBasePath, express.static(frontendDistPath));
+    app.use(frontendBasePath, express.static(frontendDistPath, frontendStaticOptions));
   }
-  app.use(express.static(frontendDistPath));
+  app.use(express.static(frontendDistPath, frontendStaticOptions));
 
   app.use('/api/admin', adminAuthRoutes);
   app.use('/api/categories', categoryRoutes);
