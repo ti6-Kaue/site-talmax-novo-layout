@@ -489,8 +489,16 @@ const ProductDetail = () => {
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           className={`product-hero-banner${product.productBannerUrl ? ' has-custom-banner' : ''}`}
-          style={product.productBannerUrl ? { '--product-banner-image': `url("${product.productBannerUrl}")` } : undefined}
         >
+          {product.productBannerUrl && (
+            <img
+              src={product.productBannerUrl}
+              alt=""
+              aria-hidden="true"
+              className="product-hero-banner__image"
+            />
+          )}
+
           <div className={`product-hero-media${activeImage ? '' : ' is-empty'}`}>
             {activeImage && <img src={activeImage} alt={product.name} />}
             {galleryImages.length > 1 && (
