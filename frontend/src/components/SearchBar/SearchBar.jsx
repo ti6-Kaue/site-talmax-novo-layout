@@ -39,6 +39,7 @@ const SearchSuggestionsDropdown = ({
                 <span>{product.categoryLabel || 'Produto Talmax'}</span>
               </span>
               <span className="site-search-compact-corner" aria-hidden="true">
+                <span className="site-search-compact-corner-seam" />
                 <span className="site-search-compact-arrow">
                   <ChevronRight size={16} strokeWidth={2.4} />
                 </span>
