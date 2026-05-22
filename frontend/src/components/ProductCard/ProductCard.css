@@ -96,7 +96,7 @@
 .card-details {
   position: relative;
   min-height: 86px;
-  padding: 18px calc(var(--product-card-cutout-size) + 10px) 16px 26px;
+  padding: 28px calc(var(--product-card-cutout-size) + 10px) 8px 26px;
   display: flex;
   align-items: flex-start;
   flex-grow: 1;

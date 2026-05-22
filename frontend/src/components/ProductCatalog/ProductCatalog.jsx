@@ -6,7 +6,6 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import {
-  Search,
   ChevronRight,
   SlidersHorizontal,
   X,
@@ -230,12 +229,6 @@ const ProductCatalog = () => {
     };
   }, []);
 
-  const activeCategoryLabel = useMemo(() => {
-    if (activeCategories.length === 0) return 'Ver todos';
-    if (activeCategories.length === 1) return activeCategories[0];
-    return `${activeCategories.length} categorias selecionadas`;
-  }, [activeCategories]);
-
   const routeCategory = useMemo(() => {
     const queryParams = new URLSearchParams(location.search);
     const routeCategorySlug = queryParams.get('categoria') || slug || '';
@@ -436,29 +429,15 @@ const ProductCatalog = () => {
 
   const activeRouteCategoryBannerUrl = activeRouteCategory?.page_banner_categorias_url || '';
   const shouldShowCatalogTopNav = !(activeCategories.length === 1 && activeCategories[0] === 'Talmax Digital');
-  const renderCatalogTopNav = () => (
-    <header className="catalog-top-nav catalog-top-nav--actions-only">
-      <div className="top-nav-inner">
-        <div className="catalog-actions">
-          <div className="search-minimalist">
-            <Search size={18} color="#86868b" />
-            <input
-              type="text"
-              placeholder="O que você procura?"
-              value={searchTerm}
-              onChange={(event) => handleSearchChange(event.target.value)}
-            />
-          </div>
-          <button
-            className={`btn-filter-toggle ${activeCategories.length > 0 ? 'has-filters' : ''}`}
-            onClick={() => setIsDrawerOpen(true)}
-          >
-            <SlidersHorizontal size={18} />
-            <span>Filtrar</span>
-          </button>
-        </div>
-      </div>
-    </header>
+  const renderFilterButton = (className = '') => (
+    <button
+      type="button"
+      className={`btn-filter-toggle ${activeCategories.length > 0 ? 'has-filters' : ''} ${className}`.trim()}
+      onClick={() => setIsDrawerOpen(true)}
+    >
+      <SlidersHorizontal size={15} />
+      <span>Filtrar</span>
+    </button>
   );
 
   return (
@@ -480,6 +459,10 @@ const ProductCatalog = () => {
             <div className="category-page-intro__inner">
               <div className="category-page-title-row">
                 <h1>{activeRouteCategory.name}</h1>
+                <div className="category-page-tools">
+                  <span className="category-page-count">{filteredProducts.length} itens</span>
+                  {renderFilterButton('btn-filter-toggle--category')}
+                </div>
               </div>
 
               {activeRouteSubcategories.length > 0 && (
@@ -545,30 +528,11 @@ const ProductCatalog = () => {
       )}
 
       {shouldShowCatalogTopNav && !activeRouteCategory && (
-        <header className="catalog-top-nav">
+        <header className="catalog-top-nav catalog-top-nav--actions-only">
           <div className="top-nav-inner">
-            <div className="category-quick-info">
-              <span className="active-cat-label">{activeCategoryLabel}</span>
-              <span className="results-count">{filteredProducts.length} itens</span>
-            </div>
-
             <div className="catalog-actions">
-              <div className="search-minimalist">
-                <Search size={18} color="#86868b" />
-                <input
-                  type="text"
-                  placeholder="O que você procura?"
-                  value={searchTerm}
-                  onChange={(event) => handleSearchChange(event.target.value)}
-                />
-              </div>
-              <button
-                className={`btn-filter-toggle ${activeCategories.length > 0 ? 'has-filters' : ''}`}
-                onClick={() => setIsDrawerOpen(true)}
-              >
-                <SlidersHorizontal size={18} />
-                <span>Filtrar</span>
-              </button>
+              <span className="category-page-count">{filteredProducts.length} itens</span>
+              {renderFilterButton()}
             </div>
           </div>
         </header>
@@ -593,7 +557,12 @@ const ProductCatalog = () => {
             >
               <div className="drawer-header">
                 <h2>Categorias</h2>
-                <button className="btn-close-drawer" onClick={() => setIsDrawerOpen(false)}>
+                <button
+                  type="button"
+                  className="btn-close-drawer"
+                  onClick={() => setIsDrawerOpen(false)}
+                  aria-label="Fechar filtros"
+                >
                   <X size={24} />
                 </button>
               </div>
@@ -601,20 +570,27 @@ const ProductCatalog = () => {
               <div className="drawer-content">
                 <div className="options-stack">
                   <button
-                    className={activeCategories.length === 0 ? 'active' : ''}
+                    type="button"
+                    className={`filter-option filter-option--all ${activeCategories.length === 0 ? 'active' : ''}`}
                     onClick={resetFilters}
                   >
-                    Ver todos
+                    <span>Ver todos</span>
+                    <span className="filter-option__arrow" aria-hidden="true">
+                      <ChevronRight size={20} />
+                    </span>
                   </button>
 
                   {categoriesTree.map((category) => (
                     <div key={category.id} className="category-group">
                       <button
-                        className={`parent-cat ${activeCategories.includes(category.name) ? 'active' : ''}`}
+                        type="button"
+                        className={`filter-option parent-cat ${activeCategories.includes(category.name) ? 'active' : ''}`}
                         onClick={() => handleCategorySelect(category.name)}
                       >
-                        {category.name}
-                        {activeCategories.includes(category.name) && <ChevronRight size={14} />}
+                        <span>{category.name}</span>
+                        <span className="filter-option__arrow" aria-hidden="true">
+                          <ChevronRight size={20} />
+                        </span>
                       </button>
                     </div>
                   ))}
@@ -622,11 +598,13 @@ const ProductCatalog = () => {
               </div>
 
               <div className="drawer-footer">
-                <button className="btn-apply" onClick={() => setIsDrawerOpen(false)}>
+                <button type="button" className="btn-apply" onClick={() => setIsDrawerOpen(false)}>
                   Ver Resultados
+                  <ChevronRight size={16} aria-hidden="true" />
                 </button>
-                <button className="btn-clear-all" onClick={resetFilters}>
+                <button type="button" className="btn-clear-all" onClick={resetFilters}>
                   Limpar Filtros
+                  <ChevronRight size={16} aria-hidden="true" />
                 </button>
               </div>
             </motion.aside>
