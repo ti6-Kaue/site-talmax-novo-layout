@@ -12,7 +12,9 @@
 
 .product-hero-banner {
   position: relative;
-  min-height: clamp(560px, 52vw, 920px);
+  box-sizing: border-box;
+  height: 870px;
+  min-height: 870px;
   display: grid;
   grid-template-columns: minmax(320px, 0.95fr) minmax(360px, 1.05fr);
   align-items: center;
@@ -147,7 +149,7 @@
 
 .product-description-panel {
   width: min(100%, 1610px);
-  margin: clamp(3.8rem, 6vw, 7rem) auto clamp(3.2rem, 5vw, 5.7rem);
+  margin: clamp(3.8rem, 6vw, 7rem) auto clamp(1rem, 2.2vw, 1.8rem);
   padding: clamp(2.25rem, 4.4vw, 4.6rem) clamp(2rem, 6vw, 6.8rem);
   background: #ffffff;
   border-radius: clamp(28px, 4vw, 54px);
@@ -465,8 +467,8 @@
   gap: clamp(1.4rem, 3vw, 2.25rem);
   flex-wrap: wrap;
   border-bottom: 0;
-  margin-bottom: 3rem;
-  padding: 0;
+  margin-bottom: clamp(4rem, 5vw, 5rem);
+  padding: 0 clamp(2rem, 6vw, 6.8rem);
 }
 
 .tab-btn {
@@ -888,6 +890,7 @@
 
   .product-hero-banner {
     grid-template-columns: 1fr;
+    height: auto;
     min-height: auto;
     padding: 2rem 1.25rem 5rem;
     gap: 1.5rem;
@@ -927,7 +930,8 @@
   .tabs-header {
     grid-template-columns: 1fr;
     gap: 1rem;
-    margin-bottom: 2rem;
+    margin-bottom: 3rem;
+    padding: 0 1.45rem;
   }
 
   .tab-btn {
