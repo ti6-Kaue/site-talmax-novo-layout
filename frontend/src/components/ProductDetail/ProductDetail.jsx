@@ -344,8 +344,8 @@ const ProductDetail = () => {
 
         return currentProduct.category === product.category;
       });
-    
-    return shuffleProducts(matchingProducts).slice(0, 6);
+
+    return shuffleProducts(matchingProducts).slice(0, 10);
   }, [product, allProducts]);
 
   const technicalTables = useMemo(() => {
@@ -766,8 +766,7 @@ const ProductDetail = () => {
         {relatedProducts.length > 0 && (
           <div className="related-products-section">
             <div className="section-header">
-              <h2><Sparkles size={24} className="text-primary" /> Produtos Relacionados</h2>
-              <p>Confira outras soluções da categoria <strong>{product.category}</strong></p>
+              <h2>Produtos Relacionados</h2>
             </div>
 
             <div className="related-products-carousel">
@@ -784,8 +783,8 @@ const ProductDetail = () => {
 
               <Swiper
                 modules={[Autoplay, Navigation]}
-                spaceBetween={24}
-                slidesPerView={1}
+                spaceBetween={10}
+                slidesPerView={2}
                 loop={relatedProducts.length > 1}
                 navigation={{
                   prevEl: '.related-products__nav-prev',
@@ -793,14 +792,14 @@ const ProductDetail = () => {
                 }}
                 autoplay={{ delay: 3500, disableOnInteraction: false }}
                 breakpoints={{
-                  640: { slidesPerView: 2 },
-                  1024: { slidesPerView: 3 },
-                  1400: { slidesPerView: 4 }
+                  640: { slidesPerView: 2, spaceBetween: 16 },
+                  1024: { slidesPerView: 3, spaceBetween: 24 },
+                  1400: { slidesPerView: 5, spaceBetween: 24 }
                 }}
               >
                 {relatedProducts.map((related, index) => (
                   <SwiperSlide key={related.id}>
-                    <ProductCard product={related} index={index} />
+                    <ProductCard product={related} index={index} imageLoading="lazy" imageFetchPriority="low" />
                   </SwiperSlide>
                 ))}
               </Swiper>
