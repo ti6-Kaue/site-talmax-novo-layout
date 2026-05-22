@@ -767,6 +767,7 @@ const ProductDetail = () => {
           <div className="related-products-section">
             <div className="section-header">
               <h2>Produtos Relacionados</h2>
+              <p>Produtos que voce tambem pode gostar</p>
             </div>
 
             <div className="related-products-carousel">

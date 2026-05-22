@@ -770,17 +770,25 @@
 }
 
 .related-products-section .section-header {
-  margin-bottom: 4.5rem;
+  margin-bottom: 2.75rem;
   text-align: left;
 }
 
 .related-products-section .section-header h2 {
   margin: 0;
   color: #0f172a;
-  font-size: clamp(2.8rem, 4.2vw, 4.5rem);
+  font-size: clamp(2.175rem, 3.65vw, 3.875rem);
   font-weight: 400;
   line-height: 1.08;
   letter-spacing: 0;
+}
+
+.related-products-section .section-header p {
+  max-width: 720px;
+  margin: 0.7rem 0 0;
+  color: #374c92;
+  font-size: clamp(1.05rem, 1.45vw, 1.55rem);
+  line-height: 1.35;
 }
 
 .related-products-carousel {
@@ -860,6 +868,22 @@
 @media (max-width: 768px) {
   .product-detail-container {
     padding: 0 0 56px;
+  }
+
+  .related-products-section {
+    padding: 2rem 1rem 0;
+  }
+
+  .related-products-section .section-header {
+    margin-bottom: 2rem;
+  }
+
+  .related-products-section .section-header h2 {
+    font-size: clamp(1.8rem, 7.4vw, 2.375rem);
+  }
+
+  .related-products-section .section-header p {
+    font-size: 1rem;
   }
 
   .product-hero-banner {
