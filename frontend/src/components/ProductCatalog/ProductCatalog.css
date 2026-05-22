@@ -59,7 +59,7 @@ body {
 .category-page-intro h1 {
   margin: 0;
   color: #1d1d1f;
-  font-size: clamp(2.7rem, 5.8vw, 4.9rem);
+  font-size: clamp(2.075rem, 5.15vw, 4.275rem);
   line-height: 1;
   font-weight: 100;
   letter-spacing: 0;
@@ -147,7 +147,7 @@ body {
 }
 
 .catalog-hero-minimal h1 {
-  font-size: 3.5rem;
+  font-size: 2.875rem;
   font-weight: 800;
   margin: 0 0 15px;
   letter-spacing: -2px;
@@ -186,7 +186,7 @@ body {
 }
 
 .digital-title-standard h1 {
-  font-size: 2.8rem;
+  font-size: 2.175rem;
   font-weight: 300;
   color: var(--dark);
   margin: 0;
@@ -715,7 +715,7 @@ body {
 @media (max-width: 900px) {
   .catalog-grid-lux { grid-template-columns: repeat(2, 1fr); }
   .catalog-grid-lux.five-cols { grid-template-columns: repeat(2, 1fr); }
-  .catalog-hero-minimal h1 { font-size: 2.5rem; }
+  .catalog-hero-minimal h1 { font-size: 1.875rem; }
 }
 
 @media (max-width: 600px) {

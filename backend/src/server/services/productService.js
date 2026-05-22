@@ -46,6 +46,7 @@ const PRODUCT_TABS_TABLE_QUERY = `
 
 let productTablesReady = false;
 let productTabsTableReady = false;
+let productIndexesReady = false;
 
 const renameTableIfNeeded = async (db, legacyTableName, tableName) => {
   try {
@@ -57,12 +58,39 @@ const renameTableIfNeeded = async (db, legacyTableName, tableName) => {
 
 const ensureProductDatabaseTables = async (db) => {
   if (productTablesReady) {
+    if (!productIndexesReady) {
+      await ensureProductIndexes(db);
+    }
     return;
   }
 
   await renameTableIfNeeded(db, LEGACY_PRODUCTS_TABLE_NAME, PRODUCTS_TABLE_NAME);
+  await ensureProductIndexes(db);
 
   productTablesReady = true;
+};
+
+const addIndexIfNeeded = async (db, indexSql) => {
+  try {
+    await db.query(indexSql);
+  } catch {
+    // Index already exists or current MySQL variant rejected the duplicate add.
+  }
+};
+
+const ensureProductIndexes = async (db) => {
+  if (productIndexesReady) {
+    return;
+  }
+
+  await addIndexIfNeeded(db, `ALTER TABLE ${PRODUCTS_TABLE_NAME} ADD INDEX idx_produtos_active_id (is_active, id)`);
+  await addIndexIfNeeded(db, `ALTER TABLE ${PRODUCTS_TABLE_NAME} ADD INDEX idx_produtos_featured_active (is_featured, is_active)`);
+  await addIndexIfNeeded(db, `ALTER TABLE ${PRODUCTS_TABLE_NAME} ADD INDEX idx_produtos_name (name)`);
+  await addIndexIfNeeded(db, `ALTER TABLE ${PRODUCTS_TABLE_NAME} ADD INDEX idx_produtos_upcera_order (is_upcera, upcera_order)`);
+  await addIndexIfNeeded(db, `ALTER TABLE ${PRODUCTS_TABLE_NAME} ADD INDEX idx_produtos_scanner_order (is_scanner, scanner_order)`);
+  await addIndexIfNeeded(db, `ALTER TABLE ${PRODUCTS_TABLE_NAME} ADD INDEX idx_produtos_printer_order (is_3d_printer, printer_order)`);
+
+  productIndexesReady = true;
 };
 
 const renameLegacyProductTabsTable = async (db) => {
@@ -291,10 +319,11 @@ const buildProductListWhereClause = (options = {}) => {
 
 const listProducts = async (db, options = {}) => {
   await ensureProductDatabaseTables(db);
-  const { includeInactive = false } = options;
+  const { includeInactive = false, includeTabs = false } = options;
   const whereClause = includeInactive ? '' : ' WHERE p.is_active = 1';
   const [rows] = await db.query(`${PRODUCT_SELECT_QUERY}${whereClause} ORDER BY p.id DESC`);
-  return attachTabsToProducts(db, rows.map(formatProductRow));
+  const products = rows.map(formatProductRow);
+  return includeTabs ? attachTabsToProducts(db, products) : products;
 };
 
 const listProductsPage = async (db, options = {}) => {
@@ -324,7 +353,7 @@ const listProductsPage = async (db, options = {}) => {
     [...params, ...orderParams, limit, offset]
   );
 
-  const items = await attachTabsToProducts(db, rows.map(formatProductRow));
+  const items = rows.map(formatProductRow);
 
   return {
     items,

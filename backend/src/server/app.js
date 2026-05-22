@@ -24,6 +24,7 @@ const {
   apiNotFoundHandler,
   errorHandler
 } = require('./utils/errorHandling');
+const { createPublicApiCacheMiddleware } = require('./utils/responseCache');
 const adminAuthRoutes = require('./routes/adminAuthRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const bannerRoutes = require('./routes/bannerRoutes');
@@ -97,6 +98,7 @@ const createApp = () => {
   app.use(createCompressionMiddleware());
   app.use(express.json());
   app.use('/api', requireTrustedWriteOrigin);
+  app.use('/api', createPublicApiCacheMiddleware());
   imageDirectories.forEach((directoryPath) => {
     app.use('/img', express.static(directoryPath, buildImageStaticOptions({
       isPrimaryDirectory: directoryPath === primaryImageDir

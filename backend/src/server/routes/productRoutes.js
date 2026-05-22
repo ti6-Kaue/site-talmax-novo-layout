@@ -28,8 +28,7 @@ const {
   attachProductCategories,
   replaceProductTabs,
   ensureProductDatabaseTables,
-  PRODUCTS_TABLE_NAME,
-  ensureProductTabsTable
+  PRODUCTS_TABLE_NAME
 } = require('../services/productService');
 const { persistUploadedFilesByType } = require('../services/fileStorageService');
 const {
@@ -334,7 +333,6 @@ router.get('/', async (req, res, next) => {
       return undefined;
     }
 
-    await ensureProductTabsTable(db);
     if (shouldPaginate) {
       const response = await listProductsPage(db, {
         includeInactive,
@@ -377,7 +375,6 @@ router.get('/:id', async (req, res, next) => {
       return undefined;
     }
 
-    await ensureProductTabsTable(db);
     const product = await findProductById(db, req.params.id, { includeInactive });
 
     if (!product) {

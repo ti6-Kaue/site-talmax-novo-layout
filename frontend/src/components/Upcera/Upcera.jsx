@@ -207,7 +207,7 @@ const Upcera = () => {
                       <div style={{ width: '40px', height: '2px', background: accentColor }}></div>
                       <span style={{ fontSize: '0.85rem', fontWeight: '900', letterSpacing: '4px', color: accentColor, textTransform: 'uppercase' }}>High Tech Ceramics</span>
                     </div>
-                    <h2 style={{ fontSize: '3.5rem', fontWeight: '900', lineHeight: '1', letterSpacing: '-2px', marginBottom: '40px', color: '#020202', textTransform: 'uppercase', cursor: 'pointer' }} onClick={() => navigate(`/produto/${product.id}`)}>{product.name}</h2>
+                    <h2 style={{ fontSize: '2.875rem', fontWeight: '900', lineHeight: '1', letterSpacing: '-2px', marginBottom: '40px', color: '#020202', textTransform: 'uppercase', cursor: 'pointer' }} onClick={() => navigate(`/produto/${product.id}`)}>{product.name}</h2>
                     {renderSpecialSectionContent(product, accentColor, 'upcera')}
                     <motion.button
                       whileHover={{ scale: 1.05 }}
@@ -245,7 +245,7 @@ const Upcera = () => {
             <div style={{ textAlign: 'center', marginBottom: '60px' }}>
               <span style={{ fontSize: '0.75rem', fontWeight: 800, color: accentColor, letterSpacing: '2px', textTransform: 'uppercase' }}>Portfolio Completo</span>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '20px', marginTop: '5px', flexWrap: 'wrap' }}>
-                <h2 style={{ fontSize: '2.5rem', fontWeight: 900, color: '#000000', margin: 0 }}>LINHA CAD/CAM</h2>
+                <h2 style={{ fontSize: '1.875rem', fontWeight: 900, color: '#000000', margin: 0 }}>LINHA CAD/CAM</h2>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}

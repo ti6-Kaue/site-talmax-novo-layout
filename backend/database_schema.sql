@@ -65,6 +65,12 @@ CREATE TABLE IF NOT EXISTS produtos (
     PRIMARY KEY (id),
     KEY idx_produtos_category_id (category_id),
     KEY idx_produtos_sub_category_id (sub_category_id),
+    KEY idx_produtos_active_id (is_active, id),
+    KEY idx_produtos_featured_active (is_featured, is_active),
+    KEY idx_produtos_name (name),
+    KEY idx_produtos_upcera_order (is_upcera, upcera_order),
+    KEY idx_produtos_scanner_order (is_scanner, scanner_order),
+    KEY idx_produtos_printer_order (is_3d_printer, printer_order),
     CONSTRAINT fk_produtos_categoria
         FOREIGN KEY (category_id) REFERENCES categorias(id) ON DELETE SET NULL,
     CONSTRAINT fk_produtos_sub_categoria

@@ -195,7 +195,7 @@ const Scanners = () => {
                       <div style={{ width: '40px', height: '2px', background: accentColor }}></div>
                       <span style={{ fontSize: '0.85rem', fontWeight: '900', letterSpacing: '4px', color: accentColor, textTransform: 'uppercase' }}>Precision Scanning</span>
                     </div>
-                    <h2 style={{ fontSize: '3.5rem', fontWeight: '900', lineHeight: '1', letterSpacing: '-2px', marginBottom: '40px', color: '#020202', textTransform: 'uppercase', cursor: 'pointer' }} onClick={() => navigate(`/produto/${product.id}`)}>{product.name}</h2>
+                    <h2 style={{ fontSize: '2.875rem', fontWeight: '900', lineHeight: '1', letterSpacing: '-2px', marginBottom: '40px', color: '#020202', textTransform: 'uppercase', cursor: 'pointer' }} onClick={() => navigate(`/produto/${product.id}`)}>{product.name}</h2>
                     {renderSpecialSectionContent(product, accentColor, 'scanners')}
                     <motion.button
                       whileHover={{ scale: 1.05 }}

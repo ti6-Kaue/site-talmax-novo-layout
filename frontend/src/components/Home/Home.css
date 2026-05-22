@@ -65,7 +65,7 @@
 .home-featured-products__header h2 {
   margin: 0;
   color: #0f172a;
-  font-size: clamp(2.8rem, 4.2vw, 4.5rem);
+  font-size: clamp(2.175rem, 3.65vw, 3.875rem);
   font-weight: 400;
   line-height: 1.08;
   letter-spacing: 0;
@@ -193,7 +193,7 @@
 .categories__header h2 {
   margin: 0;
   color: #2d2f34;
-  font-size: clamp(3.1rem, 5.45vw, 4.15rem);
+  font-size: clamp(2.475rem, 4.9vw, 3.525rem);
   font-weight: 300;
   line-height: 1.02;
   letter-spacing: 0;
@@ -1110,7 +1110,7 @@ body[data-theme='dark'] .service-banner {
   }
 
   .home-featured-products__header h2 {
-    font-size: clamp(2.2rem, 9vw, 3rem);
+    font-size: clamp(1.8rem, 7.4vw, 2.375rem);
   }
 
   .home-featured-products__header p {
@@ -1143,7 +1143,7 @@ body[data-theme='dark'] .service-banner {
   }
 
   .categories__header h2 {
-    font-size: clamp(2.45rem, 9vw, 3.3rem);
+    font-size: clamp(1.95rem, 7.4vw, 2.675rem);
   }
 
   .categories__header p {
@@ -1345,7 +1345,7 @@ body[data-theme='dark'] .service-banner {
   }
 
   .home-featured-products__header h2 {
-    font-size: 2rem;
+    font-size: 1.5rem;
   }
 
   .home-featured-products__carousel {
@@ -1361,7 +1361,7 @@ body[data-theme='dark'] .service-banner {
   }
 
   .categories__header h2 {
-    font-size: 2.35rem;
+    font-size: 1.85rem;
   }
 
   .categories__header p {
