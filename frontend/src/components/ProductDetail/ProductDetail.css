@@ -34,7 +34,7 @@
   background:
     linear-gradient(90deg, rgba(3, 5, 11, 0.7) 0%, rgba(3, 5, 11, 0.32) 45%, rgba(3, 5, 11, 0.74) 100%),
     linear-gradient(180deg, rgba(3, 5, 11, 0.15) 0%, rgba(3, 5, 11, 0.64) 100%),
-    var(--product-banner-image) center / cover no-repeat,
+    var(--product-banner-image) center / contain no-repeat,
     linear-gradient(180deg, #03050b 0%, #071729 100%);
 }
 
