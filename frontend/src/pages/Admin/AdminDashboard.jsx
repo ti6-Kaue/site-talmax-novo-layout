@@ -41,6 +41,7 @@ const AdminUpcera = lazy(() => import('./AdminUpcera/AdminUpcera'));
 const AdminScanners = lazy(() => import('./AdminScanners/AdminScanners'));
 const AdminPrinters = lazy(() => import('./AdminPrinters/AdminPrinters'));
 const AdminSegments = lazy(() => import('./AdminSegments/AdminSegments'));
+const AdminHeaderMenu = lazy(() => import('./AdminHeaderMenu/AdminHeaderMenu'));
 const AdminHomeContent = lazy(() => import('./AdminHomeContent/AdminHomeContent'));
 const AdminTalmaxDigital = lazy(() => import('./AdminTalmaxDigital/AdminTalmaxDigital'));
 const AdminDigitalGroups = lazy(() => import('./AdminTalmaxDigital/AdminDigitalGroups'));
@@ -102,8 +103,8 @@ const AdminDashboardContent = () => {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
     { id: 'support', label: 'Suporte', icon: <Headphones size={20} /> },
-    { id: 'technical-assistance', label: 'Assistencia Tecnica', icon: <Wrench size={20} /> },
-    ...(isMasterAdmin ? [{ id: 'users', label: 'Usuarios Admin', icon: <UserCog size={20} /> }] : [])
+    { id: 'technical-assistance', label: 'Assistência Técnica', icon: <Wrench size={20} /> },
+    ...(isMasterAdmin ? [{ id: 'users', label: 'Usuários Admin', icon: <UserCog size={20} /> }] : [])
   ];
   const catalogItems = [
     { id: 'products', label: 'Cadastro de Produtos', icon: <Package size={18} /> },
@@ -111,6 +112,7 @@ const AdminDashboardContent = () => {
     { id: 'category-pages', label: 'Pagina de Categoria', icon: <ImageIcon size={18} /> },
   ];
   const homeItems = [
+    { id: 'header-menu', label: 'Cabeçalho', icon: <Menu size={20} /> },
     { id: 'banners', label: 'Banners', icon: <ImageIcon size={18} /> },
     { id: 'segments', label: 'Home Segmentos', icon: <Layers size={18} /> },
     { id: 'featured', label: 'Home Destaques', icon: <CheckCircle size={18} /> },
@@ -119,7 +121,7 @@ const AdminDashboardContent = () => {
   ];
   const editPageItems = [
     
-    { id: 'custom-pages', label: 'Paginas Personalizadas', icon: <LayoutDashboard size={18} /> },
+    { id: 'custom-pages', label: 'Páginas Personalizadas', icon: <LayoutDashboard size={18} /> },
     { id: 'digital-groups', label: 'Grupo de Segmentos', icon: <Layers size={18} /> },
   ];
   const pageItems = [
@@ -161,6 +163,8 @@ const AdminDashboardContent = () => {
         );
       case 'categories':
         return withAdminSectionLoader(<AdminCategories />, 'Carregando categorias...');
+      case 'header-menu':
+        return withAdminSectionLoader(<AdminHeaderMenu />, 'Carregando cabecalho...');
       case 'users':
         return withAdminSectionLoader(<AdminUsers />, 'Carregando usuarios do painel...');
       case 'banners':
@@ -172,21 +176,21 @@ const AdminDashboardContent = () => {
       case 'segments':
         return withAdminSectionLoader(<AdminSegments />, 'Carregando segmentos...');
       case 'custom-pages':
-        return withAdminSectionLoader(<AdminCustomPages />, 'Carregando paginas personalizadas...');
+        return withAdminSectionLoader(<AdminCustomPages />, 'Carregando páginas personalizadas...');
       case 'category-pages':
-        return withAdminSectionLoader(<AdminCategoryPages />, 'Carregando paginas de categoria...');
+        return withAdminSectionLoader(<AdminCategoryPages />, 'Carregando páginas de categoria...');
       case 'talmax-digital':
-        return withAdminSectionLoader(<AdminTalmaxDigital />, 'Carregando pagina Talmax Digital...');
+        return withAdminSectionLoader(<AdminTalmaxDigital />, 'Carregando página Talmax Digital...');
       case 'digital-groups':
         return withAdminSectionLoader(<AdminDigitalGroups />, 'Carregando grupos de segmentos...');
       case 'upcera':
-        return withAdminSectionLoader(<AdminUpcera />, 'Carregando pagina Upcera...');
+        return withAdminSectionLoader(<AdminUpcera />, 'Carregando página Upcera...');
       case 'scanners':
-        return withAdminSectionLoader(<AdminScanners />, 'Carregando pagina Scanners...');
+        return withAdminSectionLoader(<AdminScanners />, 'Carregando página Scanners...');
       case 'printers':
-        return withAdminSectionLoader(<AdminPrinters />, 'Carregando pagina Impressoras 3D...');
+        return withAdminSectionLoader(<AdminPrinters />, 'Carregando página Impressoras 3D...');
       case 'technical-assistance':
-        return withAdminSectionLoader(<AdminTechnicalAssistance />, 'Carregando assistencia tecnica...');
+        return withAdminSectionLoader(<AdminTechnicalAssistance />, 'Carregando assistência técnica...');
       case 'support':
         return withAdminSectionLoader(<AdminSupport />, 'Carregando suporte...');
       default:

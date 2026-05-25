@@ -4,6 +4,7 @@ import {
   BadgeInfo,
   Eye,
   EyeOff,
+  Menu,
   Megaphone,
   Pencil,
   Plus,
@@ -18,6 +19,7 @@ import { apiAssetPath } from '../../../utils/assets';
 import './AdminHomeContent.css';
 
 const SECTION_LABELS = {
+  'header-menu': 'Menu do cabecalho',
   'info-card': 'Card informativo',
   'orange-ad': 'Propaganda'
 };
@@ -29,11 +31,11 @@ const buildEmptyForm = (sectionType = 'info-card') => ({
   logo_text: sectionType === 'orange-ad' ? 'moby' : '',
   logo_image_url: '',
   logo_image_file: null,
-  button_label: sectionType === 'orange-ad' ? 'Conheca' : 'Saiba Mais',
+  button_label: sectionType === 'header-menu' ? '' : (sectionType === 'orange-ad' ? 'Conheca' : 'Saiba Mais'),
   link_url: '',
   is_external: sectionType === 'orange-ad',
-  background_color: sectionType === 'orange-ad' ? '#f06400' : '#111630',
-  text_color: '#ffffff',
+  background_color: sectionType === 'orange-ad' ? '#f06400' : (sectionType === 'header-menu' ? '#ffffff' : '#111630'),
+  text_color: sectionType === 'header-menu' ? '#243f96' : '#ffffff',
   button_color: '#374c92',
   button_text_color: '#ffffff',
   display_order: '0',
@@ -83,7 +85,7 @@ const buildPayload = (form) => {
 };
 
 const AdminHomeContent = () => {
-  const { addToast } = useAdmin();
+  const { addToast, categories } = useAdmin();
   const [items, setItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -92,6 +94,7 @@ const AdminHomeContent = () => {
   const [form, setForm] = useState(buildEmptyForm());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [togglingId, setTogglingId] = useState(null);
+  const [addingCategoryId, setAddingCategoryId] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
 
@@ -138,6 +141,20 @@ const AdminHomeContent = () => {
 
   const infoCards = filteredItems.filter((item) => item.section_type === 'info-card');
   const orangeAds = filteredItems.filter((item) => item.section_type === 'orange-ad');
+  const headerMenuItems = filteredItems.filter((item) => item.section_type === 'header-menu');
+  const allHeaderMenuItems = items.filter((item) => item.section_type === 'header-menu');
+  const availableHeaderCategories = useMemo(() => (
+    (Array.isArray(categories) ? categories : [])
+      .filter((category) => category?.slug)
+      .sort((a, b) => {
+        const parentDifference = Number(a.parent_id || 0) - Number(b.parent_id || 0);
+
+        return parentDifference || String(a.name || '').localeCompare(String(b.name || ''), 'pt-BR');
+      })
+  ), [categories]);
+  const headerMenuLinks = useMemo(() => new Set(
+    allHeaderMenuItems.map((item) => String(item.link_url || '').trim())
+  ), [allHeaderMenuItems]);
   const logoImagePreview = useMemo(() => (
     form.logo_image_file ? URL.createObjectURL(form.logo_image_file) : ''
   ), [form.logo_image_file]);
@@ -251,6 +268,37 @@ const AdminHomeContent = () => {
     setShowDeleteModal(true);
   };
 
+  const handleAddCategoryToHeader = async (category) => {
+    if (!category?.slug || addingCategoryId === category.id) {
+      return;
+    }
+
+    const categoryPath = `/categoria/${category.slug}`;
+    const maxDisplayOrder = allHeaderMenuItems.reduce(
+      (maxOrder, item) => Math.max(maxOrder, Number(item.display_order || 0)),
+      0
+    );
+    const nextForm = {
+      ...buildEmptyForm('header-menu'),
+      title: category.name || category.slug,
+      link_url: categoryPath,
+      display_order: String(maxDisplayOrder + 10),
+      active: true
+    };
+
+    try {
+      setAddingCategoryId(category.id);
+      await homeContentBlockService.create(buildPayload(nextForm));
+      addToast('Categoria adicionada ao cabecalho!');
+      await loadItems();
+    } catch (error) {
+      console.error('Erro ao adicionar categoria ao cabecalho:', error);
+      addToast(error.message || 'Erro ao adicionar categoria ao cabecalho', 'error');
+    } finally {
+      setAddingCategoryId(null);
+    }
+  };
+
   const confirmDelete = async () => {
     if (!itemToDelete?.id) {
       return;
@@ -269,7 +317,7 @@ const AdminHomeContent = () => {
   };
 
   const renderItemCard = (item) => {
-    const Icon = item.section_type === 'orange-ad' ? Megaphone : BadgeInfo;
+    const Icon = item.section_type === 'orange-ad' ? Megaphone : (item.section_type === 'header-menu' ? Menu : BadgeInfo);
     const style = {
       '--admin-home-preview-bg': item.background_color || '#111630',
       '--admin-home-preview-color': item.text_color || '#ffffff',
@@ -360,6 +408,73 @@ const AdminHomeContent = () => {
     </section>
   );
 
+  const renderHeaderMenuSection = () => (
+    <section className="admin-card admin-home-content__section">
+      <div className="card-header admin-home-content__section-header">
+        <div>
+          <h2><Menu size={20} /> Menu do cabecalho</h2>
+          <p>Escolha quais categorias aparecem no dropdown Produtos do cabecalho.</p>
+        </div>
+        <button type="button" className="btn-secondary" onClick={() => handleCreate('header-menu')}>
+          <Plus size={18} />
+          Novo link manual
+        </button>
+      </div>
+
+      <div className="card-body">
+        <div className="admin-home-content__category-picker">
+          <div className="admin-home-content__category-picker-head">
+            <strong>Categorias disponiveis</strong>
+            <span>{availableHeaderCategories.length} categorias encontradas</span>
+          </div>
+
+          {availableHeaderCategories.length === 0 ? (
+            <div className="empty-state">
+              <Menu size={32} />
+              <p>Nenhuma categoria cadastrada.</p>
+            </div>
+          ) : (
+            <div className="admin-home-content__category-list">
+              {availableHeaderCategories.map((category) => {
+                const categoryPath = `/categoria/${category.slug}`;
+                const alreadyAdded = headerMenuLinks.has(categoryPath);
+
+                return (
+                  <article key={category.id || category.slug} className="admin-home-content__category-option">
+                    <div>
+                      <strong>{category.name}</strong>
+                      <span>{categoryPath}</span>
+                    </div>
+                    <button
+                      type="button"
+                      className={alreadyAdded ? 'status-badge status-active' : 'btn-secondary'}
+                      onClick={() => handleAddCategoryToHeader(category)}
+                      disabled={alreadyAdded || addingCategoryId === category.id}
+                    >
+                      {alreadyAdded ? 'No cabecalho' : addingCategoryId === category.id ? 'Adicionando...' : 'Adicionar'}
+                    </button>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {headerMenuItems.length > 0 && (
+          <>
+            <div className="admin-home-content__subheading">
+              <strong>Itens no cabecalho</strong>
+              <span>Edite ordem, nome ou remova quando precisar.</span>
+            </div>
+            <div className="admin-home-content__grid">
+              {headerMenuItems.map(renderItemCard)}
+            </div>
+          </>
+        )}
+      </div>
+    </section>
+  );
+
   return (
     <div className="admin-home-content">
       <div className="admin-card">
@@ -441,6 +556,7 @@ const AdminHomeContent = () => {
                       >
                         <option value="info-card">Card informativo</option>
                         <option value="orange-ad">Propaganda </option>
+                        <option value="header-menu">Menu do cabecalho</option>
                       </select>
                     </div>
 
@@ -496,37 +612,47 @@ const AdminHomeContent = () => {
                     )}
 
                     <div className="form-group admin-home-content__form-group--full">
-                      <label>{form.section_type === 'orange-ad' ? 'Chamada da propaganda' : 'Titulo do card'}</label>
+                      <label>
+                        {form.section_type === 'orange-ad'
+                          ? 'Chamada da propaganda'
+                          : form.section_type === 'header-menu'
+                            ? 'Texto do link'
+                            : 'Titulo do card'}
+                      </label>
                       <input
                         type="text"
                         value={form.title}
                         onChange={(event) => handleInputChange('title', event.target.value)}
-                        placeholder="Texto principal"
+                        placeholder={form.section_type === 'header-menu' ? 'Ex.: Fresadoras' : 'Texto principal'}
                         required
                       />
                     </div>
 
-                    <div className="form-group admin-home-content__form-group--full">
-                      <label>Descricao</label>
-                      <textarea
-                        value={form.description}
-                        onChange={(event) => handleInputChange('description', event.target.value)}
-                        placeholder="Texto complementar. Quebre linhas para separar os blocos."
-                      />
-                    </div>
+                    {form.section_type !== 'header-menu' && (
+                      <div className="form-group admin-home-content__form-group--full">
+                        <label>Descricao</label>
+                        <textarea
+                          value={form.description}
+                          onChange={(event) => handleInputChange('description', event.target.value)}
+                          placeholder="Texto complementar. Quebre linhas para separar os blocos."
+                        />
+                      </div>
+                    )}
+
+                    {form.section_type !== 'header-menu' && (
+                      <div className="form-group">
+                        <label>Texto do botão</label>
+                        <input
+                          type="text"
+                          value={form.button_label}
+                          onChange={(event) => handleInputChange('button_label', event.target.value)}
+                          placeholder="Saiba Mais"
+                        />
+                      </div>
+                    )}
 
                     <div className="form-group">
-                      <label>Texto do botão</label>
-                      <input
-                        type="text"
-                        value={form.button_label}
-                        onChange={(event) => handleInputChange('button_label', event.target.value)}
-                        placeholder="Saiba Mais"
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label>Link do botão</label>
+                      <label>{form.section_type === 'header-menu' ? 'Link do menu' : 'Link do botão'}</label>
                       <input
                         type="text"
                         value={form.link_url}

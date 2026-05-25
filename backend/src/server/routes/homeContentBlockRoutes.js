@@ -20,7 +20,7 @@ const logger = require('../utils/logger');
 
 const router = express.Router();
 
-const SECTION_TYPES = new Set(['info-card', 'orange-ad']);
+const SECTION_TYPES = new Set(['info-card', 'orange-ad', 'header-menu']);
 
 const HOME_CONTENT_BLOCKS_TABLE_QUERY = `
   CREATE TABLE IF NOT EXISTS home_content_blocks (
@@ -208,6 +208,14 @@ const getSectionDefaults = (sectionType) => (
       button_text_color: '#ffffff',
       button_label: 'Conheca'
     }
+    : sectionType === 'header-menu'
+      ? {
+        background_color: '#ffffff',
+        text_color: '#243f96',
+        button_color: '#374c92',
+        button_text_color: '#ffffff',
+        button_label: ''
+      }
     : {
       background_color: '#111630',
       text_color: '#ffffff',

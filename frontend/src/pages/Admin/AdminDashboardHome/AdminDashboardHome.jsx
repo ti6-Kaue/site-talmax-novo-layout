@@ -309,6 +309,9 @@ const AdminDashboardHome = ({ onOpenTab }) => {
       </section>
 
       <section className="dashboard-actions">
+        <button type="button" onClick={() => onOpenTab('header-menu')}>
+          <Zap size={18} /> Editar cabecalho da Home
+        </button>
         <button type="button" onClick={() => onOpenTab('products-list')}>
           <Search size={18} /> Revisar produtos
         </button>

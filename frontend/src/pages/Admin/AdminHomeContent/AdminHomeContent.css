@@ -25,6 +25,216 @@
   align-items: stretch;
 }
 
+.admin-home-content__category-picker {
+  min-height: 0;
+  padding: 0.8rem;
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.admin-header-menu-layout {
+  display: grid;
+  grid-template-columns: minmax(360px, 0.95fr) minmax(420px, 1.05fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.admin-home-content__category-picker-head,
+.admin-home-content__subheading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.7rem;
+  color: var(--admin-text);
+}
+
+.admin-home-content__category-picker-head > div:first-child,
+.admin-home-content__subheading > div {
+  min-width: 0;
+}
+
+.admin-home-content__category-picker-head span,
+.admin-home-content__subheading span {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--admin-text-light);
+  font-size: 0.85rem;
+}
+
+.admin-header-menu-search {
+  position: relative;
+  width: min(260px, 100%);
+  flex-shrink: 0;
+}
+
+.admin-header-menu-search input {
+  width: 100%;
+  min-height: 36px;
+  padding: 0 2.2rem 0 0.75rem;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--admin-text);
+}
+
+.admin-header-menu-search button {
+  position: absolute;
+  right: 0.35rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--admin-text-light);
+  cursor: pointer;
+}
+
+.admin-home-content__category-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.55rem;
+  max-height: 520px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.admin-home-content__category-option {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  padding: 0.65rem 0.7rem;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.admin-home-content__category-option div {
+  min-width: 0;
+}
+
+.admin-home-content__category-option strong,
+.admin-home-content__category-option span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-home-content__category-option span {
+  margin-top: 0.15rem;
+  color: var(--admin-text-light);
+  font-size: 0.74rem;
+}
+
+.admin-home-content__category-option button {
+  flex-shrink: 0;
+  min-height: 32px;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.76rem;
+}
+
+.admin-home-content__subheading {
+  margin-bottom: 0.7rem;
+}
+
+.admin-home-content__header-item {
+  display: grid;
+  grid-template-columns: minmax(170px, 1fr) auto minmax(170px, 220px);
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: var(--admin-card-bg);
+}
+
+.admin-home-content__header-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.55rem;
+  max-height: 520px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.admin-header-menu-selected {
+  min-height: 0;
+  padding: 0.8rem;
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.admin-home-content__header-item-main {
+  min-width: 0;
+}
+
+.admin-home-content__header-item-main strong,
+.admin-home-content__header-item-main span,
+.admin-home-content__header-item-main em {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-home-content__header-item-main strong {
+  color: var(--admin-text);
+  font-size: 0.95rem;
+}
+
+.admin-home-content__header-item-main em {
+  margin-top: 0.12rem;
+  color: var(--admin-primary);
+  font-size: 0.78rem;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.admin-home-content__header-item-main span {
+  margin-top: 0.15rem;
+  color: var(--admin-text-light);
+  font-size: 0.78rem;
+}
+
+.admin-home-content__header-item .admin-home-content__actions {
+  grid-template-columns: 1fr 1fr;
+  margin-top: 0;
+}
+
+.admin-header-menu-order {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.45rem;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.admin-header-menu-order label {
+  color: var(--admin-text-light);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.admin-header-menu-order input {
+  width: 68px;
+  min-height: 32px;
+  padding: 0 0.35rem;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  background: #f8fafc;
+  color: var(--admin-text);
+  font-weight: 800;
+}
+
 .admin-home-content__item {
   display: flex;
   flex-direction: column;
@@ -308,6 +518,13 @@
 }
 
 body[data-theme='dark'] .admin-home-content__item,
+body[data-theme='dark'] .admin-home-content__header-item,
+body[data-theme='dark'] .admin-header-menu-selected,
+body[data-theme='dark'] .admin-header-menu-order,
+body[data-theme='dark'] .admin-header-menu-order input,
+body[data-theme='dark'] .admin-home-content__category-picker,
+body[data-theme='dark'] .admin-home-content__category-option,
+body[data-theme='dark'] .admin-header-menu-search input,
 body[data-theme='dark'] .admin-home-content__color-row,
 body[data-theme='dark'] .admin-home-content__check,
 body[data-theme='dark'] .admin-home-content__logo-upload,
@@ -324,15 +541,30 @@ body[data-theme='dark'] .admin-home-content__meta span {
   .admin-home-content__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .admin-header-menu-layout,
+  .admin-home-content__header-item {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 768px) {
+  .admin-home-content__category-picker-head,
+  .admin-home-content__subheading {
+    align-items: stretch;
+  }
+
+  .admin-header-menu-search {
+    width: 100%;
+  }
+
   .admin-home-content__main-header .search-box,
   .admin-home-content__section-header .btn-secondary {
     width: 100%;
   }
 
   .admin-home-content__grid,
+  .admin-home-content__category-list,
   .admin-home-content__form-grid,
   .admin-home-content__color-row,
   .admin-home-content__actions {

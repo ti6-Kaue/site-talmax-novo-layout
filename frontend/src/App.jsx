@@ -329,6 +329,7 @@ const AppContent = ({ appReady, menuOpen, setMenuOpen, theme, onToggleTheme }) =
   const [desktopSearchExpanded, setDesktopSearchExpanded] = useState(false);
   const [cookieConsentStatus, setCookieConsentStatus] = useState(() => readCookieConsentStatus());
   const [footerAds, setFooterAds] = useState([]);
+  const [headerMenuItems, setHeaderMenuItems] = useState([]);
   const [productNavCategories, setProductNavCategories] = useState([]);
   const headerRef = useRef(null);
   const desktopSearchRef = useRef(null);
@@ -490,6 +491,7 @@ const AppContent = ({ appReady, menuOpen, setMenuOpen, theme, onToggleTheme }) =
   useEffect(() => {
     if (isAdmin) {
       setFooterAds([]);
+      setHeaderMenuItems([]);
       return undefined;
     }
 
@@ -502,18 +504,19 @@ const AppContent = ({ appReady, menuOpen, setMenuOpen, theme, onToggleTheme }) =
             return;
           }
 
-          setFooterAds(
-            (Array.isArray(items) ? items : [])
-              .filter((item) => item.section_type === 'orange-ad' && item.active)
-          );
+          const activeItems = Array.isArray(items) ? items.filter((item) => item.active) : [];
+
+          setFooterAds(activeItems.filter((item) => item.section_type === 'orange-ad'));
+          setHeaderMenuItems(activeItems.filter((item) => item.section_type === 'header-menu'));
         })
         .catch((error) => {
           console.error('Erro ao carregar propagandas do rodape:', error);
 
           if (isMounted) {
-            setFooterAds([]);
-          }
-        });
+          setFooterAds([]);
+          setHeaderMenuItems([]);
+        }
+      });
     }, 1200);
 
     return () => {
@@ -652,6 +655,44 @@ const AppContent = ({ appReady, menuOpen, setMenuOpen, theme, onToggleTheme }) =
   }, [productNavCategories]);
 
   const renderProductCategoryLinks = (onClick) => {
+    if (headerMenuItems.length > 0) {
+      return headerMenuItems
+        .slice()
+        .sort((a, b) => {
+          const orderDifference = Number(a.display_order || 0) - Number(b.display_order || 0);
+
+          return orderDifference || String(a.title || '').localeCompare(String(b.title || ''), 'pt-BR');
+        })
+        .map((item) => {
+          const href = String(item.link_url || '').trim();
+          const label = item.title || 'Link';
+
+          if (href && (Boolean(item.is_external) || isExternalFooterAdTarget(href))) {
+            return (
+              <a
+                key={`header-menu-${item.id}`}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={onClick}
+              >
+                {label}
+              </a>
+            );
+          }
+
+          return (
+            <Link
+              key={`header-menu-${item.id}`}
+              to={href || '/produtos'}
+              onClick={onClick}
+            >
+              {label}
+            </Link>
+          );
+        });
+    }
+
     if (visibleProductNavCategories.length === 0) {
       return (
         <>
