@@ -459,28 +459,24 @@
 }
 
 .btn-whatsapp-quote {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(0.55rem, 1vw, 1rem);
-  min-height: clamp(44px, 3.7vw, 52px);
-  background-color: #374c92;
+  gap: 12px;
+  background-color: var(--primary);
   color: white;
   text-decoration: none;
-  padding: 0 clamp(1.2rem, 2.4vw, 2rem);
-  border-radius: 999px;
-  font-weight: 900;
-  font-size: clamp(0.86rem, 1.08vw, 1.1rem);
-  line-height: 1;
-  text-transform: uppercase;
-  white-space: nowrap;
-  transition: transform 0.25s ease, background-color 0.25s ease;
-  box-shadow: none;
+  padding: 18px 32px;
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 18px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(55, 76, 146, 0.2);
 }
 
 .btn-whatsapp-quote:hover {
   background-color: #2d3f78;
-  transform: translateY(-1px);
+  transform: translateY(-3px);
 }
 
 /* Tabs Section */

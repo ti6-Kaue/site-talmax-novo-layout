@@ -1,7 +1,7 @@
 .premium-product-card {
   --product-card-radius: 18px;
-  --product-card-cutout-width: clamp(170px, 13vw, 218px);
-  --product-card-cutout-height: 78px;
+  --product-card-cutout-size: 82px;
+  --product-card-button-size: 48px;
   --product-card-cutout-radius: 16px;
   --product-card-cutout-outer-radius: 18px;
   --product-card-page-bg: var(--product-card-cutout-bg, var(--surface-muted, #f1f4f9));
@@ -96,7 +96,7 @@
 .card-details {
   position: relative;
   min-height: 86px;
-  padding: 28px calc(var(--product-card-cutout-width) + 10px) 8px 26px;
+  padding: 28px calc(var(--product-card-cutout-size) + 10px) 8px 26px;
   display: flex;
   align-items: flex-start;
   flex-grow: 1;
@@ -146,13 +146,13 @@
   position: absolute;
   right: 0;
   bottom: 0;
-  width: var(--product-card-cutout-width);
-  height: var(--product-card-cutout-height);
+  width: var(--product-card-cutout-size);
+  height: var(--product-card-cutout-size);
   margin: 0;
   display: flex;
   align-items: flex-end;
   justify-content: flex-end;
-  padding: 12px 12px 14px 18px;
+  padding: 14px;
   border-radius: var(--product-card-cutout-radius) 0 0 0;
   background: var(--product-card-page-bg-gradient);
   box-shadow: none;
@@ -185,23 +185,17 @@
 }
 
 .btn-quote-lux {
-  width: min(100%, 174px);
-  height: 48px;
-  padding: 0 18px 0 22px;
-  border: 0;
-  border-radius: 999px;
-  background: #374c92;
-  color: #ffffff;
+  width: var(--product-card-button-size);
+  height: var(--product-card-button-size);
+  padding: 0;
+  border: 1.5px solid #17214a;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #17214a;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  font-size: 0.9rem;
-  font-weight: 900;
-  line-height: 1;
-  text-transform: uppercase;
-  white-space: nowrap;
   transition: transform 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
   pointer-events: auto;
   position: relative;
@@ -215,9 +209,10 @@
 .premium-product-card:hover .btn-quote-lux,
 .premium-product-card:focus-within .btn-quote-lux,
 .btn-quote-lux:hover {
-  background: #2d3f78;
+  background: #374c92;
+  border-color: #374c92;
   color: #ffffff;
-  transform: translateY(-1px);
+  transform: scale(1.06);
 }
 
 .premium-product-card:hover .btn-quote-lux svg,
