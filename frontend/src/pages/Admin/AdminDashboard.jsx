@@ -37,14 +37,10 @@ const AdminCategories = lazy(() => import('./AdminCategories/AdminCategories'));
 const AdminCategoryPages = lazy(() => import('./AdminCategoryPages/AdminCategoryPages'));
 const AdminBanners = lazy(() => import('./AdminBanners/AdminBanners'));
 const AdminFeatured = lazy(() => import('./AdminFeatured/AdminFeatured'));
-const AdminUpcera = lazy(() => import('./AdminUpcera/AdminUpcera'));
-const AdminScanners = lazy(() => import('./AdminScanners/AdminScanners'));
-const AdminPrinters = lazy(() => import('./AdminPrinters/AdminPrinters'));
 const AdminSegments = lazy(() => import('./AdminSegments/AdminSegments'));
 const AdminHeaderMenu = lazy(() => import('./AdminHeaderMenu/AdminHeaderMenu'));
 const AdminHomeContent = lazy(() => import('./AdminHomeContent/AdminHomeContent'));
-const AdminTalmaxDigital = lazy(() => import('./AdminTalmaxDigital/AdminTalmaxDigital'));
-const AdminDigitalGroups = lazy(() => import('./AdminTalmaxDigital/AdminDigitalGroups'));
+const AdminTalmaxDigitalCarousels = lazy(() => import('./AdminTalmaxDigitalCarousels/AdminTalmaxDigitalCarousels'));
 const AdminCustomPages = lazy(() => import('./AdminCustomPages/AdminCustomPages'));
 const AdminUsers = lazy(() => import('./AdminUsers/AdminUsers'));
 const AdminTechnicalAssistance = lazy(() => import('./AdminTechnicalAssistance/AdminTechnicalAssistance'));
@@ -122,13 +118,9 @@ const AdminDashboardContent = () => {
   const editPageItems = [
     
     { id: 'custom-pages', label: 'Páginas Personalizadas', icon: <LayoutDashboard size={18} /> },
-    { id: 'digital-groups', label: 'Grupo de Segmentos', icon: <Layers size={18} /> },
   ];
   const pageItems = [
-    { id: 'talmax-digital', label: 'Talmax Digital', icon: <ImageIcon size={18} /> },
-    { id: 'upcera', label: 'Upcera', icon: <CheckCircle size={18} /> },
-    { id: 'scanners', label: 'Scanners', icon: <Search size={18} /> },
-    { id: 'printers', label: 'Impressoras 3D', icon: <ImageIcon size={18} /> }
+    { id: 'talmax-digital-carousels', label: 'Talmax Digital', icon: <ImageIcon size={18} /> }
   ];
   const activeItem = [...menuItems, ...catalogItems, ...homeItems, ...editPageItems, ...pageItems].find((item) => item.id === activeTab);
   const isHomeSectionActive = homeItems.some((item) => item.id === activeTab);
@@ -179,16 +171,8 @@ const AdminDashboardContent = () => {
         return withAdminSectionLoader(<AdminCustomPages />, 'Carregando páginas personalizadas...');
       case 'category-pages':
         return withAdminSectionLoader(<AdminCategoryPages />, 'Carregando páginas de categoria...');
-      case 'talmax-digital':
-        return withAdminSectionLoader(<AdminTalmaxDigital />, 'Carregando página Talmax Digital...');
-      case 'digital-groups':
-        return withAdminSectionLoader(<AdminDigitalGroups />, 'Carregando grupos de segmentos...');
-      case 'upcera':
-        return withAdminSectionLoader(<AdminUpcera />, 'Carregando página Upcera...');
-      case 'scanners':
-        return withAdminSectionLoader(<AdminScanners />, 'Carregando página Scanners...');
-      case 'printers':
-        return withAdminSectionLoader(<AdminPrinters />, 'Carregando página Impressoras 3D...');
+      case 'talmax-digital-carousels':
+        return withAdminSectionLoader(<AdminTalmaxDigitalCarousels />, 'Carregando Talmax Digital...');
       case 'technical-assistance':
         return withAdminSectionLoader(<AdminTechnicalAssistance />, 'Carregando assistência técnica...');
       case 'support':

@@ -96,6 +96,28 @@ CREATE TABLE IF NOT EXISTS abas_produto (
         FOREIGN KEY (product_id) REFERENCES produtos(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS produto_categorias (
+    product_id INT NOT NULL,
+    category_id INT NOT NULL,
+    PRIMARY KEY (product_id, category_id),
+    KEY idx_produto_categorias_category_id (category_id),
+    CONSTRAINT fk_produto_categorias_product
+        FOREIGN KEY (product_id) REFERENCES produtos(id) ON DELETE CASCADE,
+    CONSTRAINT fk_produto_categorias_category
+        FOREIGN KEY (category_id) REFERENCES categorias(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS produto_sub_categorias (
+    product_id INT NOT NULL,
+    sub_category_id INT NOT NULL,
+    PRIMARY KEY (product_id, sub_category_id),
+    KEY idx_produto_sub_categorias_sub_category_id (sub_category_id),
+    CONSTRAINT fk_produto_sub_categorias_product
+        FOREIGN KEY (product_id) REFERENCES produtos(id) ON DELETE CASCADE,
+    CONSTRAINT fk_produto_sub_categorias_sub_category
+        FOREIGN KEY (sub_category_id) REFERENCES sub_categorias(id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS banners (
     id INT NOT NULL AUTO_INCREMENT,
     title VARCHAR(255) DEFAULT NULL,

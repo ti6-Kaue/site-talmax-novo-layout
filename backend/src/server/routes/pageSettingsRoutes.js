@@ -40,7 +40,8 @@ const DEFAULT_PAGE_SETTINGS = {
     overline: 'TECNOLOGIA ODONTOLOGICA',
     title: 'Talmax Digital',
     description: 'O futuro da protese dentaria com tecnologia de ponta e precisao absoluta.',
-    logo_url: '/img/logo-talmax-digital-pos.png'
+    logo_url: '/img/logo-talmax-digital-pos.png',
+    carousel_categories: []
   },
   upcera: {
     page_name: 'upcera',
@@ -194,7 +195,17 @@ const normalizePageSetting = (pageName, content = {}, explicitLogoUrl = null) =>
     card_url: sanitizeNavigationTarget(content.card_url ?? defaults.card_url ?? '', { allowExternal: true, allowRelative: true }),
     info_title: sanitizeTextInput(content.info_title ?? defaults.info_title ?? '', { preserveNewlines: false, maxLength: 160 }),
     info_subtitle: sanitizeTextInput(content.info_subtitle ?? defaults.info_subtitle ?? '', { preserveNewlines: false, maxLength: 240 }),
-    info_body: sanitizeTextInput(content.info_body ?? defaults.info_body ?? '', { preserveNewlines: true, maxLength: 2400 })
+    info_body: sanitizeTextInput(content.info_body ?? defaults.info_body ?? '', { preserveNewlines: true, maxLength: 2400 }),
+    carousel_categories: Array.isArray(content.carousel_categories)
+      ? content.carousel_categories
+        .map((item) => ({
+          id: Number(item?.id || 0),
+          name: sanitizeTextInput(item?.name || '', { preserveNewlines: false, maxLength: 120 }),
+          slug: sanitizeTextInput(item?.slug || '', { preserveNewlines: false, maxLength: 160 }),
+          parent_id: item?.parent_id ? Number(item.parent_id) : null
+        }))
+        .filter((item) => item.id > 0 && item.name && item.slug)
+      : defaults.carousel_categories || []
   };
 };
 
@@ -311,7 +322,8 @@ router.put('/:pageName', requireAdminSession, upload.any(), async (req, res, nex
       card_url: req.body.card_url,
       info_title: req.body.info_title,
       info_subtitle: req.body.info_subtitle,
-      info_body: req.body.info_body
+      info_body: req.body.info_body,
+      carousel_categories: parseContent(req.body.carousel_categories)
     }, nextLogoUrl);
 
     await db.query(

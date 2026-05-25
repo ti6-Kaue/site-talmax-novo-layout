@@ -1,10 +1,12 @@
-/**
+﻿/**
  * Pagina: ProductCatalog
  * Rota: /produtos e /categoria/:slug
  * Responsabilidade: listar produtos e aplicar filtros por busca e categoria
  */
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, Navigation } from 'swiper/modules';
 import {
   ChevronRight,
   SlidersHorizontal,
@@ -16,10 +18,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import ProductCard from '../ProductCard/ProductCard';
 import API_URL from '../../services/api';
 import { trackSearch } from '../../services/analytics';
+import pageSettingsService, { normalizeSpecialPageSettings } from '../../services/pageSettingsService';
 import { apiAssetPath } from '../../utils/assets';
 import { parseSafeExtraData } from '../../utils/contentSafety';
 import { getNormalizedCategoryNames, getVisibleCategoryLabel } from '../../utils/productCategories';
 import { normalizeSearchText } from '../../utils/searchText';
+import 'swiper/css';
+import 'swiper/css/navigation';
 import './ProductCatalog.css';
 
 const ITEMS_PER_PAGE = 20;
@@ -30,7 +35,7 @@ const CustomPagination = ({ total, current, onChange }) => {
     pages.push(i);
   }
 
-  // Lógica para mostrar apenas algumas páginas se houver muitas
+  // LÃ³gica para mostrar apenas algumas pÃ¡ginas se houver muitas
   const visiblePages = pages.filter(p => 
     p === 1 || p === total || (p >= current - 2 && p <= current + 2)
   );
@@ -85,23 +90,116 @@ const featuredCategoryOrder = [
   'Ceras',
   'Revestimentos',
   'Zirkon Ice',
-  'Ligas Metálicas',
+  'Ligas MetÃ¡licas',
   'Soldas',
   'Corte e Acabamento',
-  'Microscópio e Lupa',
+  'MicroscÃ³pio e Lupa',
   'Equipamentos',
-  'Acessórios para Cerâmica',
+  'AcessÃ³rios para CerÃ¢mica',
   'T-Lithium',
   'Talmax Digital',
   'Blocos',
   'Linha Cad/Cam',
   'Linha de Ceramicas',
   'Resinas',
-  'Prótese Dentária',
+  'PrÃ³tese DentÃ¡ria',
   'Nail e Podologia'
 ];
 
 const normalizedFeaturedCategoryOrder = featuredCategoryOrder.map(normalizeSearchText);
+
+const talmaxDigitalProductGroups = [
+  { id: 'fresadoras', title: 'Fresadoras', keywords: ['fresadora', 'fresadoras'] },
+  { id: 'scanners', title: 'Scanners', keywords: ['scanner', 'scanners'] },
+  { id: 'impressoras', title: 'Impressoras', keywords: ['impressora', 'impressoras', 'impressora 3d', 'impressoras 3d'], subCategoryIds: [63], flag: 'is_3d_printer' },
+  { id: 'cad-cam', title: 'CAD/CAM', keywords: ['cad cam', 'cad/cam', 'linha cad cam', 'linha cad/cam'], categoryIds: [15] }
+];
+
+const getTalmaxDigitalGroupIndex = (product) => {
+  const searchableText = normalizeSearchText([
+    product.name,
+    product.category,
+    product.category_names,
+    ...(Array.isArray(product.allCategoryNames) ? product.allCategoryNames : [])
+  ].filter(Boolean).join(' '));
+
+  return talmaxDigitalProductGroups.findIndex((group) =>
+    group.keywords.some((keyword) => searchableText.includes(normalizeSearchText(keyword)))
+    || (group.flag && product[group.flag])
+    || (Array.isArray(group.categoryIds) && Array.isArray(product.categoryIds)
+      && product.categoryIds.some((categoryId) => group.categoryIds.includes(Number(categoryId))))
+    || (Array.isArray(group.subCategoryIds) && Array.isArray(product.subCategoryIds)
+      && product.subCategoryIds.some((subCategoryId) => group.subCategoryIds.includes(Number(subCategoryId))))
+  );
+};
+
+const TalmaxDigitalCarousel = ({ group }) => {
+  if (!group.products.length) {
+    return null;
+  }
+
+  return (
+    <section className="talmax-digital-featured-group">
+      <div className="talmax-digital-featured-group__inner">
+        <div className="talmax-digital-featured__header">
+          <h2>{group.title}</h2>
+          <p>Produtos Talmax Digital</p>
+        </div>
+
+        <div className="talmax-digital-featured__carousel">
+          <button
+            type="button"
+            className={`talmax-digital-featured__nav talmax-digital-featured__nav-prev talmax-digital-featured__nav-prev--${group.id}`}
+            aria-label="Produto anterior"
+          />
+          <button
+            type="button"
+            className={`talmax-digital-featured__nav talmax-digital-featured__nav-next talmax-digital-featured__nav-next--${group.id}`}
+            aria-label="Proximo produto"
+          />
+          <Swiper
+            modules={[Autoplay, Navigation]}
+            spaceBetween={10}
+            slidesPerView={2}
+            loop={group.products.length > 1}
+            navigation={{
+              prevEl: `.talmax-digital-featured__nav-prev--${group.id}`,
+              nextEl: `.talmax-digital-featured__nav-next--${group.id}`
+            }}
+            autoplay={{ delay: 3500, disableOnInteraction: false }}
+            breakpoints={{
+              640: { slidesPerView: 2, spaceBetween: 16 },
+              1024: { slidesPerView: 3, spaceBetween: 24 },
+              1400: { slidesPerView: 5, spaceBetween: 24 }
+            }}
+          >
+            {group.products.map((product, index) => (
+              <SwiperSlide key={product.id}>
+                <ProductCard product={product} index={index} imageLoading="lazy" imageFetchPriority="low" />
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const TalmaxDigitalCarousels = ({ groups }) => {
+  const visibleGroups = groups.filter((group) => group.products.length > 0);
+
+  if (!visibleGroups.length) {
+    return null;
+  }
+
+  return (
+    <section className="talmax-digital-featured">
+      {visibleGroups.map((group) => (
+        <TalmaxDigitalCarousel key={group.id} group={group} />
+      ))}
+    </section>
+  );
+};
 
 const ProductCatalog = () => {
   const { slug } = useParams();
@@ -113,10 +211,11 @@ const ProductCatalog = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [products, setProducts] = useState([]);
   const [allCategories, setAllCategories] = useState([]);
+  const [talmaxDigitalCarouselSettings, setTalmaxDigitalCarouselSettings] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [activeSubcategorySlug, setActiveSubcategorySlug] = useState('');
 
-  // Sincroniza o estado inicial e as mudanças de URL
+  // Sincroniza o estado inicial e as mudanÃ§as de URL
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     const searchQuery = queryParams.get('busca') || '';
@@ -153,7 +252,7 @@ const ProductCatalog = () => {
       setActiveSubcategorySlug(subcategoryQuery);
     }
     
-    // Sempre volta para a primeira página ao mudar busca ou categoria na URL
+    // Sempre volta para a primeira pÃ¡gina ao mudar busca ou categoria na URL
     setCurrentPage(1);
   }, [location.search, slug, allCategories]);
 
@@ -164,11 +263,12 @@ const ProductCatalog = () => {
       setIsLoading(true);
       try {
         
-        // Se houver busca, pedimos para a API filtrar para garantir consistência
+        // Se houver busca, pedimos para a API filtrar para garantir consistÃªncia
 
-        const [prodRes, catRes] = await Promise.all([
+        const [prodRes, catRes, pageSettingsItems] = await Promise.all([
           fetch(`${API_URL}/products`, { signal: controller.signal }),
-          fetch(`${API_URL}/categories`, { signal: controller.signal })
+          fetch(`${API_URL}/categories`, { signal: controller.signal }),
+          pageSettingsService.getAll().catch(() => [])
         ]);
 
         if (!prodRes.ok) {
@@ -181,9 +281,11 @@ const ProductCatalog = () => {
 
         const prodData = await prodRes.json();
         const catData = await catRes.json();
+        const normalizedSettings = normalizeSpecialPageSettings(pageSettingsItems);
         setAllCategories(catData);
+        setTalmaxDigitalCarouselSettings(normalizedSettings['talmax-digital']?.carousel_categories || []);
 
-        // Se a API retornou um objeto com paginação (comum em buscas), pegamos os itens
+        // Se a API retornou um objeto com paginaÃ§Ã£o (comum em buscas), pegamos os itens
         const rawProducts = Array.isArray(prodData) ? prodData : (prodData.items || []);
 
         const segmentSlugs = ['talmax-digital', 'protese-dentaria', 'nail-e-podologia'];
@@ -204,6 +306,7 @@ const ProductCatalog = () => {
             categoryIds: Array.isArray(product.category_ids) ? product.category_ids.map(Number) : [],
             subCategoryIds: Array.isArray(product.sub_category_ids) ? product.sub_category_ids.map(Number) : [],
             is_upcera: product.is_upcera === true || Number(product.is_upcera) === 1,
+            is_3d_printer: product.is_3d_printer === true || Number(product.is_3d_printer) === 1,
             category: getVisibleCategoryLabel(productCatNames, segmentNames),
             image: product.main_image ? apiAssetPath(product.main_image) : '',
             ...extra,
@@ -216,7 +319,7 @@ const ProductCatalog = () => {
         if (error.name === 'AbortError') {
           return;
         }
-        console.error('Erro ao carregar dados do catálogo:', error);
+        console.error('Erro ao carregar dados do catÃ¡logo:', error);
       } finally {
         setIsLoading(false);
       }
@@ -349,7 +452,7 @@ const ProductCatalog = () => {
     return results;
   }, [searchTerm, activeCategories, activeRouteSubcategory, products, allCategories, categoryMatchesProduct]);
 
-  // Paginação
+  // PaginaÃ§Ã£o
   useEffect(() => {
     const normalizedTerm = searchTerm.trim();
 
@@ -376,11 +479,39 @@ const ProductCatalog = () => {
     return filteredProducts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
   }, [filteredProducts, currentPage]);
 
+  const isTalmaxDigitalCategory = activeCategories.length === 1 && activeCategories[0] === 'Talmax Digital';
+  const talmaxDigitalCarouselGroups = useMemo(() => {
+    const configuredCategories = Array.isArray(talmaxDigitalCarouselSettings)
+      ? talmaxDigitalCarouselSettings
+      : [];
+
+    if (configuredCategories.length > 0) {
+      return configuredCategories.map((category) => ({
+        id: `category-${category.id}`,
+        title: category.name,
+        products: products
+          .filter((product) => categoryMatchesProduct(product, category))
+          .sort((productA, productB) =>
+            String(productA.name || '').localeCompare(String(productB.name || ''), 'pt-BR')
+          )
+      }));
+    }
+
+    return talmaxDigitalProductGroups.map((group, groupIndex) => ({
+      ...group,
+      products: products
+        .filter((product) => getTalmaxDigitalGroupIndex(product) === groupIndex)
+        .sort((productA, productB) =>
+          String(productA.name || '').localeCompare(String(productB.name || ''), 'pt-BR')
+        )
+    }));
+  }, [categoryMatchesProduct, products, talmaxDigitalCarouselSettings]);
+
   const handleSearchChange = (value) => {
     setSearchTerm(value);
     setCurrentPage(1);
     
-    // Atualizar a URL sem recarregar a página (opcional, mas recomendado para consistência)
+    // Atualizar a URL sem recarregar a pÃ¡gina (opcional, mas recomendado para consistÃªncia)
     const params = new URLSearchParams(location.search);
     if (value) {
       params.set('busca', value);
@@ -428,7 +559,7 @@ const ProductCatalog = () => {
   };
 
   const activeRouteCategoryBannerUrl = activeRouteCategory?.page_banner_categorias_url || '';
-  const shouldShowCatalogTopNav = !(activeCategories.length === 1 && activeCategories[0] === 'Talmax Digital');
+  const shouldShowCatalogTopNav = !isTalmaxDigitalCategory;
   const renderFilterButton = (className = '') => (
     <button
       type="button"
@@ -455,7 +586,7 @@ const ProductCatalog = () => {
             </section>
           )}
 
-          <section className={`category-page-intro ${!activeRouteCategoryBannerUrl ? 'category-page-intro--no-banner' : ''}`}>
+          <section className={`category-page-intro ${!activeRouteCategoryBannerUrl ? 'category-page-intro--no-banner' : ''} ${isTalmaxDigitalCategory ? 'category-page-intro--talmax-digital' : ''}`}>
             <div className="category-page-intro__inner">
               <div className="category-page-title-row">
                 <h1>{activeRouteCategory.name}</h1>
@@ -465,7 +596,7 @@ const ProductCatalog = () => {
                 </div>
               </div>
 
-              {activeRouteSubcategories.length > 0 && (
+              {!isTalmaxDigitalCategory && activeRouteSubcategories.length > 0 && (
                 <nav className="category-subnav" aria-label={`Subcategorias de ${activeRouteCategory.name}`}>
                   <button
                     type="button"
@@ -493,38 +624,8 @@ const ProductCatalog = () => {
         </>
       )}
 
-      {activeCategories.length === 1 && activeCategories[0] === 'Talmax Digital' && (
-        <section className="digital-quick-nav">
-          <div className="quick-nav-grid">
-            {[
-              { id: 'upcera', title: 'UPCERA', desc: 'Cerâmicas e Discos', icon: 'U' },
-              { id: 'scanners', title: 'SCANNERS', desc: 'Intraoral e Bancada', icon: 'S' },
-              { id: 'impressoras', title: 'IMPRESSORAS 3D', desc: 'Anycubic e Resinas', icon: '3D' },
-              { id: 'componentes', title: 'COMPONENTES', desc: 'Peças e Estruturas', icon: 'C' },
-              { id: 'insumos', title: 'INSUMOS', desc: 'Blocos e Ceras', icon: 'I' }
-            ].map((item) => (
-              <div
-                key={item.id}
-                className="quick-card-standard"
-                onClick={() => {
-                  if (item.id === 'upcera') {
-                    navigate('/upcera');
-                  } else {
-                    handleSearchChange(item.title);
-                    setActiveCategories([]);
-                  }
-                }}
-              >
-                <div className="card-icon-box">{item.icon}</div>
-                <h3>{item.title}</h3>
-                <p>{item.desc}</p>
-                <div className="card-arrow">
-                  <ChevronRight size={16} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+      {isTalmaxDigitalCategory && (
+        <TalmaxDigitalCarousels groups={talmaxDigitalCarouselGroups} />
       )}
 
       {shouldShowCatalogTopNav && !activeRouteCategory && (
@@ -616,11 +717,11 @@ const ProductCatalog = () => {
         {isLoading ? (
           <div className="pro-loader">
             <div className="spinner-lux"></div>
-            <p>Sincronizando catálogo...</p>
+            <p>Sincronizando catÃ¡logo...</p>
           </div>
-        ) : activeCategories.length === 1 && activeCategories[0] === 'Talmax Digital' ? null : (
+        ) : isTalmaxDigitalCategory ? null : (
           <>
-            <div className={`catalog-grid-lux ${activeCategories.length === 1 && activeCategories[0] === 'Talmax Digital' ? 'five-cols' : ''}`}>
+            <div className="catalog-grid-lux">
               <AnimatePresence mode="popLayout">
                 {paginatedProducts.length > 0 ? (
                   paginatedProducts.map((product, index) => (

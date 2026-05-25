@@ -43,8 +43,6 @@ const ProductCatalog = lazy(() => import('./components/ProductCatalog/ProductCat
 const ProductDetail = lazy(() => import('./components/ProductDetail/ProductDetail'));
 const Support = lazy(() => import('./components/Support/Support'));
 const HistoriaDiretoria = lazy(() => import('./components/HistoriaDiretoria/HistoriaDiretoria'));
-const TalmaxDigital = lazy(() => import('./components/TalmaxDigital/TalmaxDigital'));
-const DigitalGroupPage = lazy(() => import('./components/TalmaxDigital/DigitalGroupPage'));
 const Upcera = lazy(() => import('./components/Upcera/Upcera'));
 const Scanners = lazy(() => import('./components/Scanners/Scanners'));
 const Impressoras3D = lazy(() => import('./components/Impressoras3D/Impressoras3D'));
@@ -398,7 +396,13 @@ const AppContent = ({ appReady, menuOpen, setMenuOpen, theme, onToggleTheme }) =
     }
 
     const handleDocumentPointerDown = (event) => {
-      if (event.target instanceof Element && desktopSearchRef.current?.contains(event.target)) {
+      if (
+        event.target instanceof Element
+        && (
+          desktopSearchRef.current?.contains(event.target)
+          || event.target.closest('[data-site-search-root="true"]')
+        )
+      ) {
         return;
       }
 
@@ -1007,8 +1011,7 @@ const AppContent = ({ appReady, menuOpen, setMenuOpen, theme, onToggleTheme }) =
           <Route path="/depoimentos" element={<PagePlaceholder title="Depoimentos" />} />
 
           <Route path="/produtos" element={withRouteLoader(<ProductCatalog />, 'Carregando catalogo...')} />
-          <Route path="/categoria/talmax-digital" element={withRouteLoader(<TalmaxDigital />, 'Carregando Talmax Digital...')} />
-          <Route path="/grupo-digital/:slug" element={withRouteLoader(<DigitalGroupPage />, 'Carregando grupo digital...')} />
+          <Route path="/grupo-digital/:slug" element={<Navigate to="/produtos" replace />} />
           <Route path="/upcera" element={withRouteLoader(<Upcera />, 'Carregando Upcera...')} />
           <Route path="/scanners" element={withRouteLoader(<Scanners />, 'Carregando scanners...')} />
           <Route path="/impressoras-3d" element={withRouteLoader(<Impressoras3D />, 'Carregando impressoras 3D...')} />

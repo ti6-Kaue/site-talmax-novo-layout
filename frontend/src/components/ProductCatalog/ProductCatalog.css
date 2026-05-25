@@ -56,6 +56,22 @@ body {
   gap: clamp(0.9rem, 2vw, 1.4rem);
 }
 
+.category-page-intro--talmax-digital .category-page-title-row {
+  position: relative;
+  padding-bottom: clamp(1.5rem, 3vw, 2.25rem);
+}
+
+.category-page-intro--talmax-digital .category-page-title-row::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: min(1600px, calc(100vw - 4rem));
+  height: 7px;
+  background: rgba(255, 255, 255, 0.96);
+  transform: translateX(-50%);
+}
+
 .category-page-intro h1 {
   margin: 0;
   color: #1d1d1f;
@@ -260,6 +276,122 @@ body {
 .quick-card-standard:hover .card-arrow {
   opacity: 1;
   transform: translateX(0);
+}
+
+.talmax-digital-featured {
+  background: #f1f4f9;
+  padding: 2.5rem 2rem 0;
+}
+
+.talmax-digital-featured-group__inner {
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.talmax-digital-featured-group + .talmax-digital-featured-group {
+  margin-top: clamp(3.4rem, 6vw, 5.2rem);
+  padding-top: clamp(3.4rem, 6vw, 5.2rem);
+  position: relative;
+}
+
+.talmax-digital-featured-group + .talmax-digital-featured-group::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: min(1600px, calc(100vw - 4rem));
+  height: 7px;
+  background: rgba(255, 255, 255, 0.96);
+  transform: translateX(-50%);
+}
+
+.talmax-digital-featured__header {
+  text-align: left;
+  margin-bottom: 4.5rem;
+}
+
+.talmax-digital-featured__header h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: clamp(2.175rem, 3.65vw, 3.875rem);
+  line-height: 1.08;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.talmax-digital-featured__header p {
+  margin: 1rem 0 0;
+  color: var(--primary);
+  font-size: clamp(1.05rem, 1.8vw, 1.55rem);
+  font-weight: 400;
+}
+
+.talmax-digital-featured__carousel {
+  position: relative;
+  padding: 0;
+}
+
+.talmax-digital-featured__carousel .swiper {
+  padding: 0.5rem 0.35rem 1rem;
+  overflow: hidden;
+}
+
+.talmax-digital-featured__carousel .swiper-wrapper {
+  align-items: stretch;
+}
+
+.talmax-digital-featured__carousel .swiper-slide {
+  height: auto;
+  display: flex;
+}
+
+.talmax-digital-featured__carousel .swiper-slide .premium-product-card {
+  width: 100%;
+}
+
+.talmax-digital-featured__nav {
+  position: absolute;
+  top: 50%;
+  margin-top: -28px;
+  z-index: 10;
+  width: 56px;
+  height: 56px;
+  border: 0;
+  background: transparent;
+  color: transparent;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.talmax-digital-featured__nav::after {
+  content: '';
+  width: 44px;
+  height: 44px;
+  display: block;
+  margin: 6px auto;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+.talmax-digital-featured__nav-prev {
+  left: -72px;
+}
+
+.talmax-digital-featured__nav-next {
+  right: -72px;
+}
+
+.talmax-digital-featured__nav-prev::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 44 44' fill='none'%3E%3Cpath d='M27 10L15 22L27 34' stroke='%2388A6D8' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M36 10L24 22L36 34' stroke='%2388A6D8' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.talmax-digital-featured__nav-next::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 44 44' fill='none'%3E%3Cpath d='M17 10L29 22L17 34' stroke='%2388A6D8' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M8 10L20 22L8 34' stroke='%2388A6D8' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.talmax-digital-featured__nav:hover {
+  transform: scale(1.08);
 }
 
 /* --- NAVBAR DE FILTROS --- */
@@ -716,6 +848,17 @@ body {
   .catalog-grid-lux { grid-template-columns: repeat(2, 1fr); }
   .catalog-grid-lux.five-cols { grid-template-columns: repeat(2, 1fr); }
   .catalog-hero-minimal h1 { font-size: 1.875rem; }
+  .talmax-digital-featured {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  .category-page-intro--talmax-digital .category-page-title-row::after,
+  .talmax-digital-featured-group + .talmax-digital-featured-group::before {
+    width: calc(100vw - 2rem);
+  }
+  .talmax-digital-featured__nav {
+    display: none;
+  }
 }
 
 @media (max-width: 600px) {
@@ -735,6 +878,7 @@ body {
     width: 100%;
   }
   .catalog-viewport { padding-right: 1rem; padding-left: 1rem; }
+  .talmax-digital-featured__header { margin-bottom: 1.6rem; }
   .top-nav-inner { flex-direction: column; gap: 15px; align-items: stretch; }
   .catalog-actions { flex-direction: column; align-items: stretch; }
   .search-minimalist { width: 100%; }

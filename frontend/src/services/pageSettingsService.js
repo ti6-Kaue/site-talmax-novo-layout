@@ -11,7 +11,8 @@ export const DEFAULT_SPECIAL_PAGE_SETTINGS = {
     overline: 'TECNOLOGIA ODONTOLOGICA',
     
     description: 'O futuro da protese dentaria com tecnologia de ponta e precisao absoluta.',
-    logo_url: '/img/logo-talmax-digital-pos.png'
+    logo_url: '/img/logo-talmax-digital-pos.png',
+    carousel_categories: []
   },
   upcera: {
     page_name: 'upcera',

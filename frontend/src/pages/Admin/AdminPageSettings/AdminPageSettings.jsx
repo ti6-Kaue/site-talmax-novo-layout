@@ -5,7 +5,7 @@ import pageSettingsService, { normalizeSpecialPageSettings } from '../../../serv
 import { apiAssetPath } from '../../../utils/assets';
 import './AdminPageSettings.css';
 
-const PAGE_ORDER = ['talmax-digital', 'upcera', 'scanners', 'printers'];
+const PAGE_ORDER = ['upcera', 'scanners', 'printers'];
 
 const buildFormsState = (settingsMap) => (
   PAGE_ORDER.reduce((accumulator, pageKey) => {

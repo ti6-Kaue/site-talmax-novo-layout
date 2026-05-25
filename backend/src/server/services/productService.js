@@ -9,18 +9,25 @@ const {
 const { normalizeStoredProductExtraData } = require('../validation/productSchemas');
 
 const PRODUCTS_TABLE_NAME = 'produtos';
+const PRODUCT_CATEGORIES_TABLE_NAME = 'produto_categorias';
+const PRODUCT_SUB_CATEGORIES_TABLE_NAME = 'produto_sub_categorias';
 const PRODUCT_TABS_TABLE_NAME = 'abas_produto';
 const LEGACY_PRODUCTS_TABLE_NAME = 'products';
 const LEGACY_PRODUCT_TABS_TABLE_NAME = 'product_tabs';
 
 const PRODUCT_SELECT_QUERY = `
   SELECT p.*,
-         CONCAT_WS(', ', c.name, sc.name) as category_names,
-         COALESCE(p.category_id, sc.category_id) as main_category_ids,
-         p.sub_category_id as sub_category_ids
+         TRIM(BOTH ', ' FROM CONCAT_WS(', ',
+           GROUP_CONCAT(DISTINCT rel_c.name ORDER BY rel_c.name SEPARATOR ', '),
+           GROUP_CONCAT(DISTINCT rel_sc.name ORDER BY rel_sc.name SEPARATOR ', ')
+         )) as category_names,
+         GROUP_CONCAT(DISTINCT rel_c.id ORDER BY rel_c.id SEPARATOR ',') as main_category_ids,
+         GROUP_CONCAT(DISTINCT rel_sc.id ORDER BY rel_sc.id SEPARATOR ',') as sub_category_ids
   FROM ${PRODUCTS_TABLE_NAME} p
-  LEFT JOIN sub_categorias sc ON sc.id = p.sub_category_id
-  LEFT JOIN categorias c ON c.id = COALESCE(p.category_id, sc.category_id)
+  LEFT JOIN ${PRODUCT_CATEGORIES_TABLE_NAME} pc ON pc.product_id = p.id
+  LEFT JOIN categorias rel_c ON rel_c.id = COALESCE(pc.category_id, p.category_id)
+  LEFT JOIN ${PRODUCT_SUB_CATEGORIES_TABLE_NAME} psc ON psc.product_id = p.id
+  LEFT JOIN sub_categorias rel_sc ON rel_sc.id = COALESCE(psc.sub_category_id, p.sub_category_id)
 `;
 
 const PRODUCT_TABS_TABLE_QUERY = `
@@ -41,6 +48,32 @@ const PRODUCT_TABS_TABLE_QUERY = `
     KEY idx_abas_produto_display_order (display_order),
     CONSTRAINT fk_abas_produto_product
       FOREIGN KEY (product_id) REFERENCES ${PRODUCTS_TABLE_NAME}(id) ON DELETE CASCADE
+  )
+`;
+
+const PRODUCT_CATEGORIES_TABLE_QUERY = `
+  CREATE TABLE IF NOT EXISTS ${PRODUCT_CATEGORIES_TABLE_NAME} (
+    product_id INT NOT NULL,
+    category_id INT NOT NULL,
+    PRIMARY KEY (product_id, category_id),
+    KEY idx_produto_categorias_category_id (category_id),
+    CONSTRAINT fk_produto_categorias_product
+      FOREIGN KEY (product_id) REFERENCES ${PRODUCTS_TABLE_NAME}(id) ON DELETE CASCADE,
+    CONSTRAINT fk_produto_categorias_category
+      FOREIGN KEY (category_id) REFERENCES categorias(id) ON DELETE CASCADE
+  )
+`;
+
+const PRODUCT_SUB_CATEGORIES_TABLE_QUERY = `
+  CREATE TABLE IF NOT EXISTS ${PRODUCT_SUB_CATEGORIES_TABLE_NAME} (
+    product_id INT NOT NULL,
+    sub_category_id INT NOT NULL,
+    PRIMARY KEY (product_id, sub_category_id),
+    KEY idx_produto_sub_categorias_sub_category_id (sub_category_id),
+    CONSTRAINT fk_produto_sub_categorias_product
+      FOREIGN KEY (product_id) REFERENCES ${PRODUCTS_TABLE_NAME}(id) ON DELETE CASCADE,
+    CONSTRAINT fk_produto_sub_categorias_sub_category
+      FOREIGN KEY (sub_category_id) REFERENCES sub_categorias(id) ON DELETE CASCADE
   )
 `;
 
@@ -65,6 +98,8 @@ const ensureProductDatabaseTables = async (db) => {
   }
 
   await renameTableIfNeeded(db, LEGACY_PRODUCTS_TABLE_NAME, PRODUCTS_TABLE_NAME);
+  await db.query(PRODUCT_CATEGORIES_TABLE_QUERY);
+  await db.query(PRODUCT_SUB_CATEGORIES_TABLE_QUERY);
   await ensureProductIndexes(db);
 
   productTablesReady = true;
@@ -243,6 +278,8 @@ const normalizeSlugList = (value = []) => (
   ))
 );
 
+const buildProductGroupByClause = () => ' GROUP BY p.id';
+
 const buildProductListWhereClause = (options = {}) => {
   const {
     includeInactive = false,
@@ -268,16 +305,21 @@ const buildProductListWhereClause = (options = {}) => {
         OR EXISTS (
           SELECT 1
           FROM categorias c
-          WHERE c.id = COALESCE(
-              p.category_id,
-              (SELECT parent_sc.category_id FROM sub_categorias parent_sc WHERE parent_sc.id = p.sub_category_id LIMIT 1)
+          LEFT JOIN ${PRODUCT_CATEGORIES_TABLE_NAME} search_pc
+            ON search_pc.product_id = p.id AND search_pc.category_id = c.id
+          WHERE (
+              c.id = p.category_id
+              OR search_pc.product_id IS NOT NULL
+              OR c.id = (SELECT parent_sc.category_id FROM sub_categorias parent_sc WHERE parent_sc.id = p.sub_category_id LIMIT 1)
             )
             AND LOWER(TRIM(c.name)) LIKE ?
         )
         OR EXISTS (
           SELECT 1
           FROM sub_categorias sc
-          WHERE sc.id = p.sub_category_id
+          LEFT JOIN ${PRODUCT_SUB_CATEGORIES_TABLE_NAME} search_psc
+            ON search_psc.product_id = p.id AND search_psc.sub_category_id = sc.id
+          WHERE (sc.id = p.sub_category_id OR search_psc.product_id IS NOT NULL)
             AND LOWER(TRIM(sc.name)) LIKE ?
         )
       )
@@ -292,16 +334,21 @@ const buildProductListWhereClause = (options = {}) => {
         EXISTS (
           SELECT 1
           FROM categorias c
-          WHERE c.id = COALESCE(
-              p.category_id,
-              (SELECT parent_sc.category_id FROM sub_categorias parent_sc WHERE parent_sc.id = p.sub_category_id LIMIT 1)
+          LEFT JOIN ${PRODUCT_CATEGORIES_TABLE_NAME} filter_pc
+            ON filter_pc.product_id = p.id AND filter_pc.category_id = c.id
+          WHERE (
+              c.id = p.category_id
+              OR filter_pc.product_id IS NOT NULL
+              OR c.id = (SELECT parent_sc.category_id FROM sub_categorias parent_sc WHERE parent_sc.id = p.sub_category_id LIMIT 1)
             )
             AND c.slug IN (?)
         )
         OR EXISTS (
           SELECT 1
           FROM sub_categorias sc
-          WHERE sc.id = p.sub_category_id
+          LEFT JOIN ${PRODUCT_SUB_CATEGORIES_TABLE_NAME} filter_psc
+            ON filter_psc.product_id = p.id AND filter_psc.sub_category_id = sc.id
+          WHERE (sc.id = p.sub_category_id OR filter_psc.product_id IS NOT NULL)
             AND sc.slug IN (?)
         )
       )
@@ -321,7 +368,7 @@ const listProducts = async (db, options = {}) => {
   await ensureProductDatabaseTables(db);
   const { includeInactive = false, includeTabs = false } = options;
   const whereClause = includeInactive ? '' : ' WHERE p.is_active = 1';
-  const [rows] = await db.query(`${PRODUCT_SELECT_QUERY}${whereClause} ORDER BY p.id DESC`);
+  const [rows] = await db.query(`${PRODUCT_SELECT_QUERY}${whereClause}${buildProductGroupByClause()} ORDER BY p.id DESC`);
   const products = rows.map(formatProductRow);
   return includeTabs ? attachTabsToProducts(db, products) : products;
 };
@@ -349,7 +396,7 @@ const listProductsPage = async (db, options = {}) => {
     : ' ORDER BY p.id DESC';
 
   const [rows] = await db.query(
-    `${PRODUCT_SELECT_QUERY}${whereClause}${orderClause} LIMIT ? OFFSET ?`,
+    `${PRODUCT_SELECT_QUERY}${whereClause}${buildProductGroupByClause()}${orderClause} LIMIT ? OFFSET ?`,
     [...params, ...orderParams, limit, offset]
   );
 
@@ -372,7 +419,7 @@ const findProductById = async (db, productId, options = {}) => {
   await ensureProductDatabaseTables(db);
   const { includeInactive = false } = options;
   const [rows] = await db.query(
-    `${PRODUCT_SELECT_QUERY} WHERE p.id = ?${includeInactive ? '' : ' AND p.is_active = 1'}`,
+    `${PRODUCT_SELECT_QUERY} WHERE p.id = ?${includeInactive ? '' : ' AND p.is_active = 1'}${buildProductGroupByClause()}`,
     [productId]
   );
   if (!rows[0]) {
@@ -385,8 +432,16 @@ const findProductById = async (db, productId, options = {}) => {
 
 const attachProductCategories = async (connection, productId, mainCategoryIds, subCategoryIds) => {
   await ensureProductDatabaseTables(connection);
-  const validMainIds = Array.isArray(mainCategoryIds) ? mainCategoryIds : [];
-  const validSubIds = Array.isArray(subCategoryIds) ? subCategoryIds : [];
+  const validMainIds = Array.from(new Set(
+    (Array.isArray(mainCategoryIds) ? mainCategoryIds : [])
+      .map(Number)
+      .filter((id) => Number.isInteger(id) && id > 0)
+  ));
+  const validSubIds = Array.from(new Set(
+    (Array.isArray(subCategoryIds) ? subCategoryIds : [])
+      .map(Number)
+      .filter((id) => Number.isInteger(id) && id > 0)
+  ));
 
   let categoryId = validMainIds[0] || null;
   let subCategoryId = validSubIds[0] || null;
@@ -412,6 +467,23 @@ const attachProductCategories = async (connection, productId, mainCategoryIds, s
     `UPDATE ${PRODUCTS_TABLE_NAME} SET category_id = ?, sub_category_id = ? WHERE id = ?`,
     [categoryId, subCategoryId, productId]
   );
+
+  await connection.query(`DELETE FROM ${PRODUCT_CATEGORIES_TABLE_NAME} WHERE product_id = ?`, [productId]);
+  await connection.query(`DELETE FROM ${PRODUCT_SUB_CATEGORIES_TABLE_NAME} WHERE product_id = ?`, [productId]);
+
+  if (validMainIds.length > 0) {
+    await connection.query(
+      `INSERT IGNORE INTO ${PRODUCT_CATEGORIES_TABLE_NAME} (product_id, category_id) VALUES ?`,
+      [validMainIds.map((id) => [productId, id])]
+    );
+  }
+
+  if (validSubIds.length > 0) {
+    await connection.query(
+      `INSERT IGNORE INTO ${PRODUCT_SUB_CATEGORIES_TABLE_NAME} (product_id, sub_category_id) VALUES ?`,
+      [validSubIds.map((id) => [productId, id])]
+    );
+  }
 };
 
 const replaceProductTabs = async (connection, productId, tabs = []) => {
