@@ -11,6 +11,7 @@ const {
 } = require('../validation/productSchemas');
 const {
   ensureProductDatabaseTables,
+  formatProductRow,
   PRODUCTS_TABLE_NAME
 } = require('../services/productService');
 const { wrapError } = require('../utils/errorHandling');
@@ -155,6 +156,30 @@ router.put('/3d-printers/products', requireAdminSession, async (req, res, next) 
     sectionKey: 'printers',
     successMessage: 'Produtos Impressoras 3D atualizados com sucesso!'
   });
+});
+
+router.get('/featured-products', async (req, res, next) => {
+  try {
+    await ensureProductDatabaseTables(db);
+
+    const [rows] = await db.query(
+      `
+        SELECT p.*,
+               CONCAT_WS(', ', c.name, sc.name) as category_names,
+               COALESCE(p.category_id, sc.category_id) as main_category_ids,
+               p.sub_category_id as sub_category_ids
+        FROM ${PRODUCTS_TABLE_NAME} p
+        LEFT JOIN sub_categorias sc ON sc.id = p.sub_category_id
+        LEFT JOIN categorias c ON c.id = COALESCE(p.category_id, sc.category_id)
+        WHERE p.is_active = 1 AND p.is_featured = 1
+        ORDER BY p.id DESC
+      `
+    );
+
+    return res.json(rows.map(formatProductRow));
+  } catch (err) {
+    return next(wrapError(err, { publicMessage: 'Erro ao listar produtos em destaque.' }));
+  }
 });
 
 router.put('/featured-products', requireAdminSession, async (req, res, next) => {

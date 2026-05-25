@@ -76,7 +76,7 @@ const Home = () => {
 
     const fetchFeaturedProducts = async () => {
       try {
-        const productsResponse = await fetch(`${API_URL}/products`, { signal: controller.signal });
+        const productsResponse = await fetch(`${API_URL}/featured-products`, { signal: controller.signal });
 
         if (!productsResponse.ok) {
           throw new Error('Falha ao carregar produtos em destaque');
