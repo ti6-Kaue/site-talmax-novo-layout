@@ -1,6 +1,5 @@
 /**
- * Define as rotas das secoes especiais do site.
- * Atualiza os produtos destacados de paginas como Upcera, Scanners e Impressoras 3D.
+ * Define as rotas da secao de produtos em destaque do site.
  */
 const express = require('express');
 const db = require('../../config/database');
@@ -130,33 +129,6 @@ const saveSpecialSectionProducts = async (req, res, next, config) => {
     connection.release();
   }
 };
-
-router.put('/upcera/products', requireAdminSession, async (req, res, next) => {
-  await saveSpecialSectionProducts(req, res, next, {
-    flagColumn: 'is_upcera',
-    orderColumn: 'upcera_order',
-    sectionKey: 'upcera',
-    successMessage: 'Produtos Upcera atualizados com sucesso!'
-  });
-});
-
-router.put('/scanners/products', requireAdminSession, async (req, res, next) => {
-  await saveSpecialSectionProducts(req, res, next, {
-    flagColumn: 'is_scanner',
-    orderColumn: 'scanner_order',
-    sectionKey: 'scanners',
-    successMessage: 'Produtos Scanners atualizados com sucesso!'
-  });
-});
-
-router.put('/3d-printers/products', requireAdminSession, async (req, res, next) => {
-  await saveSpecialSectionProducts(req, res, next, {
-    flagColumn: 'is_3d_printer',
-    orderColumn: 'printer_order',
-    sectionKey: 'printers',
-    successMessage: 'Produtos Impressoras 3D atualizados com sucesso!'
-  });
-});
 
 router.get('/featured-products', async (req, res, next) => {
   try {

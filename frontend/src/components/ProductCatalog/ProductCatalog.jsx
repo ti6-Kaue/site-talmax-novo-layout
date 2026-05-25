@@ -377,14 +377,24 @@ const ProductCatalog = () => {
     }
 
     const categoryId = Number(category.id);
+    const normalizedCategoryName = normalizeSearchText(String(category.name || ''));
+    const normalizedCategorySlug = normalizeSearchText(String(category.slug || ''));
     const productCategoryIds = Array.isArray(product.categoryIds) ? product.categoryIds.map(Number) : [];
     const productSubCategoryIds = Array.isArray(product.subCategoryIds) ? product.subCategoryIds.map(Number) : [];
     const allCategoryNames = Array.isArray(product.allCategoryNames) ? product.allCategoryNames : [];
+    const searchableProductText = normalizeSearchText([
+      product.name,
+      product.category,
+      product.category_names,
+      ...allCategoryNames
+    ].filter(Boolean).join(' '));
 
     if (category.parent_id) {
       return (
         productSubCategoryIds.includes(categoryId)
-        || allCategoryNames.some((name) => normalizeSearchText(String(name)) === normalizeSearchText(String(category.name)))
+        || allCategoryNames.some((name) => normalizeSearchText(String(name)) === normalizedCategoryName)
+        || (normalizedCategoryName && searchableProductText.includes(normalizedCategoryName))
+        || (normalizedCategorySlug && searchableProductText.includes(normalizedCategorySlug))
       );
     }
 
@@ -406,6 +416,8 @@ const ProductCatalog = () => {
           normalizeSearchText(String(name)) === normalizeSearchText(String(catToMatch))
         )
       )
+      || (normalizedCategoryName && searchableProductText.includes(normalizedCategoryName))
+      || (normalizedCategorySlug && searchableProductText.includes(normalizedCategorySlug))
     );
   }, [allCategories]);
 
@@ -482,19 +494,39 @@ const ProductCatalog = () => {
   const isTalmaxDigitalCategory = activeCategories.length === 1 && activeCategories[0] === 'Talmax Digital';
   const talmaxDigitalCarouselGroups = useMemo(() => {
     const configuredCategories = Array.isArray(talmaxDigitalCarouselSettings)
-      ? talmaxDigitalCarouselSettings
+      ? [...talmaxDigitalCarouselSettings].sort((a, b) => {
+        const orderA = Number(a.order || 0);
+        const orderB = Number(b.order || 0);
+
+        if (orderA !== orderB) {
+          return orderA - orderB;
+        }
+
+        return String(a.name || '').localeCompare(String(b.name || ''), 'pt-BR');
+      })
       : [];
 
     if (configuredCategories.length > 0) {
-      return configuredCategories.map((category) => ({
-        id: `category-${category.id}`,
-        title: category.name,
-        products: products
-          .filter((product) => categoryMatchesProduct(product, category))
-          .sort((productA, productB) =>
-            String(productA.name || '').localeCompare(String(productB.name || ''), 'pt-BR')
+      return configuredCategories.map((category) => {
+        const currentCategory = allCategories.find((item) => (
+          !item.parent_id
+          && (
+            Number(item.id) === Number(category.id)
+            || (item.slug && category.slug && item.slug === category.slug)
+            || normalizeSearchText(item.name) === normalizeSearchText(category.name)
           )
-      }));
+        )) || category;
+
+        return {
+          id: `category-${currentCategory.slug || currentCategory.id}`,
+          title: currentCategory.name,
+          products: products
+            .filter((product) => categoryMatchesProduct(product, currentCategory))
+            .sort((productA, productB) =>
+              String(productA.name || '').localeCompare(String(productB.name || ''), 'pt-BR')
+            )
+        };
+      });
     }
 
     return talmaxDigitalProductGroups.map((group, groupIndex) => ({
@@ -505,7 +537,7 @@ const ProductCatalog = () => {
           String(productA.name || '').localeCompare(String(productB.name || ''), 'pt-BR')
         )
     }));
-  }, [categoryMatchesProduct, products, talmaxDigitalCarouselSettings]);
+  }, [allCategories, categoryMatchesProduct, products, talmaxDigitalCarouselSettings]);
 
   const handleSearchChange = (value) => {
     setSearchTerm(value);

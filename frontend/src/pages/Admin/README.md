@@ -34,11 +34,7 @@ Modulos disponiveis hoje:
 - `featured`
 - `segments`
 - `custom-pages`
-- `digital-groups`
-- `talmax-digital`
-- `upcera`
-- `scanners`
-- `printers`
+- `talmax-digital-carousels`
 
 ## Pastas principais
 
@@ -50,13 +46,11 @@ frontend/src/pages/Admin/
 |-- AdminCategories/
 |-- AdminCustomPages/
 |-- AdminFeatured/
-|-- AdminPrinters/
 |-- AdminProducts/
-|-- AdminScanners/
 |-- AdminSecurity/
 |-- AdminSegments/
-|-- AdminTalmaxDigital/
-`-- AdminUpcera/
+|-- AdminSpecialSection/
+`-- AdminTalmaxDigitalCarousels/
 ```
 
 ## Arquivos importantes
@@ -74,4 +68,4 @@ frontend/src/pages/Admin/
 
 - a rota protegida real do painel e `/admin/painel`
 - o modulo `security` conversa com `/api/admin/login-unlock`
-- os modulos de paginas especiais tambem dependem de `/api/page-settings`
+- o modulo Talmax Digital usa `/api/page-settings` para escolher as categorias dos carrosseis

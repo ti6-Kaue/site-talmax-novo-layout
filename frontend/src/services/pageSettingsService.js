@@ -115,7 +115,7 @@ export const normalizeSpecialPageSettings = (items = []) => {
 
 const pageSettingsService = {
   async getAll() {
-    const response = await fetch(`${API_URL}/page-settings`);
+    const response = await fetch(`${API_URL}/page-settings`, { cache: 'no-store' });
     if (!response.ok) {
       throw new Error('Erro ao buscar configuracoes das paginas especiais');
     }

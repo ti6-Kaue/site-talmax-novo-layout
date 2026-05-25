@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAdmin } from '../../../context/useAdmin';
-import SpecialSectionManager from '../AdminUpcera/SpecialSectionManager';
-import '../AdminUpcera/SpecialSectionManager.css';
+import SpecialSectionManager from '../AdminSpecialSection/SpecialSectionManager';
+import '../AdminSpecialSection/SpecialSectionManager.css';
 
 const AdminFeatured = () => {
   const { products, mainCategories, subCategories, productsHook, addToast } = useAdmin();

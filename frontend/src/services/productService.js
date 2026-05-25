@@ -58,36 +58,6 @@ export const productService = {
     return res.json();
   },
 
-  updateUpcera: async (selectedProducts) => {
-    const res = await fetch(`${API_URL}/upcera/products`, createAdminRequestOptions({
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ selected_products: selectedProducts })
-    }));
-    await ensureAdminResponse(res, 'Erro ao atualizar produtos Upcera');
-    return res.json();
-  },
-
-  updateScanners: async (selectedProducts) => {
-    const res = await fetch(`${API_URL}/scanners/products`, createAdminRequestOptions({
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ selected_products: selectedProducts })
-    }));
-    await ensureAdminResponse(res, 'Erro ao atualizar produtos Scanners');
-    return res.json();
-  },
-
-  updatePrinters: async (selectedProducts) => {
-    const res = await fetch(`${API_URL}/3d-printers/products`, createAdminRequestOptions({
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ selected_products: selectedProducts })
-    }));
-    await ensureAdminResponse(res, 'Erro ao atualizar produtos de Impressoras 3D');
-    return res.json();
-  },
-
   updateFeatured: async (selectedProducts) => {
     const res = await fetch(`${API_URL}/featured-products`, createAdminRequestOptions({
       method: 'PUT',

@@ -26,6 +26,10 @@ const shouldSkipPublicApiCache = (req) => {
     return true;
   }
 
+  if (req.path.startsWith('/page-settings')) {
+    return true;
+  }
+
   if (req.query?.include_inactive !== undefined) {
     return true;
   }

@@ -138,6 +138,7 @@ const ProductCard = ({ product, imageLoading = 'lazy', imageFetchPriority = 'aut
               trackProductClick(product, 'product_card_button');
             }}
           >
+            Saiba Mais
             <ChevronRight size={22} strokeWidth={2.15} />
           </Link>
         </div>

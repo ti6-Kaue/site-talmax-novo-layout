@@ -35,10 +35,98 @@
   font-size: 0.9rem;
 }
 
-.admin-talmax-digital-carousels__grid {
+.admin-talmax-digital-carousels__columns {
   display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.admin-talmax-digital-carousels__panel {
+  background: #f8fafc;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 14px;
+}
+
+.admin-talmax-digital-carousels__panel--selected {
+  background: rgba(55, 76, 146, 0.06);
+  border-color: rgba(55, 76, 146, 0.16);
+}
+
+.admin-talmax-digital-carousels__panel-header {
+  align-items: center;
+  color: #172033;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.admin-talmax-digital-carousels__panel-header span {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-radius: 999px;
+  color: #374c92;
+  display: inline-flex;
+  font-size: 0.78rem;
+  font-weight: 800;
+  height: 26px;
+  justify-content: center;
+  min-width: 26px;
+  padding: 0 8px;
+}
+
+.admin-talmax-digital-carousels__search {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-radius: 10px;
+  color: #64748b;
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 0 12px;
+}
+
+.admin-talmax-digital-carousels__search input {
+  background: transparent;
+  border: 0;
+  color: #172033;
+  flex: 1;
+  font: inherit;
+  min-width: 0;
+  outline: 0;
+  padding: 12px 0;
+}
+
+.admin-talmax-digital-carousels__search input::placeholder {
+  color: #94a3b8;
+}
+
+.admin-talmax-digital-carousels__list {
+  display: grid;
+  gap: 10px;
+  max-height: 480px;
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-color: rgba(55, 76, 146, 0.45) transparent;
+  scrollbar-width: thin;
+}
+
+.admin-talmax-digital-carousels__list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.admin-talmax-digital-carousels__list::-webkit-scrollbar-thumb {
+  background: rgba(55, 76, 146, 0.45);
+  border-radius: 999px;
+}
+
+.admin-talmax-digital-carousels__list::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .admin-talmax-digital-carousels__option {
@@ -55,10 +143,24 @@
   text-align: left;
 }
 
+.admin-talmax-digital-carousels__remove {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  flex: 0 0 auto;
+  justify-content: center;
+  padding: 0;
+}
+
 .admin-talmax-digital-carousels__option span {
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 4px;
+  min-width: 0;
 }
 
 .admin-talmax-digital-carousels__option small {
@@ -82,9 +184,76 @@
   color: #ffffff;
 }
 
+.admin-talmax-digital-carousels__order {
+  align-items: center;
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
+.admin-talmax-digital-carousels__order small {
+  color: inherit;
+  font-weight: 700;
+}
+
+.admin-talmax-digital-carousels__order input {
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.16);
+  border-radius: 8px;
+  color: #172033;
+  font-weight: 800;
+  height: 34px;
+  text-align: center;
+  width: 58px;
+}
+
+.admin-talmax-digital-carousels__empty {
+  align-items: center;
+  border: 1px dashed rgba(55, 76, 146, 0.25);
+  border-radius: 10px;
+  color: #64748b;
+  display: flex;
+  font-size: 0.9rem;
+  min-height: 72px;
+  padding: 16px;
+}
+
 body[data-theme='dark'] .admin-talmax-digital-carousels__option,
-body[data-theme='dark'] .admin-talmax-digital-carousels__summary {
+body[data-theme='dark'] .admin-talmax-digital-carousels__summary,
+body[data-theme='dark'] .admin-talmax-digital-carousels__panel {
   background: rgba(15, 23, 42, 0.72);
   border-color: rgba(148, 163, 184, 0.16);
   color: #e2e8f0;
+}
+
+body[data-theme='dark'] .admin-talmax-digital-carousels__panel-header {
+  color: #e2e8f0;
+}
+
+body[data-theme='dark'] .admin-talmax-digital-carousels__panel-header span {
+  background: #0f172a;
+  border-color: rgba(148, 163, 184, 0.16);
+  color: #93c5fd;
+}
+
+body[data-theme='dark'] .admin-talmax-digital-carousels__search {
+  background: #0f172a;
+  border-color: rgba(148, 163, 184, 0.16);
+  color: #94a3b8;
+}
+
+body[data-theme='dark'] .admin-talmax-digital-carousels__search input {
+  color: #e2e8f0;
+}
+
+body[data-theme='dark'] .admin-talmax-digital-carousels__order input {
+  background: #0f172a;
+  border-color: rgba(148, 163, 184, 0.22);
+  color: #e2e8f0;
+}
+
+@media (max-width: 900px) {
+  .admin-talmax-digital-carousels__columns {
+    grid-template-columns: 1fr;
+  }
 }

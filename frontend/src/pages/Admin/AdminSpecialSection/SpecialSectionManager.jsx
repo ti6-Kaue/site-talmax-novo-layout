@@ -27,18 +27,13 @@ const getInitialOrder = (product, sectionKey) => {
     return extra.featured_order || '';
   }
 
-  return (sectionKey === 'upcera'
-    ? product.upcera_order
-    : (sectionKey === 'scanners' ? product.scanner_order : product.printer_order)) || '';
+  return '';
 };
 
 const buildSelectedProductsFromScope = (products, sectionKey) => (
   products
     .filter((product) => {
       if (sectionKey === 'featured') return product.is_featured;
-      if (sectionKey === 'upcera') return product.is_upcera;
-      if (sectionKey === 'scanners') return product.is_scanner;
-      if (sectionKey === 'printers') return product.is_3d_printer;
       return false;
     })
     .map((product) => ({

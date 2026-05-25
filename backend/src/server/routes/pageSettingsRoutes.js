@@ -202,7 +202,8 @@ const normalizePageSetting = (pageName, content = {}, explicitLogoUrl = null) =>
           id: Number(item?.id || 0),
           name: sanitizeTextInput(item?.name || '', { preserveNewlines: false, maxLength: 120 }),
           slug: sanitizeTextInput(item?.slug || '', { preserveNewlines: false, maxLength: 160 }),
-          parent_id: item?.parent_id ? Number(item.parent_id) : null
+          parent_id: item?.parent_id ? Number(item.parent_id) : null,
+          order: Number(item?.order || 0)
         }))
         .filter((item) => item.id > 0 && item.name && item.slug)
       : defaults.carousel_categories || []
