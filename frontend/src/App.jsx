@@ -54,6 +54,7 @@ const Admin = lazy(() => import('./pages/Admin/AdminDashboard'));
 
 const THEME_STORAGE_KEY = 'talmax-theme';
 const LOADER_DELAY_MS = 1000;
+const AFTER_PAINT_DELAY_MS = 250;
 const PRODUCTS_NAV_CATEGORY_ORDER = [
   'Fresadoras',
   'Scanners',
@@ -76,6 +77,40 @@ const normalizeNavCategoryText = (value = '') => (
 );
 
 const normalizedProductsNavOrder = PRODUCTS_NAV_CATEGORY_ORDER.map(normalizeNavCategoryText);
+
+const scheduleAfterInitialPaint = (callback, delay = AFTER_PAINT_DELAY_MS) => {
+  if (typeof window === 'undefined') {
+    return () => {};
+  }
+
+  let cancelled = false;
+  let timeoutId = 0;
+  let idleId = 0;
+
+  const run = () => {
+    if (!cancelled) {
+      callback();
+    }
+  };
+
+  timeoutId = window.setTimeout(() => {
+    if ('requestIdleCallback' in window) {
+      idleId = window.requestIdleCallback(run, { timeout: 1200 });
+      return;
+    }
+
+    run();
+  }, delay);
+
+  return () => {
+    cancelled = true;
+    window.clearTimeout(timeoutId);
+
+    if (idleId && 'cancelIdleCallback' in window) {
+      window.cancelIdleCallback(idleId);
+    }
+  };
+};
 
 const FullScreenLoader = ({ label = 'Carregando...' }) => (
   <div className="app-loader-overlay" role="status" aria-live="polite" aria-label={label}>
@@ -238,7 +273,7 @@ function App() {
       return false;
     }
 
-    return document.readyState === 'complete';
+    return document.readyState !== 'loading';
   });
   const [theme, setTheme] = useState(() => {
     if (typeof window === 'undefined') {
@@ -258,10 +293,15 @@ function App() {
       setAppReady(true);
     };
 
-    window.addEventListener('load', releaseApp, { once: true });
+    if (document.readyState !== 'loading') {
+      releaseApp();
+      return undefined;
+    }
+
+    document.addEventListener('DOMContentLoaded', releaseApp, { once: true });
 
     return () => {
-      window.removeEventListener('load', releaseApp);
+      document.removeEventListener('DOMContentLoaded', releaseApp);
     };
   }, [appReady]);
 
@@ -394,25 +434,28 @@ const AppContent = ({ appReady, menuOpen, setMenuOpen, theme, onToggleTheme }) =
 
     const controller = new AbortController();
 
-    fetch(`${API_URL}/categories`, { signal: controller.signal })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Erro ao carregar categorias do menu');
-        }
+    const cancelScheduledFetch = scheduleAfterInitialPaint(() => {
+      fetch(`${API_URL}/categories`, { signal: controller.signal })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('Erro ao carregar categorias do menu');
+          }
 
-        return response.json();
-      })
-      .then((items) => {
-        setProductNavCategories(Array.isArray(items) ? items : []);
-      })
-      .catch((error) => {
-        if (error.name !== 'AbortError') {
-          console.error('Erro ao carregar categorias do menu:', error);
-          setProductNavCategories([]);
-        }
-      });
+          return response.json();
+        })
+        .then((items) => {
+          setProductNavCategories(Array.isArray(items) ? items : []);
+        })
+        .catch((error) => {
+          if (error.name !== 'AbortError') {
+            console.error('Erro ao carregar categorias do menu:', error);
+            setProductNavCategories([]);
+          }
+        });
+    });
 
     return () => {
+      cancelScheduledFetch();
       controller.abort();
     };
   }, [isAdmin]);
@@ -452,27 +495,30 @@ const AppContent = ({ appReady, menuOpen, setMenuOpen, theme, onToggleTheme }) =
 
     let isMounted = true;
 
-    homeContentBlockService.getAll()
-      .then((items) => {
-        if (!isMounted) {
-          return;
-        }
+    const cancelScheduledFetch = scheduleAfterInitialPaint(() => {
+      homeContentBlockService.getAll()
+        .then((items) => {
+          if (!isMounted) {
+            return;
+          }
 
-        setFooterAds(
-          (Array.isArray(items) ? items : [])
-            .filter((item) => item.section_type === 'orange-ad' && item.active)
-        );
-      })
-      .catch((error) => {
-        console.error('Erro ao carregar propagandas do rodape:', error);
+          setFooterAds(
+            (Array.isArray(items) ? items : [])
+              .filter((item) => item.section_type === 'orange-ad' && item.active)
+          );
+        })
+        .catch((error) => {
+          console.error('Erro ao carregar propagandas do rodape:', error);
 
-        if (isMounted) {
-          setFooterAds([]);
-        }
-      });
+          if (isMounted) {
+            setFooterAds([]);
+          }
+        });
+    }, 1200);
 
     return () => {
       isMounted = false;
+      cancelScheduledFetch();
     };
   }, [isAdmin]);
 
