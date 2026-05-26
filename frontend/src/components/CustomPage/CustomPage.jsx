@@ -32,7 +32,7 @@ const CustomPage = () => {
   }, [slug]);
 
   if (isLoading) {
-    return <div className="custom-page__state">Carregando página...</div>;
+    return <div className="custom-page__state custom-page__state--loading">Carregando página...</div>;
   }
 
   if (error || !page) {

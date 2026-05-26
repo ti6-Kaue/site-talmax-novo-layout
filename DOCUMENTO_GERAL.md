@@ -623,12 +623,22 @@ No ambiente real, use:
 
 | Variavel | Para que serve |
 | --- | --- |
+| `IMAGE_STORAGE_PROVIDER` | escolha explicita: `cloudinary`, `s3`, `sftp` ou `local` |
 | `UPLOAD_DIR` | pasta local principal das imagens |
 | `UPLOAD_MAX_FILE_SIZE_MB` | tamanho maximo por upload |
 | `CLOUDINARY_CLOUD_NAME` | Cloudinary |
 | `CLOUDINARY_API_KEY` | Cloudinary |
 | `CLOUDINARY_API_SECRET` | Cloudinary |
 | `CLOUDINARY_FOLDER` | pasta base no Cloudinary |
+| `AWS_REGION` | regiao do S3 |
+| `AWS_ACCESS_KEY_ID` | chave de acesso para S3 |
+| `AWS_SECRET_ACCESS_KEY` | chave secreta para S3 |
+| `S3_BUCKET` | bucket de imagens |
+| `S3_PREFIX` | pasta base no bucket |
+| `S3_PUBLIC_BASE_URL` | URL publica/CDN opcional para montar links |
+| `S3_ENDPOINT` | endpoint opcional para S3 compativel |
+| `S3_FORCE_PATH_STYLE` | use `true` para alguns provedores compativeis com S3 |
+| `S3_CACHE_CONTROL` | cache enviado no objeto |
 | `SFTP_HOST` | servidor SFTP |
 | `SFTP_PORT` | porta SFTP |
 | `SFTP_USER` | usuario SFTP |
@@ -694,9 +704,11 @@ Arquivos principais:
 
 Hoje o projeto pode funcionar assim:
 
-1. Cloudinary, se estiver configurado
-2. SFTP, se Cloudinary nao estiver ativo e o SFTP estiver configurado
-3. armazenamento local
+1. `IMAGE_STORAGE_PROVIDER`, se estiver configurado
+2. Cloudinary, se estiver configurado
+3. S3, se Cloudinary nao estiver ativo e S3 estiver configurado
+4. SFTP, se os anteriores nao estiverem ativos e o SFTP estiver configurado
+5. armazenamento local
 
 ### 12.3 Pastas de imagem
 

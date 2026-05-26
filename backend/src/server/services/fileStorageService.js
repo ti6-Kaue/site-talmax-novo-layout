@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 const { v2: cloudinary } = require('cloudinary');
 const SftpClient = require('ssh2-sftp-client');
 const { ensurePrimaryImageDir } = require('../config/imageStorage');
@@ -25,6 +26,47 @@ const hasSftpConfig = () => {
     process.env.SFTP_REMOTE_DIR &&
     process.env.SFTP_PUBLIC_BASE_URL
   );
+};
+
+const hasS3Config = () => {
+  return !!(
+    process.env.S3_BUCKET &&
+    process.env.AWS_REGION &&
+    process.env.AWS_ACCESS_KEY_ID &&
+    process.env.AWS_SECRET_ACCESS_KEY
+  );
+};
+
+const getStorageProvider = () => {
+  const requestedProvider = String(process.env.IMAGE_STORAGE_PROVIDER || '').trim().toLowerCase();
+
+  if (requestedProvider) {
+    return requestedProvider;
+  }
+
+  if (hasCloudinaryConfig()) return 'cloudinary';
+  if (hasS3Config()) return 's3';
+  if (hasSftpConfig()) return 'sftp';
+
+  return 'local';
+};
+
+const assertConfiguredStorageProvider = (storageProvider) => {
+  if (storageProvider === 'cloudinary' && !hasCloudinaryConfig()) {
+    throw new Error('IMAGE_STORAGE_PROVIDER=cloudinary definido, mas faltam variaveis CLOUDINARY_*.');
+  }
+
+  if (storageProvider === 's3' && !hasS3Config()) {
+    throw new Error('IMAGE_STORAGE_PROVIDER=s3 definido, mas faltam AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY ou S3_BUCKET.');
+  }
+
+  if (storageProvider === 'sftp' && !hasSftpConfig()) {
+    throw new Error('IMAGE_STORAGE_PROVIDER=sftp definido, mas faltam variaveis SFTP_*.');
+  }
+
+  if (!['cloudinary', 's3', 'sftp', 'local'].includes(storageProvider)) {
+    throw new Error('IMAGE_STORAGE_PROVIDER invalido. Use cloudinary, s3, sftp ou local.');
+  }
 };
 
 const normalizeFingerprintValue = (value, options = {}) => {
@@ -123,6 +165,62 @@ const buildCloudinaryFolder = (resourceType = 'geral') => {
   return normalizedResourceType ? `${baseFolder}/${normalizedResourceType}` : baseFolder;
 };
 
+const buildS3Key = (file, resourceType = 'geral') => {
+  const basePrefix = String(process.env.S3_PREFIX || 'talmax').replace(/^\/+|\/+$/g, '');
+  const normalizedResourceType = String(resourceType || 'geral').replace(/^\/+|\/+$/g, '');
+  const parts = [basePrefix, normalizedResourceType, file.filename].filter(Boolean);
+
+  return parts.join('/');
+};
+
+const buildS3PublicUrl = (key) => {
+  const publicBaseUrl = String(process.env.S3_PUBLIC_BASE_URL || '').trim().replace(/\/+$/, '');
+
+  if (publicBaseUrl) {
+    return `${publicBaseUrl}/${key.split('/').map(encodeURIComponent).join('/')}`;
+  }
+
+  const bucket = process.env.S3_BUCKET;
+  const region = process.env.AWS_REGION;
+
+  return `https://${bucket}.s3.${region}.amazonaws.com/${key.split('/').map(encodeURIComponent).join('/')}`;
+};
+
+const uploadFileToS3 = async (file, options = {}) => {
+  const key = buildS3Key(file, options.resourceType);
+  const client = new S3Client({
+    region: process.env.AWS_REGION,
+    endpoint: process.env.S3_ENDPOINT || undefined,
+    forcePathStyle: String(process.env.S3_FORCE_PATH_STYLE || '').toLowerCase() === 'true',
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+    }
+  });
+
+  logger.info({
+    bucket: process.env.S3_BUCKET,
+    key,
+    fileName: file.filename
+  }, 'Enviando arquivo para S3.');
+
+  await client.send(new PutObjectCommand({
+    Bucket: process.env.S3_BUCKET,
+    Key: key,
+    Body: fs.createReadStream(file.path),
+    ContentType: file.mimetype || undefined,
+    CacheControl: process.env.S3_CACHE_CONTROL || 'public, max-age=31536000, immutable'
+  }));
+
+  const finalUrl = buildS3PublicUrl(key);
+  logger.info({
+    fileName: file.filename,
+    finalUrl
+  }, 'Upload S3 finalizado com sucesso.');
+
+  return finalUrl;
+};
+
 const uploadFileToCloudinary = async (file, options = {}) => {
   const folder = buildCloudinaryFolder(options.resourceType);
 
@@ -169,8 +267,7 @@ const uploadFileToCloudinary = async (file, options = {}) => {
 const persistExistingLocalFile = async (filePath, options = {}) => {
   if (!filePath) return null;
 
-  const useCloudinary = hasCloudinaryConfig();
-  const useSftp = hasSftpConfig();
+  const storageProvider = getStorageProvider();
   const normalizedPath = path.resolve(filePath);
   const fileName = path.basename(normalizedPath);
   const file = {
@@ -179,13 +276,18 @@ const persistExistingLocalFile = async (filePath, options = {}) => {
     originalname: fileName
   };
 
+  assertConfiguredStorageProvider(storageProvider);
   await assertUploadedImageFile(file);
 
-  if (useCloudinary) {
+  if (storageProvider === 'cloudinary' && hasCloudinaryConfig()) {
     return uploadFileToCloudinary(file, options);
   }
 
-  if (useSftp) {
+  if (storageProvider === 's3' && hasS3Config()) {
+    return uploadFileToS3(file, options);
+  }
+
+  if (storageProvider === 'sftp' && hasSftpConfig()) {
     return uploadFileToSftp(file);
   }
 
@@ -269,20 +371,24 @@ const validateUploadedImageOrCleanup = async (file) => {
 const persistUploadedFile = async (file, options = {}) => {
   if (!file) return null;
 
-  const useCloudinary = hasCloudinaryConfig();
-  const useSftp = hasSftpConfig();
+  const storageProvider = getStorageProvider();
 
   logger.debug({
     fileName: file.filename,
     filePath: file.path,
-    useCloudinary,
-    useSftp,
+    storageProvider,
     resourceType: options.resourceType || 'geral'
   }, 'Iniciando persistencia de arquivo.');
 
+  try {
+    assertConfiguredStorageProvider(storageProvider);
+  } catch (error) {
+    cleanupLocalTempFile(file);
+    throw error;
+  }
   await validateUploadedImageOrCleanup(file);
 
-  if (useCloudinary) {
+  if (storageProvider === 'cloudinary' && hasCloudinaryConfig()) {
     try {
       const publicUrl = await uploadFileToCloudinary(file, options);
       cleanupLocalTempFile(file);
@@ -299,7 +405,24 @@ const persistUploadedFile = async (file, options = {}) => {
     }
   }
 
-  if (useSftp) {
+  if (storageProvider === 's3' && hasS3Config()) {
+    try {
+      const publicUrl = await uploadFileToS3(file, options);
+      cleanupLocalTempFile(file);
+      return publicUrl;
+    } catch (error) {
+      cleanupLocalTempFile(file);
+      logger.error({
+        err: error,
+        fileName: file.filename,
+        filePath: file.path,
+        resourceType: options.resourceType || 'geral'
+      }, 'Falha fatal ao subir arquivo no S3.');
+      throw error;
+    }
+  }
+
+  if (storageProvider === 'sftp' && hasSftpConfig()) {
     try {
       const publicUrl = await uploadFileToSftp(file);
       cleanupLocalTempFile(file);
@@ -335,8 +458,10 @@ const persistUploadedFilesByType = async (files = [], options = {}) => {
 
 module.exports = {
   hasCloudinaryConfig,
+  hasS3Config,
   hasSftpConfig,
   buildCloudinaryFolder,
+  buildS3Key,
   persistUploadedFile,
   persistExistingLocalFile,
   persistUploadedFiles,

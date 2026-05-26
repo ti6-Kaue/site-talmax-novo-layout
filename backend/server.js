@@ -35,16 +35,25 @@ const startServer = async () => {
     const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
     const apiKey = process.env.CLOUDINARY_API_KEY;
     const apiSecret = process.env.CLOUDINARY_API_SECRET;
+    const requestedStorageProvider = process.env.IMAGE_STORAGE_PROVIDER || null;
+    const s3Bucket = process.env.S3_BUCKET;
 
     logger.info({
       port: PORT,
       host: '0.0.0.0',
       environment: process.env.NODE_ENV || 'development',
+      requestedStorageProvider,
       cloudinary: {
         cloudName: cloudName || null,
         apiKeyConfigured: !!apiKey,
         apiSecretConfigured: !!apiSecret,
         storageMode: cloudName && apiKey && apiSecret ? 'cloudinary' : 'local'
+      },
+      s3: {
+        bucket: s3Bucket || null,
+        region: process.env.AWS_REGION || null,
+        accessKeyConfigured: !!process.env.AWS_ACCESS_KEY_ID,
+        secretKeyConfigured: !!process.env.AWS_SECRET_ACCESS_KEY
       }
     }, 'Servidor rodando');
   });
