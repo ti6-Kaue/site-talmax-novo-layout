@@ -9,7 +9,6 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Navigation } from 'swiper/modules';
 import {
   CheckCircle2,
-  MessageCircle,
   Info,
   ChevronRight,
   ChevronLeft,
@@ -442,6 +441,7 @@ const ProductDetail = () => {
 
   const whatsappMessage = encodeURIComponent(`Ola! Gostaria de mais informacoes sobre o produto: ${product.name}`);
   const whatsappUrl = `https://wa.me/554130123456?text=${whatsappMessage}`;
+  const showQuoteButton = shouldShowQuoteButton(product.showQuoteButton);
   const handleQuoteClick = (source) => {
     trackQuoteClick(product, source);
     trackWhatsappClick(source);
@@ -488,7 +488,7 @@ const ProductDetail = () => {
         <motion.section
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`product-hero-banner${product.productBannerUrl ? ' has-custom-banner' : ''}`}
+          className={`product-hero-banner${product.productBannerUrl ? ' has-custom-banner' : ''}${showQuoteButton ? ' has-quote-action' : ''}`}
         >
           {product.productBannerUrl && (
             <img
@@ -513,8 +513,10 @@ const ProductDetail = () => {
             {heroOverline && <span className="product-hero-overline">{heroOverline}</span>}
             <h1>{heroTitle}</h1>
             {product.is_upcera && <span className="product-hero-brand">UPCERA</span>}
+          </div>
 
-            {shouldShowQuoteButton(product.showQuoteButton) && (
+          {showQuoteButton && (
+            <span className="product-hero-action-corner">
               <a
                 href={whatsappUrl}
                 target="_blank"
@@ -522,10 +524,10 @@ const ProductDetail = () => {
                 className="btn-whatsapp-quote"
                 onClick={() => handleQuoteClick('product_hero')}
               >
-                <MessageCircle size={20} /> Solicitar Orçamento
+                  Solicitar Orçamento
               </a>
-            )}
-          </div>
+            </span>
+          )}
 
           {galleryImages.length > 1 && (
             <div className="product-hero-dots" aria-label="Imagens do produto">
@@ -645,7 +647,7 @@ const ProductDetail = () => {
               </div>
             )}
 
-            {shouldShowQuoteButton(product.showQuoteButton) && (
+            {showQuoteButton && (
               <div className="product-actions">
                 <a
                   href={whatsappUrl}
@@ -654,7 +656,7 @@ const ProductDetail = () => {
                   className="btn-whatsapp-quote"
                   onClick={() => handleQuoteClick('product_actions')}
                 >
-                  <MessageCircle size={20} /> Solicitar Orçamento
+                  Solicitar Orçamento
                 </a>
               </div>
             )}

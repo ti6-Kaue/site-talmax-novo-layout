@@ -11,6 +11,12 @@
 }
 
 .product-hero-banner {
+  --product-hero-radius: clamp(42px, 5.5vw, 86px);
+  --product-hero-action-corner-width: max-content;
+  --product-hero-action-corner-height: clamp(56px, 5.2vw, 78px);
+  --product-hero-action-corner-radius: clamp(8px, 2.2vw, 16px);
+  --product-hero-action-corner-outer-radius: clamp(16px, 2vw, 28px);
+  --product-hero-page-bg: #eef2f8;
   position: relative;
   box-sizing: border-box;
   height: 870px;
@@ -20,14 +26,14 @@
   align-items: center;
   gap: clamp(2rem, 5vw, 7rem);
   padding: clamp(3rem, 6vw, 7.5rem) clamp(2rem, 8vw, 11rem) clamp(5rem, 7vw, 8.5rem);
-  border-radius: 0 0 clamp(46px, 6vw, 92px) clamp(46px, 6vw, 92px);
+  border-radius: 0 0 var(--product-hero-radius) var(--product-hero-radius);
   color: #ffffff;
   overflow: hidden;
   background:
     radial-gradient(circle at 64% 58%, rgba(42, 126, 201, 0.42) 0%, rgba(14, 34, 68, 0.1) 28%, transparent 52%),
     radial-gradient(circle at 48% 86%, rgba(105, 190, 236, 0.75) 0%, rgba(21, 78, 124, 0.36) 28%, transparent 48%),
     linear-gradient(180deg, #03050b 0%, #050713 45%, #071729 100%);
-  box-shadow: 0 26px 58px rgba(15, 23, 42, 0.16);
+  box-shadow: none;
 }
 
 .product-hero-banner.has-custom-banner {
@@ -35,7 +41,15 @@
   min-height: 0;
   aspect-ratio: 1920 / 800;
   background: #000000;
-  border-radius: 0 0 clamp(46px, 6vw, 92px) clamp(46px, 6vw, 92px);
+  border-radius: 0 0 var(--product-hero-radius) var(--product-hero-radius);
+}
+
+.product-hero-banner.has-quote-action {
+  border-bottom-right-radius: 0;
+}
+
+.product-hero-banner.has-custom-banner.has-quote-action {
+  border-bottom-right-radius: 0;
 }
 
 .product-hero-banner__image {
@@ -46,7 +60,12 @@
   display: block;
   object-fit: contain;
   object-position: center;
+  border-radius: inherit;
   z-index: 0;
+}
+
+.product-hero-banner.has-quote-action .product-hero-banner__image {
+  border-bottom-right-radius: 0;
 }
 
 .product-hero-banner.has-custom-banner::before {
@@ -91,6 +110,62 @@
 .product-hero-dots {
   position: relative;
   z-index: 1;
+}
+
+.product-hero-action-corner {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  z-index: 4;
+  width: var(--product-hero-action-corner-width);
+  height: var(--product-hero-action-corner-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.38rem clamp(1.45rem, 2vw, 2rem) 0.46rem clamp(1.6rem, 2.2vw, 2.15rem);
+  border-radius: var(--product-hero-action-corner-radius) 0 0 0;
+  background: var(--product-hero-page-bg);
+  isolation: isolate;
+}
+
+.product-hero-action-corner::before,
+.product-hero-action-corner::after {
+  content: '';
+  position: absolute;
+  width: var(--product-hero-action-corner-outer-radius);
+  height: var(--product-hero-action-corner-outer-radius);
+  background: transparent;
+  pointer-events: none;
+}
+
+.product-hero-action-corner::before {
+  top: calc(var(--product-hero-action-corner-outer-radius) * -1);
+  right: 0;
+  border-bottom-right-radius: 999px;
+  box-shadow: 6px 6px 0 6px var(--product-hero-page-bg);
+}
+
+.product-hero-action-corner::after {
+  bottom: 0;
+  left: calc(var(--product-hero-action-corner-outer-radius) * -1);
+  border-bottom-right-radius: 999px;
+  box-shadow: 6px 6px 0 6px var(--product-hero-page-bg);
+}
+
+.product-hero-action-corner .btn-whatsapp-quote {
+  position: relative;
+  z-index: 1;
+  width: auto;
+  min-width: max-content;
+  height: clamp(40px, 3.7vw, 50px);
+  padding: 0 clamp(1.3rem, 2.4vw, 2rem);
+  border-radius: 999px;
+  font-size: clamp(0.82rem, 1.08vw, 1.1rem);
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: none;
 }
 
 .product-hero-media {
@@ -914,12 +989,17 @@
   }
 
   .product-hero-banner {
+    --product-hero-radius: 38px;
     grid-template-columns: 1fr;
     height: auto;
     min-height: auto;
     padding: 2rem 1.25rem 5rem;
     gap: 1.5rem;
-    border-radius: 0 0 38px 38px;
+    border-radius: 0 0 var(--product-hero-radius) var(--product-hero-radius);
+  }
+
+  .product-hero-action-corner {
+    display: none;
   }
 
   .product-hero-media {
