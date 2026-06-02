@@ -24,12 +24,12 @@ const ProductTabsSection = ({
     <div className="form-group">
       <label>Abas do produto</label>
       <p className="product-form-helper">
-        Adicione quantas abas extras quiser. Cada aba tem um nome e um conteudo proprio para aparecer na pagina do produto.
+        Adicione quantas abas extras quiser. Cada aba tem um nome e um conteúdo próprio para aparecer na página do produto.
       </p>
 
       {formData.productTabs.length === 0 && (
         <p className="product-form-helper">
-          Nenhuma aba extra cadastrada ainda. Use o botao abaixo para criar a primeira.
+          Nenhuma aba extra cadastrada ainda. Use o botão abaixo para criar a primeira.
         </p>
       )}
 
@@ -66,26 +66,26 @@ const ProductTabsSection = ({
               onChange={(e) => updateDynamicSection(index, 'contentAsList', e.target.checked)}
             />
             <div>
-              <strong>Exibir conteudo em topicos</strong>
+              <strong>Exibir conteúdo em tópicos</strong>
               <span>Cada linha do texto vira um item listado dentro desta aba.</span>
             </div>
           </label>
 
           <div className="dynamic-section-card__field">
-            <label>Conteudo da aba</label>
+            <label>Conteúdo da aba</label>
             <textarea
               value={section.content}
               onChange={(e) => updateDynamicSection(index, 'content', e.target.value)}
               placeholder={
                 section.contentAsList
                   ? 'Escreva um item por linha para montar a lista desta aba'
-                  : 'Escreva o conteudo que sera mostrado ao clicar nesta aba'
+                  : 'Escreva o conteúdo que será mostrado ao clicar nesta aba'
               }
             />
           </div>
 
           <div className="dynamic-section-card__field">
-            <label><Video size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />Link do video (opcional)</label>
+            <label><Video size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />Link do vídeo (opcional)</label>
             <input
               type="url"
               value={section.videoUrl || ''}
@@ -93,7 +93,7 @@ const ProductTabsSection = ({
               placeholder="Ex.: https://www.youtube.com/watch?v=... ou https://vimeo.com/..."
             />
             <p className="product-form-helper">
-              Cole o link do YouTube ou Vimeo. O video sera exibido dentro da aba junto com o conteudo.
+              Cole o link do YouTube ou Vimeo. O vídeo será exibido dentro da aba junto com o conteúdo.
             </p>
           </div>
 

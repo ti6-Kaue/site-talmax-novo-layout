@@ -34,8 +34,8 @@ const DEFAULT_SUPPORT_CONTENT_CARDS = [
   {
     seed_key: 'digital',
     title: 'Suporte Digital',
-    description: 'Uma equipe especializada em gerar resultados reais para o seu neg\u00f3cio. Oferecemos atendimento personalizado desde a aquisi\u00e7\u00e3o do sistema CAD/CAM, com treinamentos pr\u00e1ticos, orienta\u00e7\u00e3o completa no uso de softwares e produtos, e um suporte p\u00f3s-venda pr\u00f3ximo e cont\u00ednuo.',
-    description_secondary: 'Estamos ao lado de laborat\u00f3rios e cl\u00ednicas em 24 estados e 95 munic\u00edpios, garantindo performance, seguran\u00e7a e evolu\u00e7\u00e3o constante.',
+    description: 'Uma equipe especializada em gerar resultados reais para o seu negócio. Oferecemos atendimento personalizado desde a aquisição do sistema CAD/CAM, com treinamentos práticos, orientação completa no uso de softwares e produtos, e um suporte pós-venda próximo e contínuo.',
+    description_secondary: 'Estamos ao lado de laboratórios e clínicas em 24 estados e 95 municípios, garantindo performance, segurança e evolução constante.',
     button_label: 'Saiba mais',
     link_url: 'https://talmax.com.br/suportetalmax/',
     display_order: 0
@@ -43,8 +43,8 @@ const DEFAULT_SUPPORT_CONTENT_CARDS = [
   {
     seed_key: 'produto',
     title: 'Suporte de Produto',
-    description: 'Mais do que suporte, entregamos solu\u00e7\u00f5es.',
-    description_secondary: 'Comprometido em entregar solu\u00e7\u00f5es eficientes, nosso time de produtos oferece um suporte t\u00e9cnico especializado para cada necessidade. Trabalhamos com materiais desenvolvidos a partir de rigorosos processos de pesquisa, an\u00e1lise e testes, garantindo qualidade, confiabilidade e seguran\u00e7a em cada aplica\u00e7\u00e3o.',
+    description: 'Mais do que suporte, entregamos soluções.',
+    description_secondary: 'Comprometido em entregar soluções eficientes, nosso time de produtos oferece um suporte técnico especializado para cada necessidade. Trabalhamos com materiais desenvolvidos a partir de rigorosos processos de pesquisa, análise e testes, garantindo qualidade, confiabilidade e segurança em cada aplicação.',
     button_label: 'Saiba mais',
     link_url: 'https://talmax.tomticket.com/?account=3097344P21072020051958',
     display_order: 1

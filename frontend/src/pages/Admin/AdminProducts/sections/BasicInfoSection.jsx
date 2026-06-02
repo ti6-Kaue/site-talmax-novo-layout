@@ -33,15 +33,15 @@ const BasicInfoSection = ({
           onChange={(e) => setFormData((current) => ({ ...current, is_active: e.target.checked }))}
         />
         <div>
-          <strong>Produto ativo no catalogo</strong>
-          <span>Quando desativado, ele some do catalogo e das paginas publicas, mas continua no painel administrativo.</span>
+          <strong>Produto ativo no catálogo</strong>
+          <span>Quando desativado, ele some do catálogo e das páginas públicas, mas continua no painel administrativo.</span>
         </div>
       </label>
     </div>
 
     <div className="product-form-toggle-bar">
       <div className="product-form-toggle-copy">
-        <strong>Botao de orcamento</strong>
+        <strong>Botão de orçamento</strong>
         <span>Status atual: {formData.showQuoteButton ? 'ON' : 'OFF'}</span>
       </div>
       <button
@@ -49,7 +49,7 @@ const BasicInfoSection = ({
         className={`btn-secondary product-form-toggle-button ${formData.showQuoteButton ? 'is-on' : 'is-off'}`}
         onClick={() => setFormData((current) => ({ ...current, showQuoteButton: !current.showQuoteButton }))}
       >
-        {formData.showQuoteButton ? 'Desligar orcamento' : 'Ligar orcamento'}
+        {formData.showQuoteButton ? 'Desligar orçamento' : 'Ligar orçamento'}
       </button>
     </div>
 
@@ -57,7 +57,7 @@ const BasicInfoSection = ({
       <label>Categorias Principais</label>
       {formData.category_ids.length === 0 && (
         <p className="product-form-helper">
-          Selecione pelo menos uma categoria principal para o produto nao aparecer como sem categoria.
+          Selecione pelo menos uma categoria principal para o produto não aparecer como sem categoria.
         </p>
       )}
 

@@ -18,7 +18,7 @@ router.post('/events', async (req, res, next) => {
 
     if (!result.ok) {
       return res.status(400).json({
-        error: 'Evento de analytics invalido.',
+        error: 'Evento de analytics inválido.',
         details: result.details
       });
     }

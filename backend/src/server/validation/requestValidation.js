@@ -31,7 +31,7 @@ const formatZodIssues = (issues = [], prefix = []) => (
   issues.map((issue) => {
     const path = [...prefix, ...(Array.isArray(issue.path) ? issue.path : [])];
     const message = issue.code === 'unrecognized_keys'
-      ? `Campos nao permitidos: ${(issue.keys || []).join(', ')}.`
+      ? `Campos não permitidos: ${(issue.keys || []).join(', ')}.`
       : issue.message;
     return {
       field: buildPathLabel(path),
@@ -96,11 +96,11 @@ const stringField = (label, options = {}) => {
   const schema = z.preprocess(
     (value) => coerceTrimmedString(value, { preserveNewlines }),
     z.string({
-      required_error: `${label} e obrigatorio.`,
+      required_error: `${label} é obrigatório.`,
       invalid_type_error: `${label} precisa ser um texto.`
     })
-      .min(minLength, `${label} e obrigatorio.`)
-      .max(maxLength, `${label} deve ter no maximo ${maxLength} caracteres.`)
+      .min(minLength, `${label} é obrigatório.`)
+      .max(maxLength, `${label} deve ter no máximo ${maxLength} caracteres.`)
   );
 
   return optional ? schema.optional() : schema;
@@ -133,12 +133,12 @@ const navigationField = (label, options = {}) => {
 
     return sanitizedValue || INVALID_NAVIGATION_TARGET;
   }, z.string({
-    required_error: `${label} e obrigatorio.`,
+    required_error: `${label} é obrigatório.`,
     invalid_type_error: `${label} precisa ser um texto.`
   })
-    .min(minLength, `${label} e obrigatorio.`)
-    .max(maxLength, `${label} deve ter no maximo ${maxLength} caracteres.`)
-    .refine((value) => value !== INVALID_NAVIGATION_TARGET, `${label} precisa ser um link valido.`)
+    .min(minLength, `${label} é obrigatório.`)
+    .max(maxLength, `${label} deve ter no máximo ${maxLength} caracteres.`)
+    .refine((value) => value !== INVALID_NAVIGATION_TARGET, `${label} precisa ser um link válido.`)
     .transform((value) => (value === INVALID_NAVIGATION_TARGET ? '' : value)));
 
   return optional ? schema.optional() : schema;
@@ -171,12 +171,12 @@ const assetReferenceField = (label, options = {}) => {
 
     return sanitizedValue || INVALID_ASSET_REFERENCE;
   }, z.string({
-    required_error: `${label} e obrigatorio.`,
+    required_error: `${label} é obrigatório.`,
     invalid_type_error: `${label} precisa ser um texto.`
   })
-    .min(minLength, `${label} e obrigatorio.`)
-    .max(maxLength, `${label} deve ter no maximo ${maxLength} caracteres.`)
-    .refine((value) => value !== INVALID_ASSET_REFERENCE, `${label} precisa ser uma referencia valida.`)
+    .min(minLength, `${label} é obrigatório.`)
+    .max(maxLength, `${label} deve ter no máximo ${maxLength} caracteres.`)
+    .refine((value) => value !== INVALID_ASSET_REFERENCE, `${label} precisa ser uma referência válida.`)
     .transform((value) => (value === INVALID_ASSET_REFERENCE ? '' : value)));
 
   return optional ? schema.optional() : schema;
@@ -242,10 +242,10 @@ const integerLike = (label, options = {}) => {
 
     return value;
   }, z.number({
-    required_error: `${label} e obrigatorio.`,
-    invalid_type_error: `${label} precisa ser um numero inteiro.`
+    required_error: `${label} é obrigatório.`,
+    invalid_type_error: `${label} precisa ser um número inteiro.`
   })
-    .int(`${label} precisa ser um numero inteiro.`)
+    .int(`${label} precisa ser um número inteiro.`)
     .min(min, `${label} precisa ser maior ou igual a ${min}.`)
     .max(max, `${label} precisa ser menor ou igual a ${max}.`));
 

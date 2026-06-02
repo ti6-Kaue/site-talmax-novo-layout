@@ -92,7 +92,7 @@ const resolveAdminReadAccess = async (req, res) => {
   const adminSession = await getAuthenticatedAdminSession(req);
 
   if (!adminSession) {
-    res.status(401).json({ error: 'Sessao invalida ou expirada.' });
+    res.status(401).json({ error: 'Sessão inválida ou expirada.' });
     return null;
   }
 
@@ -146,7 +146,7 @@ router.post('/', requireAdminSession, upload.single('image'), async (req, res, n
       : null;
 
     if (!image_url) {
-      return res.status(400).json({ error: 'A imagem do banner e obrigatoria.' });
+      return res.status(400).json({ error: 'A imagem do banner é obrigatória.' });
     }
 
     const isActive = payload.active === false ? 0 : 1;
@@ -190,7 +190,7 @@ router.put('/:id', requireAdminSession, upload.single('image'), async (req, res,
 router.delete('/:id', requireAdminSession, async (req, res, next) => {
   try {
     await db.query('DELETE FROM banners WHERE id = ?', [req.params.id]);
-    return res.json({ message: 'Banner excluido!' });
+    return res.json({ message: 'Banner excluído!' });
   } catch (err) {
     return next(wrapError(err, { publicMessage: 'Erro ao excluir banner.' }));
   }

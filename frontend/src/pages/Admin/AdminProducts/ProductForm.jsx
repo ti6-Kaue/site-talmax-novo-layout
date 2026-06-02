@@ -674,7 +674,7 @@ const ProductForm = ({
     return (
       <div className="table-selection-actions">
         <span className="table-selection-actions__label">
-          SeleÃ§Ã£o {getSpreadsheetColumnLabel(labelRange.startCol)}{labelRange.startRow + 1}:{getSpreadsheetColumnLabel(labelRange.endCol)}{labelRange.endRow + 1}
+          Seleção {getSpreadsheetColumnLabel(labelRange.startCol)}{labelRange.startRow + 1}:{getSpreadsheetColumnLabel(labelRange.endCol)}{labelRange.endRow + 1}
         </span>
         {canClearSelection && (
           <button
@@ -682,7 +682,7 @@ const ProductForm = ({
             className="btn-secondary table-builder-toolbar-button table-builder-toolbar-button--remove"
             onClick={() => clearSelectedRange(tableIndex)}
           >
-            Apagar cÃ©lulas
+            Apagar células
           </button>
         )}
         {(canMergeSelection || canMergeVerticalSelection) && (
@@ -691,7 +691,7 @@ const ProductForm = ({
             className="btn-secondary table-builder-toolbar-button table-builder-toolbar-button--merge"
             onClick={() => applyMergeRange(tableIndex)}
           >
-            Mesclar cÃ©lulas
+            Mesclar células
           </button>
         )}
         {canUnmergeSelection && (
@@ -708,7 +708,7 @@ const ProductForm = ({
           className="btn-secondary table-builder-toolbar-button table-builder-toolbar-button--remove"
           onClick={clearDragSelection}
         >
-          Cancelar seleÃ§Ã£o
+          Cancelar seleção
         </button>
       </div>
     );

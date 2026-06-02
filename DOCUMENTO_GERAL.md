@@ -25,7 +25,7 @@ O projeto e dividido em 4 partes principais:
 3. `MySQL`
    Banco com produtos, categorias, banners, usuarios, paginas e configuracoes.
 4. `storage de imagens`
-   Pode ser local, Cloudinary ou SFTP.
+   Pode ser local, Cloudinary, S3 ou SFTP.
 
 Fluxo geral:
 
@@ -500,7 +500,7 @@ Responsabilidades:
 | Arquivo | Para que serve |
 | --- | --- |
 | `backend/src/server/services/productService.js` | listagem, detalhe, tabs e relacoes do produto |
-| `backend/src/server/services/fileStorageService.js` | salvar imagem em local, Cloudinary ou SFTP |
+| `backend/src/server/services/fileStorageService.js` | selecionar provider e salvar imagem em local, Cloudinary, S3 ou SFTP |
 | `backend/src/server/services/backupContentService.js` | fallback local para alguns conteudos |
 
 ### 9.5 Validacao e utilitarios

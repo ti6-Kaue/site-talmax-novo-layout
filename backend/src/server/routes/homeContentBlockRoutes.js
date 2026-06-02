@@ -49,8 +49,8 @@ const HOME_CONTENT_BLOCKS_TABLE_QUERY = `
 const DEFAULT_HOME_CONTENT_BLOCKS = [
   {
     section_type: 'info-card',
-    title: 'Talmax perto de Voce',
-    description: 'Trabalhamos com dentais selecionadas para garantir qualidade, procedencia e suporte.',
+    title: 'Talmax perto de Você',
+    description: 'Trabalhamos com dentais selecionadas para garantir qualidade, procedência e suporte.',
     logo_text: '',
     logo_image_url: '',
     button_label: 'Saiba Mais',
@@ -366,7 +366,7 @@ const resolveAdminReadAccess = async (req, res) => {
   const adminSession = await getAuthenticatedAdminSession(req);
 
   if (!adminSession) {
-    res.status(401).json({ error: 'Sessao invalida ou expirada.' });
+    res.status(401).json({ error: 'Sessão inválida ou expirada.' });
     return null;
   }
 
@@ -418,7 +418,7 @@ router.post('/', requireAdminSession, upload.any(), async (req, res, next) => {
 
     if (details.length > 0) {
       return res.status(400).json({
-        error: 'Dados invalidos para o bloco da home.',
+        error: 'Dados inválidos para o bloco da home.',
         details
       });
     }
@@ -481,7 +481,7 @@ router.put('/:id', requireAdminSession, upload.any(), async (req, res, next) => 
     const [existingRows] = await db.query('SELECT id, logo_image_url FROM home_content_blocks WHERE id = ? LIMIT 1', [id]);
 
     if (existingRows.length === 0) {
-      return res.status(404).json({ error: 'Bloco da home nao encontrado.' });
+      return res.status(404).json({ error: 'Bloco da home não encontrado.' });
     }
 
     const logoImageFile = getUploadedFileByField(req.files, 'logo_image');
@@ -498,7 +498,7 @@ router.put('/:id', requireAdminSession, upload.any(), async (req, res, next) => 
 
     if (details.length > 0) {
       return res.status(400).json({
-        error: 'Dados invalidos para o bloco da home.',
+        error: 'Dados inválidos  para o bloco da home.',
         details
       });
     }

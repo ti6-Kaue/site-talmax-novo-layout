@@ -18,7 +18,7 @@ const GallerySection = ({
     <div className="product-banner-manager">
       <div className="product-banner-copy">
         <strong>Fundo do banner do produto</strong>
-        <span>Essa imagem aparece no topo da pagina do produto, atras da foto e do nome.</span>
+        <span>Essa imagem aparece no topo da página do produto, atrás da foto e do nome.</span>
       </div>
 
       <label className="product-banner-upload">
@@ -48,7 +48,7 @@ const GallerySection = ({
 
     {previews.length > 0 && (
       <p className="product-form-helper">
-        Escolha qual foto deve ficar como principal. Essa sera a imagem usada na listagem e no detalhe do produto.
+        Escolha qual foto deve ficar como principal. Essa será a imagem usada na listagem e no detalhe do produto.
       </p>
     )}
 

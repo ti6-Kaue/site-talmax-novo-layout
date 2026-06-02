@@ -37,8 +37,8 @@ router.get('/debug-session', (req, res) => {
     protocol: req.protocol,
     secure: req.secure,
     host: req.headers.host,
-    sameSiteConfig: process.env.ADMIN_COOKIE_SAME_SITE || '(nao definido, padrao lax)',
-    nodeEnv: process.env.NODE_ENV || '(nao definido)'
+    sameSiteConfig: process.env.ADMIN_COOKIE_SAME_SITE || '(não definido, padrão lax)',
+    nodeEnv: process.env.NODE_ENV || '(não definido)'
   });
 });
 

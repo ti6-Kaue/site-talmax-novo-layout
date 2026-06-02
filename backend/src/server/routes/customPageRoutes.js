@@ -197,13 +197,13 @@ router.get('/', requireAdminSession, async (req, res, next) => {
     const items = await Promise.all(rows.map((row) => buildPayload(row)));
     res.json(items);
   } catch (error) {
-    logger.error({ err: error }, 'Erro ao listar paginas personalizadas.');
+    logger.error({ err: error }, 'Erro ao listar páginas personalizadas.');
 
     if (isMissingCustomPagesTableError(error) || isSchemaPermissionError(error)) {
       return res.json([]);
     }
 
-    return next(wrapError(error, { publicMessage: 'Erro ao listar paginas personalizadas.' }));
+    return next(wrapError(error, { publicMessage: 'Erro ao listar páginas personalizadas.' }));
   }
 });
 
@@ -217,19 +217,19 @@ router.get('/public/:slug', async (req, res, next) => {
     );
 
     if (!rows[0]) {
-      return res.status(404).json({ error: 'Pagina nao encontrada.' });
+      return res.status(404).json({ error: 'Página não encontrada.' });
     }
 
     const item = await buildPayload(rows[0], { includeProducts: true });
     return res.json(item);
   } catch (error) {
-    logger.error({ err: error }, 'Erro ao buscar pagina personalizada publica.');
+    logger.error({ err: error }, 'Erro ao buscar página personalizada pública.');
 
     if (isMissingCustomPagesTableError(error) || isSchemaPermissionError(error)) {
-      return res.status(404).json({ error: 'Pagina nao encontrada.' });
+      return res.status(404).json({ error: 'Página não encontrada.' });
     }
 
-    return next(wrapError(error, { publicMessage: 'Erro ao buscar pagina personalizada.' }));
+    return next(wrapError(error, { publicMessage: 'Erro ao buscar página personalizada.' }));
   }
 });
 
@@ -241,11 +241,11 @@ router.post('/', requireAdminSession, upload.any(), async (req, res, next) => {
     const slug = slugify(sanitizeTextInput(req.body.slug || title, { preserveNewlines: false, maxLength: 180 }));
 
     if (!title) {
-      return res.status(400).json({ error: 'Informe o titulo da pagina.' });
+      return res.status(400).json({ error: 'Informe o título da página.' });
     }
 
     if (!slug) {
-      return res.status(400).json({ error: 'Informe um slug valido para a pagina.' });
+      return res.status(400).json({ error: 'Informe um slug válido para a página.' });
     }
 
     const files = Array.isArray(req.files) ? req.files : [];
@@ -287,7 +287,7 @@ router.post('/', requireAdminSession, upload.any(), async (req, res, next) => {
     logger.error({ err: error }, 'Erro ao criar pagina personalizada.');
 
     if (isMissingCustomPagesTableError(error) || isSchemaPermissionError(error)) {
-      return next(createHttpError(503, 'A tabela de paginas personalizadas nao esta disponivel no banco de producao.', {
+      return next(createHttpError(503, 'A tabela de páginas personalizadas não está disponível no banco de produção.', {
         code: error.code,
         expose: true,
         cause: error
@@ -295,14 +295,14 @@ router.post('/', requireAdminSession, upload.any(), async (req, res, next) => {
     }
 
     if (error?.code === 'ER_DUP_ENTRY') {
-      return next(createHttpError(400, getWriteErrorMessage(error, 'Erro ao criar pagina personalizada.'), {
+      return next(createHttpError(400, getWriteErrorMessage(error, 'Erro ao criar página personalizada.'), {
         code: error.code,
         expose: true,
         cause: error
       }));
     }
 
-    return next(wrapError(error, { publicMessage: 'Erro ao criar pagina personalizada.' }));
+    return next(wrapError(error, { publicMessage: 'Erro ao criar página personalizada.' }));
   }
 });
 
@@ -312,12 +312,12 @@ router.put('/:id', requireAdminSession, upload.any(), async (req, res, next) => 
 
     const pageId = Number(req.params.id);
     if (!Number.isInteger(pageId) || pageId <= 0) {
-      return res.status(400).json({ error: 'Pagina invalida.' });
+      return res.status(400).json({ error: 'Página inválida.' });
     }
 
     const [rows] = await db.query('SELECT * FROM custom_pages WHERE id = ? LIMIT 1', [pageId]);
     if (!rows[0]) {
-      return res.status(404).json({ error: 'Pagina nao encontrada.' });
+      return res.status(404).json({ error: 'Página não encontrada.' });
     }
 
     const currentItem = rows[0];
@@ -328,7 +328,7 @@ router.put('/:id', requireAdminSession, upload.any(), async (req, res, next) => 
     }));
 
     if (!title || !slug) {
-      return res.status(400).json({ error: 'Titulo e slug sao obrigatorios.' });
+      return res.status(400).json({ error: 'Título e slug são obrigatórios.' });
     }
 
     const files = Array.isArray(req.files) ? req.files : [];
@@ -375,12 +375,12 @@ router.put('/:id', requireAdminSession, upload.any(), async (req, res, next) => 
 
     const [updatedRows] = await db.query('SELECT * FROM custom_pages WHERE id = ? LIMIT 1', [pageId]);
     const item = await buildPayload(updatedRows[0]);
-    return res.json({ message: 'Pagina atualizada com sucesso.', item });
+    return res.json({ message: 'Página atualizada com sucesso.', item });
   } catch (error) {
-    logger.error({ err: error }, 'Erro ao atualizar pagina personalizada.');
+    logger.error({ err: error }, 'Erro ao atualizar página personalizada.');
 
     if (isMissingCustomPagesTableError(error) || isSchemaPermissionError(error)) {
-      return next(createHttpError(503, 'A tabela de paginas personalizadas nao esta disponivel no banco de producao.', {
+      return next(createHttpError(503, 'A tabela de páginas personalizadas não está disponível no banco de produção.', {
         code: error.code,
         expose: true,
         cause: error
@@ -388,14 +388,14 @@ router.put('/:id', requireAdminSession, upload.any(), async (req, res, next) => 
     }
 
     if (error?.code === 'ER_DUP_ENTRY') {
-      return next(createHttpError(400, getWriteErrorMessage(error, 'Erro ao atualizar pagina personalizada.'), {
+      return next(createHttpError(400, getWriteErrorMessage(error, 'Erro ao atualizar página personalizada.'), {
         code: error.code,
         expose: true,
         cause: error
       }));
     }
 
-    return next(wrapError(error, { publicMessage: 'Erro ao atualizar pagina personalizada.' }));
+    return next(wrapError(error, { publicMessage: 'Erro ao atualizar página personalizada.' }));
   }
 });
 
@@ -405,27 +405,27 @@ router.delete('/:id', requireAdminSession, async (req, res, next) => {
 
     const pageId = Number(req.params.id);
     if (!Number.isInteger(pageId) || pageId <= 0) {
-      return res.status(400).json({ error: 'Pagina invalida.' });
+      return res.status(400).json({ error: 'Página inválida.' });
     }
 
     const [result] = await db.query('DELETE FROM custom_pages WHERE id = ?', [pageId]);
     if (result.affectedRows === 0) {
-      return res.status(404).json({ error: 'Pagina nao encontrada.' });
+      return res.status(404).json({ error: 'Página não encontrada.' });
     }
 
-    return res.json({ message: 'Pagina excluida com sucesso.' });
+    return res.json({ message: 'Página excluída com sucesso.' });
   } catch (error) {
-    logger.error({ err: error }, 'Erro ao excluir pagina personalizada.');
+    logger.error({ err: error }, 'Erro ao excluir página personalizada.');
 
     if (isMissingCustomPagesTableError(error) || isSchemaPermissionError(error)) {
-      return next(createHttpError(503, 'A tabela de paginas personalizadas nao esta disponivel no banco de producao.', {
+      return next(createHttpError(503, 'A tabela de páginas personalizadas não está disponível no banco de produção.', {
         code: error.code,
         expose: true,
         cause: error
       }));
     }
 
-    return next(wrapError(error, { publicMessage: 'Erro ao excluir pagina personalizada.' }));
+    return next(wrapError(error, { publicMessage: 'Erro ao excluir página personalizada.' }));
   }
 });
 

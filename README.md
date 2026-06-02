@@ -33,7 +33,7 @@ Em producao o backend tambem serve:
 - permite criar paginas personalizadas em `/pagina/:slug`
 - permite criar grupos digitais em `/grupo-digital/:slug`
 - administra produtos, categorias, banners, destaques da home, segmentos, paginas especiais e configuracoes pelo painel
-- aceita upload local, Cloudinary ou SFTP
+- aceita upload local, Cloudinary, S3 ou SFTP
 
 ## Estrutura do repositorio
 

@@ -749,7 +749,7 @@ const ProductCatalog = () => {
         {isLoading ? (
           <div className="pro-loader">
             <div className="spinner-lux"></div>
-            <p>Sincronizando catÃ¡logo...</p>
+            <p>Sincronizando catálogo...</p>
           </div>
         ) : isTalmaxDigitalCategory ? null : (
           <>

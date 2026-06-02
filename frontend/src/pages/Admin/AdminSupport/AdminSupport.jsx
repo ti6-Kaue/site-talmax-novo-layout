@@ -87,8 +87,8 @@ const AdminSupport = () => {
       const normalizedMap = normalizeSpecialPageSettings(items);
       setPageSettingsForm(buildPageSettingsForm(normalizedMap.support));
     } catch (error) {
-      console.error('Erro ao carregar conteudo da pagina de suporte:', error);
-      addToast(error.message || 'Erro ao carregar conteudo da pagina de suporte', 'error');
+      console.error('Erro ao carregar conteúdo da página de suporte:', error);
+      addToast(error.message || 'Erro ao carregar conteúdo da página de suporte', 'error');
     } finally {
       setIsPageSettingsLoading(false);
     }
@@ -194,11 +194,11 @@ const AdminSupport = () => {
       if (result?.item) {
         setPageSettingsForm(buildPageSettingsForm(result.item));
       }
-      addToast('Conteudo da pagina de suporte atualizado com sucesso!');
+      addToast('Conteúdo da página de suporte atualizado com sucesso!');
       await loadPageSettings();
     } catch (error) {
-      console.error('Erro ao salvar conteudo da pagina de suporte:', error);
-      addToast(error.message || 'Erro ao salvar conteudo da pagina de suporte', 'error');
+      console.error('Erro ao salvar conteúdo da página de suporte:', error);
+      addToast(error.message || 'Erro ao salvar conteúdo da página de suporte', 'error');
     } finally {
       setIsPageSettingsSaving(false);
     }
@@ -297,14 +297,14 @@ const AdminSupport = () => {
       <div className="admin-card admin-technical-assistance__page-settings">
         <div className="card-header admin-technical-assistance__header">
           <div className="admin-technical-assistance__header-copy">
-            <h2><ImageIcon size={20} /> Conteudo da pagina de suporte</h2>
+            <h2><ImageIcon size={20} /> Conteúdo da página de suporte</h2>
             <p>Edite o banner, logo, texto do topo e o bloco "Ao seu lado em cada resultado".</p>
           </div>
         </div>
 
         <div className="card-body">
           {isPageSettingsLoading ? (
-            <div className="loading-container">Carregando conteudo da pagina...</div>
+            <div className="loading-container">Carregando conteúdo da página...</div>
           ) : (
             <article className="admin-technical-assistance__settings-panel">
               <div className="admin-technical-assistance__settings-grid">
@@ -331,13 +331,13 @@ const AdminSupport = () => {
                 </div>
 
                 <div className="form-group admin-technical-assistance__form-group--full">
-                  <label>Previa da posicao no banner</label>
+                  <label>Prévia da posição no banner</label>
                   <div className="admin-technical-assistance__hero-preview">
                     {pageSettingsForm.bannerPreview ? (
                       <img src={pageSettingsForm.bannerPreview} alt="" aria-hidden="true" />
                     ) : (
                       <div className="admin-technical-assistance__hero-preview-empty">
-                        Envie um banner para visualizar a posicao
+                        Envie um banner para visualizar a posição
                       </div>
                     )}
 
@@ -389,12 +389,12 @@ const AdminSupport = () => {
                       rows="3"
                       value={pageSettingsForm.description || ''}
                       onChange={(event) => handlePageSettingsInputChange('description', event.target.value)}
-                      placeholder="Estamos com voce todos os dias..."
+                      placeholder="Estamos com você todos os dias..."
                     />
                   </div>
 
                   <div className="form-group admin-technical-assistance__form-group--full">
-                    <label>Posicao da logo e do texto</label>
+                    <label>Posição da logo e do texto</label>
                     <div className="admin-technical-assistance__range-grid">
                       <label className="admin-technical-assistance__range-control">
                         <span>Horizontal <strong>{pageSettingsForm.hero_content_x}%</strong></span>

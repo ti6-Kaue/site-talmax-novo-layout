@@ -627,7 +627,7 @@ const ProductDetail = () => {
                   aria-expanded={!isFeaturesCollapsed}
                 >
                   <span className="product-features__title">
-                    <Info size={18} /> Caracteristicas Principais
+                    <Info size={18} /> Características Principais
                   </span>
                   <span className="product-features__action">
                     {isFeaturesCollapsed ? 'Expandir' : 'Recolher'}
@@ -777,7 +777,7 @@ const ProductDetail = () => {
           <div className="related-products-section">
             <div className="section-header">
               <h2>Produtos Relacionados</h2>
-              <p>Produtos que voce tambem pode gostar</p>
+              <p>Produtos que você também pode gostar</p>
             </div>
 
             <div className="related-products-carousel">

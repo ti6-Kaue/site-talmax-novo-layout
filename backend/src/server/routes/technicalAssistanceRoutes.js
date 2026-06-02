@@ -130,7 +130,7 @@ const buildValidationErrors = (payload, rawInput = {}) => {
   }
 
   if (!payload.address) {
-    details.push({ field: 'address', message: 'Informe o endereco.' });
+    details.push({ field: 'address', message: 'Informe o endereço.' });
   }
 
   if (!payload.city) {
@@ -142,15 +142,15 @@ const buildValidationErrors = (payload, rawInput = {}) => {
   }
 
   if (payload.email && !isValidEmail(payload.email)) {
-    details.push({ field: 'email', message: 'Informe um e-mail valido.' });
+    details.push({ field: 'email', message: 'Informe um e-mail válido.' });
   }
 
   if (rawInput.map_url && !payload.map_url) {
-    details.push({ field: 'map_url', message: 'Informe uma URL valida para o mapa.' });
+    details.push({ field: 'map_url', message: 'Informe uma URL válida para o mapa.' });
   }
 
   if (rawInput.site_url && !payload.site_url) {
-    details.push({ field: 'site_url', message: 'Informe uma URL valida para o site.' });
+    details.push({ field: 'site_url', message: 'Informe uma URL válida para o site.' });
   }
 
   return details;
@@ -160,11 +160,11 @@ const buildContentCardValidationErrors = (payload, rawInput = {}) => {
   const details = [];
 
   if (!payload.title) {
-    details.push({ field: 'title', message: 'Informe o titulo do card.' });
+    details.push({ field: 'title', message: 'Informe o título do card.' });
   }
 
   if ((rawInput.link_url || rawInput.linkUrl) && !payload.link_url) {
-    details.push({ field: 'link_url', message: 'Informe uma URL valida para o link do card.' });
+    details.push({ field: 'link_url', message: 'Informe uma URL válida para o link do card.' });
   }
 
   return details;
@@ -249,7 +249,7 @@ router.get('/', async (req, res, next) => {
 
     res.json(rows.map(normalizeTechnicalAssistanceRow));
   } catch (error) {
-    return next(wrapError(error, { publicMessage: 'Erro ao carregar os cards da assistencia tecnica.' }));
+    return next(wrapError(error, { publicMessage: 'Erro ao carregar os cards da assistência técnica.' }));
   }
 });
 
@@ -258,7 +258,7 @@ router.get('/content-cards', async (req, res, next) => {
     await ensureTechnicalAssistanceTable();
     res.json(await getContentCardRows());
   } catch (error) {
-    return next(wrapError(error, { publicMessage: 'Erro ao carregar os cards de conteudo da assistencia tecnica.' }));
+    return next(wrapError(error, { publicMessage: 'Erro ao carregar os cards de conteúdo da assistência técnica.' }));
   }
 });
 
@@ -267,7 +267,7 @@ router.get('/content-cards/admin', requireAdminSession, async (req, res, next) =
     await ensureTechnicalAssistanceTable();
     res.json(await getContentCardRows({ includeInactive: true }));
   } catch (error) {
-    return next(wrapError(error, { publicMessage: 'Erro ao carregar os cards de conteudo da assistencia tecnica.' }));
+    return next(wrapError(error, { publicMessage: 'Erro ao carregar os cards de conteúdo da assistência técnica.' }));
   }
 });
 
@@ -280,7 +280,7 @@ router.post('/content-cards', requireAdminSession, async (req, res, next) => {
 
     if (details.length > 0) {
       return res.status(400).json({
-        error: 'Dados invalidos para o card de conteudo da assistencia tecnica.',
+        error: 'Dados inválidos para o card de conteúdo da assistência técnica.',
         details
       });
     }
@@ -313,11 +313,11 @@ router.post('/content-cards', requireAdminSession, async (req, res, next) => {
     const [rows] = await db.query('SELECT * FROM technical_assistance_cards WHERE id = ? LIMIT 1', [result.insertId]);
 
     res.status(201).json({
-      message: 'Card de conteudo da assistencia tecnica criado com sucesso.',
+      message: 'Card de conteúdo da assistência técnica criado com sucesso.',
       item: normalizeContentCardRow(rows[0])
     });
   } catch (error) {
-    return next(wrapError(error, { publicMessage: 'Erro ao criar o card de conteudo da assistencia tecnica.' }));
+    return next(wrapError(error, { publicMessage: 'Erro ao criar o card de conteúdo da assistência técnica.' }));
   }
 });
 
@@ -333,7 +333,7 @@ router.put('/content-cards/:id', requireAdminSession, async (req, res, next) => 
     );
 
     if (existingRows.length === 0) {
-      return res.status(404).json({ error: 'Card de conteudo da assistencia tecnica nao encontrado.' });
+      return res.status(404).json({ error: 'Card de conteúdo da assistência técnica não encontrado.' });
     }
 
     const payload = normalizeContentCardPayload(req.body);
@@ -341,7 +341,7 @@ router.put('/content-cards/:id', requireAdminSession, async (req, res, next) => 
 
     if (details.length > 0) {
       return res.status(400).json({
-        error: 'Dados invalidos para o card de conteudo da assistencia tecnica.',
+        error: 'Dados inválidos para o card de conteúdo da assistência técnica.',
         details
       });
     }
@@ -374,11 +374,11 @@ router.put('/content-cards/:id', requireAdminSession, async (req, res, next) => 
     const [rows] = await db.query('SELECT * FROM technical_assistance_cards WHERE id = ? LIMIT 1', [id]);
 
     res.json({
-      message: 'Card de conteudo da assistencia tecnica atualizado com sucesso.',
+      message: 'Card de conteúdo da assistência técnica atualizado com sucesso.',
       item: normalizeContentCardRow(rows[0])
     });
   } catch (error) {
-    return next(wrapError(error, { publicMessage: 'Erro ao atualizar o card de conteudo da assistencia tecnica.' }));
+    return next(wrapError(error, { publicMessage: 'Erro ao atualizar o card de conteúdo da assistência técnica.' }));
   }
 });
 
@@ -389,9 +389,9 @@ router.delete('/content-cards/:id', requireAdminSession, async (req, res, next) 
     await ensureTechnicalAssistanceTable();
     await db.query("DELETE FROM technical_assistance_cards WHERE id = ? AND card_type = 'content'", [id]);
 
-    res.json({ message: 'Card de conteudo da assistencia tecnica removido com sucesso.' });
+    res.json({ message: 'Card de conteúdo da assistência técnica removido com sucesso.' });
   } catch (error) {
-    return next(wrapError(error, { publicMessage: 'Erro ao remover o card de conteudo da assistencia tecnica.' }));
+    return next(wrapError(error, { publicMessage: 'Erro ao remover o card de conteúdo da assistência técnica.' }));
   }
 });
 
@@ -404,7 +404,7 @@ router.post('/', requireAdminSession, async (req, res, next) => {
 
     if (details.length > 0) {
       return res.status(400).json({
-        error: 'Dados invalidos para o card de assistencia tecnica.',
+        error: 'Dados inválidos para o card de assistência técnica.',
         details
       });
     }
@@ -442,11 +442,11 @@ router.post('/', requireAdminSession, async (req, res, next) => {
     const [rows] = await db.query('SELECT * FROM technical_assistance_cards WHERE id = ? LIMIT 1', [result.insertId]);
 
     res.status(201).json({
-      message: 'Card de assistencia tecnica criado com sucesso.',
+      message: 'Card de assistência técnica criado com sucesso.',
       item: normalizeTechnicalAssistanceRow(rows[0])
     });
   } catch (error) {
-    return next(wrapError(error, { publicMessage: 'Erro ao criar o card de assistencia tecnica.' }));
+    return next(wrapError(error, { publicMessage: 'Erro ao criar o card de assistência técnica.' }));
   }
 });
 
@@ -462,7 +462,7 @@ router.put('/:id', requireAdminSession, async (req, res, next) => {
     );
 
     if (existingRows.length === 0) {
-      return res.status(404).json({ error: 'Card de assistencia tecnica nao encontrado.' });
+      return res.status(404).json({ error: 'Card de assistência técnica não encontrado.' });
     }
 
     const payload = normalizeTechnicalAssistancePayload(req.body);
@@ -470,7 +470,7 @@ router.put('/:id', requireAdminSession, async (req, res, next) => {
 
     if (details.length > 0) {
       return res.status(400).json({
-        error: 'Dados invalidos para o card de assistencia tecnica.',
+        error: 'Dados inválidos para o card de assistência técnica.',
         details
       });
     }
@@ -509,11 +509,11 @@ router.put('/:id', requireAdminSession, async (req, res, next) => {
     const [rows] = await db.query('SELECT * FROM technical_assistance_cards WHERE id = ? LIMIT 1', [id]);
 
     res.json({
-      message: 'Card de assistencia tecnica atualizado com sucesso.',
+      message: 'Card de assistência técnica atualizado com sucesso.',
       item: normalizeTechnicalAssistanceRow(rows[0])
     });
   } catch (error) {
-    return next(wrapError(error, { publicMessage: 'Erro ao atualizar o card de assistencia tecnica.' }));
+    return next(wrapError(error, { publicMessage: 'Erro ao atualizar o card de assistência técnica.' }));
   }
 });
 
@@ -524,9 +524,9 @@ router.delete('/:id', requireAdminSession, async (req, res, next) => {
     await ensureTechnicalAssistanceTable();
     await db.query("DELETE FROM technical_assistance_cards WHERE id = ? AND card_type = 'directory'", [id]);
 
-    res.json({ message: 'Card de assistencia tecnica removido com sucesso.' });
+    res.json({ message: 'Card de assistência técnica removido com sucesso.' });
   } catch (error) {
-    return next(wrapError(error, { publicMessage: 'Erro ao remover o card de assistencia tecnica.' }));
+    return next(wrapError(error, { publicMessage: 'Erro ao remover o card de assistência técnica.' }));
   }
 });
 

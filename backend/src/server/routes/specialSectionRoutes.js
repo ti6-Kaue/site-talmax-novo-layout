@@ -59,7 +59,7 @@ const saveSpecialSectionProducts = async (req, res, next, config) => {
     if (missingProductIds.length > 0) {
       await connection.rollback().catch(() => {});
       return res.status(400).json({
-        error: `Os seguintes produtos nao foram encontrados: ${missingProductIds.join(', ')}.`
+        error: `Os seguintes produtos não foram encontrados: ${missingProductIds.join(', ')}.`
       });
     }
 
@@ -122,7 +122,7 @@ const saveSpecialSectionProducts = async (req, res, next, config) => {
   } catch (err) {
     await connection.rollback().catch(() => {});
     return next(wrapError(err, {
-      publicMessage: `Erro ao salvar configuracao da secao ${parseSectionLabel(config)}.`,
+      publicMessage: `Erro ao salvar configuração da seção ${parseSectionLabel(config)}.`,
       meta: { section: parseSectionLabel(config) }
     }));
   } finally {

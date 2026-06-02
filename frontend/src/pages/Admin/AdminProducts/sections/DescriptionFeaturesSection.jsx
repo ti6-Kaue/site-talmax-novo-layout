@@ -13,8 +13,8 @@ const DescriptionFeaturesSection = ({ formData, setFormData }) => (
           onChange={(e) => setFormData((current) => ({ ...current, descriptionAsList: e.target.checked }))}
         />
         <div>
-          <strong>Exibir descricao em topicos</strong>
-          <span>Cada linha da descricao vira um item com marcador na pagina do produto.</span>
+          <strong>Exibir descrição em tópicos</strong>
+          <span>Cada linha da descrição vira um item com marcador na página do produto.</span>
         </div>
       </label>
 
@@ -26,19 +26,19 @@ const DescriptionFeaturesSection = ({ formData, setFormData }) => (
         />
         <div>
           <strong>Exibir destaques / diferenciais</strong>
-          <span>Ative apenas se quiser mostrar topicos extras separados da descricao.</span>
+          <span>Ative apenas se quiser mostrar tópicos extras separados da descrição.</span>
         </div>
       </label>
     </div>
 
     <div className="form-group">
-      <label>Descricao</label>
+      <label>Descrição</label>
       <textarea
         value={formData.description}
         onChange={(e) => setFormData((current) => ({ ...current, description: e.target.value }))}
         placeholder={
           formData.descriptionAsList
-            ? 'Escreva um item por linha para virar um topico no site'
+            ? 'Escreva um item por linha para virar um tópico no site'
             : 'Descreva o produto normalmente'
         }
       />

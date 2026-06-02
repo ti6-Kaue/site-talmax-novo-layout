@@ -198,8 +198,8 @@ const AdminDashboardHome = ({ onOpenTab }) => {
       <div className="dashboard-hero">
         <div>
           <span>Dashboard Talmax</span>
-          <h2>Visão simples do que os clientes estao procurando</h2>
-          <p>Metricas anonimas do proprio site.</p>
+          <h2>Visão simples do que os clientes estão procurando</h2>
+          <p>Métricas anônimas do próprio site.</p>
         </div>
         <button type="button" className="btn-primary" onClick={() => onOpenTab('products')}>
           <Package size={18} /> Cadastrar produto
@@ -237,7 +237,7 @@ const AdminDashboardHome = ({ onOpenTab }) => {
         <DashboardMetricCard
           title="Cliques em orçamento"
           value={formatNumber(summary.totals.quote_clicks)}
-          description="Botao solicitar orçamento"
+          description="Botão solicitar orçamento"
           icon={<ShoppingBag size={22} />}
           tone="purple"
         />
@@ -279,7 +279,7 @@ const AdminDashboardHome = ({ onOpenTab }) => {
       <section className="dashboard-bottom-grid">
         <DashboardList
           title="Buscas sem resultado"
-          description="Sinais de produtos ou nomes faltando no catalogo."
+          description="Sinais de produtos ou nomes faltando no catálogo."
           items={summary.searches_without_results}
         />
         <DashboardList
@@ -289,7 +289,7 @@ const AdminDashboardHome = ({ onOpenTab }) => {
         />
         <div className="dashboard-list-panel">
           <div className="dashboard-list-panel__header">
-            <h3>Ultimos interesses</h3>
+            <h3>Últimos interesses</h3>
             <p>Eventos recentes de busca, produto, orçamento e WhatsApp.</p>
           </div>
           {recentInterests.length > 0 ? (
@@ -310,7 +310,7 @@ const AdminDashboardHome = ({ onOpenTab }) => {
 
       <section className="dashboard-actions">
         <button type="button" onClick={() => onOpenTab('header-menu')}>
-          <Zap size={18} /> Editar cabecalho da Home
+          <Zap size={18} /> Editar cabeçalho da Home
         </button>
         <button type="button" onClick={() => onOpenTab('products-list')}>
           <Search size={18} /> Revisar produtos

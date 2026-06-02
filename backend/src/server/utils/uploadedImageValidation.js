@@ -98,7 +98,7 @@ const assertAllowedUploadImageCandidate = (file) => {
   const mimeType = String(file?.mimetype || '').trim().toLowerCase();
 
   if (!ALLOWED_UPLOAD_IMAGE_EXTENSIONS.has(extension) || !ALLOWED_UPLOAD_IMAGE_MIME_TYPES.has(mimeType)) {
-    throw createInvalidUploadImageError(`Somente imagens ${ALLOWED_UPLOAD_IMAGE_DESCRIPTION} sao permitidas.`, {
+    throw createInvalidUploadImageError(`Somente imagens ${ALLOWED_UPLOAD_IMAGE_DESCRIPTION} são permitidas.`, {
       originalName,
       mimeType
     });
@@ -111,7 +111,7 @@ const assertUploadedImageFile = async (file) => {
   const mimeType = String(file?.mimetype || '').trim().toLowerCase();
 
   if (!file?.path || !ALLOWED_UPLOAD_IMAGE_EXTENSIONS.has(extension)) {
-    throw createInvalidUploadImageError(`Somente imagens ${ALLOWED_UPLOAD_IMAGE_DESCRIPTION} sao permitidas.`, {
+    throw createInvalidUploadImageError(`Somente imagens ${ALLOWED_UPLOAD_IMAGE_DESCRIPTION} são permitidas.`, {
       originalName,
       mimeType
     });
@@ -121,7 +121,7 @@ const assertUploadedImageFile = async (file) => {
   const detectedFormat = detectUploadedImageFormat(signature);
 
   if (!detectedFormat) {
-    throw createInvalidUploadImageError('Nao foi possivel validar o formato real da imagem enviada.', {
+    throw createInvalidUploadImageError('Não foi possível validar o formato real da imagem enviada.', {
       originalName,
       mimeType
     });
@@ -130,7 +130,7 @@ const assertUploadedImageFile = async (file) => {
   const allowedFormatConfig = ALLOWED_UPLOAD_IMAGE_FORMATS[detectedFormat];
 
   if (!allowedFormatConfig.extensions.has(extension)) {
-    throw createInvalidUploadImageError('A extensao do arquivo nao corresponde ao formato real da imagem enviada.', {
+    throw createInvalidUploadImageError('A extensão do arquivo não corresponde ao formato real da imagem enviada.', {
       originalName,
       mimeType,
       detectedFormat
@@ -138,7 +138,7 @@ const assertUploadedImageFile = async (file) => {
   }
 
   if (mimeType && !allowedFormatConfig.mimeTypes.has(mimeType)) {
-    throw createInvalidUploadImageError('O tipo informado da imagem nao corresponde ao arquivo enviado.', {
+    throw createInvalidUploadImageError('O tipo informado da imagem não corresponde ao arquivo enviado.', {
       originalName,
       mimeType,
       detectedFormat

@@ -343,7 +343,7 @@ const resolveAdminReadAccess = async (req, res) => {
   const adminSession = await getAuthenticatedAdminSession(req);
 
   if (!adminSession) {
-    res.status(401).json({ error: 'Sessao invalida ou expirada.' });
+    res.status(401).json({ error: 'Sessão inválida ou expirada.' });
     return null;
   }
 
@@ -382,18 +382,18 @@ router.get('/public/:slug', async (req, res, next) => {
     ));
 
     if (!item) {
-      return res.status(404).json({ error: 'Grupo digital nao encontrado.' });
+      return res.status(404).json({ error: 'Grupo digital não encontrado.' });
     }
 
     res.json(item);
   } catch (error) {
-    logger.error({ err: error }, 'Erro ao buscar grupo digital publico.');
+    logger.error({ err: error }, 'Erro ao buscar grupo digital público.');
 
     if (isMissingTableError(error) || isSchemaPermissionError(error)) {
-      return res.status(404).json({ error: 'Grupo digital nao encontrado.' });
+      return res.status(404).json({ error: 'Grupo digital não encontrado.' });
     }
 
-    return next(wrapError(error, { publicMessage: 'Erro ao buscar grupo digital publico.' }));
+    return next(wrapError(error, { publicMessage: 'Erro ao buscar grupo digital público.' }));
   }
 });
 
@@ -445,7 +445,7 @@ router.post('/', requireAdminSession, upload.any(), async (req, res, next) => {
     logger.error({ err: error }, 'Erro ao criar grupo digital.');
 
     if (isMissingTableError(error) || isSchemaPermissionError(error)) {
-      return next(createHttpError(503, 'As tabelas de grupos digitais nao estao disponiveis no banco de producao.', {
+      return next(createHttpError(503, 'As tabelas de grupos digitais não estão disponíveis no banco de produção.', {
         code: error.code,
         expose: true,
         cause: error
@@ -506,7 +506,7 @@ router.put('/:id', requireAdminSession, upload.any(), async (req, res, next) => 
     logger.error({ err: error }, 'Erro ao atualizar grupo digital.');
 
     if (isMissingTableError(error) || isSchemaPermissionError(error)) {
-      return next(createHttpError(503, 'As tabelas de grupos digitais nao estao disponiveis no banco de producao.', {
+      return next(createHttpError(503, 'As tabelas de grupos digitais não estão disponíveis no banco de produção.', {
         code: error.code,
         expose: true,
         cause: error
@@ -528,8 +528,8 @@ router.delete('/:id', requireAdminSession, async (req, res, next) => {
     logger.error({ err: error }, 'Erro ao remover grupo digital.');
 
     if (isMissingTableError(error) || isSchemaPermissionError(error)) {
-      return next(createHttpError(503, 'As tabelas de grupos digitais nao estao disponiveis no banco de producao.', {
-        code: error.code,
+      return next(createHttpError(503, 'As tabelas de grupos digitais não estão disponíveis no banco de produção.', {
+        code: error.code, 
         expose: true,
         cause: error
       }));

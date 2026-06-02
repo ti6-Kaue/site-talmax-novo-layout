@@ -132,7 +132,7 @@ const rollbackIfPossible = async (connection) => {
   try {
     await connection.rollback();
   } catch (rollbackError) {
-    logger.warn({ err: rollbackError }, 'Falha ao executar rollback da transacao de produto.');
+    logger.warn({ err: rollbackError }, 'Falha ao executar rollback da transação de produto.');
   }
 };
 
@@ -144,7 +144,7 @@ const releaseIfPossible = (connection) => {
   try {
     connection.release();
   } catch (releaseError) {
-    logger.warn({ err: releaseError }, 'Falha ao liberar conexao do pool de produtos.');
+    logger.warn({ err: releaseError }, 'Falha ao liberar conexão do pool de produtos.');
   }
 };
 
@@ -314,7 +314,7 @@ const resolveIncludeInactiveAccess = async (req, res) => {
   const adminSession = await getAuthenticatedAdminSession(req);
 
   if (!adminSession) {
-    res.status(401).json({ error: 'Sessao invalida ou expirada.' });
+    res.status(401).json({ error: 'Sessão inválida ou expirada.' });
     return null;
   }
 
@@ -378,7 +378,7 @@ router.get('/:id', async (req, res, next) => {
     const product = await findProductById(db, req.params.id, { includeInactive });
 
     if (!product) {
-      return res.status(404).json({ error: 'Produto nao encontrado' });
+      return res.status(404).json({ error: 'Produto não encontrado' });
     }
 
     return res.json(product);
@@ -387,7 +387,7 @@ router.get('/:id', async (req, res, next) => {
       const backupProduct = findBackupProductById(req.params.id, { includeInactive });
 
       if (!backupProduct) {
-        return res.status(404).json({ error: 'Produto nao encontrado' });
+        return res.status(404).json({ error: 'Produto não encontrado' });
       }
 
       return res.json(backupProduct);
@@ -424,7 +424,7 @@ router.post('/', requireAdminSession, productUpload, async (req, res, next) => {
 
     if (duplicateProduct) {
       await rollbackIfPossible(connection);
-      return res.status(409).json({ error: 'Ja existe um produto com esse nome.' });
+      return res.status(409).json({ error: 'Já existe um produto com esse nome.' });
     }
 
     if (mergedImagePaths.length === 0) {
@@ -434,18 +434,18 @@ router.post('/', requireAdminSession, productUpload, async (req, res, next) => {
 
     if (mergedImagePaths.length > MAX_PRODUCT_IMAGES) {
       await rollbackIfPossible(connection);
-      return res.status(400).json({ error: `O produto pode ter no maximo ${MAX_PRODUCT_IMAGES} imagens.` });
+      return res.status(400).json({ error: `O produto pode ter no máximo ${MAX_PRODUCT_IMAGES} imagens.` });
     }
 
     if (!(await hasAllMainCategories(connection, parsedCategoryIds))) {
       await rollbackIfPossible(connection);
-      return res.status(400).json({ error: 'As categorias principais informadas sao invalidas.' });
+      return res.status(400).json({ error: 'As categorias principais informadas são inválidas.' });
     }
 
     if (!(await hasValidSubCategories(connection, parsedCategoryIds, parsedSubCategoryIds))) {
       await rollbackIfPossible(connection);
       return res.status(400).json({
-        error: 'As subcategorias informadas precisam existir e pertencer as categorias principais selecionadas.'
+        error: 'As subcategorias informadas precisam existir e pertencer às categorias principais selecionadas.'
       });
     }
 
@@ -503,7 +503,7 @@ router.put('/:id', requireAdminSession, productUpload, async (req, res, next) =>
 
     if (!currentProduct) {
       await rollbackIfPossible(connection);
-      return res.status(404).json({ error: 'Produto nao encontrado.' });
+      return res.status(404).json({ error: 'Produto não encontrado.' });
     }
 
     const currentExtra = normalizeStoredProductExtraData(currentProduct.extra_data);
@@ -518,7 +518,7 @@ router.put('/:id', requireAdminSession, productUpload, async (req, res, next) =>
 
     if (duplicateProduct) {
       await rollbackIfPossible(connection);
-      return res.status(409).json({ error: 'Ja existe um produto com esse nome.' });
+      return res.status(409).json({ error: 'Já existe um produto com esse nome.' });
     }
 
     if (mergedImagePaths.length === 0) {
@@ -528,18 +528,18 @@ router.put('/:id', requireAdminSession, productUpload, async (req, res, next) =>
 
     if (mergedImagePaths.length > MAX_PRODUCT_IMAGES) {
       await rollbackIfPossible(connection);
-      return res.status(400).json({ error: `O produto pode ter no maximo ${MAX_PRODUCT_IMAGES} imagens.` });
+      return res.status(400).json({ error: `O produto pode ter no máximo ${MAX_PRODUCT_IMAGES} imagens.` });
     }
 
     if (!(await hasAllMainCategories(connection, parsedCategoryIds))) {
       await rollbackIfPossible(connection);
-      return res.status(400).json({ error: 'As categorias principais informadas sao invalidas.' });
+      return res.status(400).json({ error: 'As categorias principais informadas são inválidas.' });
     }
 
     if (!(await hasValidSubCategories(connection, parsedCategoryIds, parsedSubCategoryIds))) {
       await rollbackIfPossible(connection);
       return res.status(400).json({
-        error: 'As subcategorias informadas precisam existir e pertencer as categorias principais selecionadas.'
+        error: 'As subcategorias informadas precisam existir e pertencer às categorias principais selecionadas.'
       });
     }
 
@@ -570,7 +570,7 @@ router.delete('/:id', requireAdminSession, async (req, res, next) => {
   try {
     await ensureProductDatabaseTables(db);
     await db.query(`DELETE FROM ${PRODUCTS_TABLE_NAME} WHERE id = ?`, [req.params.id]);
-    return res.json({ message: 'Produto excluido!' });
+    return res.json({ message: 'Produto excluído!' });
   } catch (err) {
     return next(wrapError(err, { publicMessage: 'Erro ao excluir produto.' }));
   }
@@ -593,14 +593,14 @@ router.put('/:id/quote-button', requireAdminSession, async (req, res, next) => {
 
   try {
     if (!Number.isInteger(productId) || productId <= 0) {
-      return res.status(400).json({ error: 'Produto invalido.' });
+      return res.status(400).json({ error: 'Produto inválido.' });
     }
 
     const payload = validateQuoteButtonPayload(req.body || {});
     const product = await findProductById(connection, productId, { includeInactive: true });
 
     if (!product) {
-      return res.status(404).json({ error: 'Produto nao encontrado.' });
+      return res.status(404).json({ error: 'Produto não encontrado.' });
     }
 
     const extra = normalizeStoredProductExtraData(product.extra_data);
@@ -608,9 +608,9 @@ router.put('/:id/quote-button', requireAdminSession, async (req, res, next) => {
 
     await connection.query(`UPDATE ${PRODUCTS_TABLE_NAME} SET extra_data = ? WHERE id = ?`, [JSON.stringify(extra), productId]);
 
-    return res.json({ message: 'Botao de orcamento atualizado!' });
+    return res.json({ message: 'Botão de orçamento atualizado!' });
   } catch (err) {
-    return next(wrapError(err, { publicMessage: 'Erro ao atualizar botao de orcamento.' }));
+    return next(wrapError(err, { publicMessage: 'Erro ao atualizar botão de orçamento.' }));
   } finally {
     releaseIfPossible(connection);
   }

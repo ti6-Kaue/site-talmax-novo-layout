@@ -105,8 +105,8 @@ const AdminHomeContent = () => {
       const data = await homeContentBlockService.getAll({ admin: true });
       setItems(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error('Erro ao carregar conteudos da home:', error);
-      addToast(error.message || 'Erro ao carregar conteudos da home', 'error');
+      console.error('Erro ao carregar conteúdos da home:', error);
+      addToast(error.message || 'Erro ao carregar conteúdos da home', 'error');
     } finally {
       setIsLoading(false);
     }
@@ -227,18 +227,18 @@ const AdminHomeContent = () => {
 
       if (editingItem?.id) {
         await homeContentBlockService.update(editingItem.id, buildPayload(form));
-        addToast('Conteudo atualizado com sucesso!');
+        addToast('Conteúdos atualizados com sucesso!');
       } else {
         await homeContentBlockService.create(buildPayload(form));
-        addToast('Conteudo criado com sucesso!');
+        addToast('Conteúdos criados com sucesso!');
       }
 
       setShowModal(false);
       setEditingItem(null);
       await loadItems();
     } catch (error) {
-      console.error('Erro ao salvar conteudo da home:', error);
-      addToast(error.message || 'Erro ao salvar conteudo da home', 'error');
+      console.error('Erro ao salvar conteúdos da home:', error);
+      addToast(error.message || 'Erro ao salvar conteúdos da home', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -253,11 +253,11 @@ const AdminHomeContent = () => {
       setTogglingId(item.id);
       const nextStatus = !item.active;
       await homeContentBlockService.updateActiveStatus(item.id, nextStatus);
-      addToast(nextStatus ? 'Conteudo ativado com sucesso!' : 'Conteudo ocultado com sucesso!');
+      addToast(nextStatus ? 'Conteúdos ativados com sucesso!' : 'Conteúdos ocultados com sucesso!');
       await loadItems();
     } catch (error) {
-      console.error('Erro ao alterar status do conteudo:', error);
-      addToast(error.message || 'Erro ao alterar status do conteudo', 'error');
+      console.error('Erro ao alterar status dos conteúdos:', error);
+      addToast(error.message || 'Erro ao alterar status dos conteúdos', 'error');
     } finally {
       setTogglingId(null);
     }
@@ -289,11 +289,11 @@ const AdminHomeContent = () => {
     try {
       setAddingCategoryId(category.id);
       await homeContentBlockService.create(buildPayload(nextForm));
-      addToast('Categoria adicionada ao cabecalho!');
+      addToast('Categoria adicionada ao cabeçalho!');
       await loadItems();
     } catch (error) {
-      console.error('Erro ao adicionar categoria ao cabecalho:', error);
-      addToast(error.message || 'Erro ao adicionar categoria ao cabecalho', 'error');
+      console.error('Erro ao adicionar categoria ao cabeçalho:', error);
+      addToast(error.message || 'Erro ao adicionar categoria ao cabeçalho', 'error');
     } finally {
       setAddingCategoryId(null);
     }
@@ -306,13 +306,13 @@ const AdminHomeContent = () => {
 
     try {
       await homeContentBlockService.remove(itemToDelete.id);
-      addToast('Conteudo removido com sucesso!');
+      addToast('Conteúdos removidos com sucesso!');
       setShowDeleteModal(false);
       setItemToDelete(null);
       await loadItems();
     } catch (error) {
-      console.error('Erro ao excluir conteudo da home:', error);
-      addToast(error.message || 'Erro ao excluir conteudo da home', 'error');
+      console.error('Erro ao excluir conteúdos da home:', error);
+      addToast(error.message || 'Erro ao excluir conteúdos da home', 'error');
     }
   };
 

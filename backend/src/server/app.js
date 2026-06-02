@@ -140,7 +140,7 @@ const createApp = () => {
     }
 
     if (path.extname(req.path)) {
-      return res.status(404).type('text/plain').send('Arquivo estatico nao encontrado.');
+      return res.status(404).type('text/plain').send('Arquivo estático não encontrado.');
     }
 
     return res.sendFile(path.join(frontendDistPath, 'index.html'));

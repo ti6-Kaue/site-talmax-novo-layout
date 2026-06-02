@@ -15,11 +15,11 @@ const sanitizeSingleLineText = (value) => (
 const requiredTrimmedString = (label, maxLength) => z.preprocess(
   sanitizeSingleLineText,
   z.string({
-    required_error: `${label} e obrigatorio.`,
+    required_error: `${label} é obrigatório.`,
     invalid_type_error: `${label} precisa ser um texto.`
   })
-    .min(1, `${label} e obrigatorio.`)
-    .max(maxLength, `${label} deve ter no maximo ${maxLength} caracteres.`)
+    .min(1, `${label} é obrigatório.`)
+    .max(maxLength, `${label} deve ter no máximo ${maxLength} caracteres.`)
 );
 
 const optionalTrimmedString = (label, maxLength) => z.preprocess((value) => {
@@ -31,19 +31,19 @@ const optionalTrimmedString = (label, maxLength) => z.preprocess((value) => {
 }, z.string({
   invalid_type_error: `${label} precisa ser um texto.`
 })
-  .min(1, `${label} e obrigatorio.`)
-  .max(maxLength, `${label} deve ter no maximo ${maxLength} caracteres.`)
+  .min(1, `${label} é obrigatório.`)
+  .max(maxLength, `${label} deve ter no máximo ${maxLength} caracteres.`)
   .optional());
 
 const requiredEmail = z.preprocess(
   sanitizeSingleLineText,
   z.string({
-    required_error: 'E-mail e obrigatorio.',
+    required_error: 'E-mail é obrigatório.',
     invalid_type_error: 'E-mail precisa ser um texto.'
   })
-    .min(1, 'E-mail e obrigatorio.')
-    .max(160, 'E-mail deve ter no maximo 160 caracteres.')
-    .email('Informe um e-mail valido.')
+    .min(1, 'E-mail é obrigatório.')
+    .max(160, 'E-mail deve ter no máximo 160 caracteres.')
+    .email('Informe um e-mail válido.')
     .transform((value) => value.toLowerCase())
 );
 
@@ -56,20 +56,20 @@ const optionalEmail = z.preprocess((value) => {
 }, z.string({
   invalid_type_error: 'E-mail precisa ser um texto.'
 })
-  .max(160, 'E-mail deve ter no maximo 160 caracteres.')
-  .email('Informe um e-mail valido.')
+  .max(160, 'E-mail deve ter no máximo 160 caracteres.')
+  .email('Informe um e-mail válido.')
   .transform((value) => value.toLowerCase())
   .optional());
 
 const requiredUsername = z.preprocess(
   sanitizeSingleLineText,
   z.string({
-    required_error: 'Usuario e obrigatorio.',
-    invalid_type_error: 'Usuario precisa ser um texto.'
+    required_error: 'Usuário é obrigatório.',
+    invalid_type_error: 'Usuário precisa ser um texto.'
   })
-    .min(3, 'Usuario deve ter pelo menos 3 caracteres.')
-    .max(50, 'Usuario deve ter no maximo 50 caracteres.')
-    .regex(ADMIN_USERNAME_PATTERN, 'Usuario pode ter apenas letras, numeros, ponto, traco e underscore.')
+    .min(3, 'Usuário deve ter pelo menos 3 caracteres.')
+    .max(50, 'Usuário deve ter no máximo 50 caracteres.')
+    .regex(ADMIN_USERNAME_PATTERN, 'Usuário pode ter apenas letras, números, ponto, traço e underscore.')
 );
 
 const optionalUsername = z.preprocess((value) => {
@@ -79,21 +79,21 @@ const optionalUsername = z.preprocess((value) => {
 
   return sanitizeSingleLineText(value);
 }, z.string({
-  invalid_type_error: 'Usuario precisa ser um texto.'
+  invalid_type_error: 'Usuário precisa ser um texto.'
 })
-  .min(3, 'Usuario deve ter pelo menos 3 caracteres.')
-  .max(50, 'Usuario deve ter no maximo 50 caracteres.')
-  .regex(ADMIN_USERNAME_PATTERN, 'Usuario pode ter apenas letras, numeros, ponto, traco e underscore.')
+  .min(3, 'Usuário deve ter pelo menos 3 caracteres.')
+  .max(50, 'Usuário deve ter no máximo 50 caracteres.')
+  .regex(ADMIN_USERNAME_PATTERN, 'Usuário pode ter apenas letras, números, ponto, traço e underscore.')
   .optional());
 
 const requiredPassword = z.preprocess(
   sanitizeSingleLineText,
   z.string({
-    required_error: 'Senha e obrigatoria.',
+    required_error: 'Senha é obrigatória.',
     invalid_type_error: 'Senha precisa ser um texto.'
   })
     .min(6, 'Senha deve ter pelo menos 6 caracteres.')
-    .max(100, 'Senha deve ter no maximo 100 caracteres.')
+    .max(100, 'Senha deve ter no máximo 100 caracteres.')
 );
 
 const optionalPassword = z.preprocess((value) => {
@@ -106,7 +106,7 @@ const optionalPassword = z.preprocess((value) => {
   invalid_type_error: 'Senha precisa ser um texto.'
 })
   .min(6, 'Senha deve ter pelo menos 6 caracteres.')
-  .max(100, 'Senha deve ter no maximo 100 caracteres.')
+  .max(100, 'Senha deve ter no máximo 100 caracteres.')
   .optional());
 
 const requiredRole = z.preprocess((value) => {
@@ -116,9 +116,9 @@ const requiredRole = z.preprocess((value) => {
 
   return value;
 }, z.string({
-  required_error: 'Perfil de acesso e obrigatorio.',
-  invalid_type_error: 'Perfil de acesso invalido.'
-}).refine((role) => ADMIN_USER_ALLOWED_ROLES.includes(role), 'Perfil de acesso invalido.'));
+  required_error: 'Perfil de acesso é obrigatório.',
+  invalid_type_error: 'Perfil de acesso inválido.'
+}).refine((role) => ADMIN_USER_ALLOWED_ROLES.includes(role), 'Perfil de acesso inválido.'));
 
 const optionalRole = z.preprocess((value) => {
   if (value === undefined || value === null || value === '') {
@@ -131,9 +131,9 @@ const optionalRole = z.preprocess((value) => {
 
   return value;
 }, z.string({
-  invalid_type_error: 'Perfil de acesso invalido.'
+  invalid_type_error: 'Perfil de acesso inválido.'
 })
-  .refine((role) => ADMIN_USER_ALLOWED_ROLES.includes(role), 'Perfil de acesso invalido.')
+  .refine((role) => ADMIN_USER_ALLOWED_ROLES.includes(role), 'Perfil de acesso inválido.')
   .optional());
 
 const createAdminUserSchema = z.object({

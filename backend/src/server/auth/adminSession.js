@@ -466,7 +466,7 @@ const getValidatedAdminSession = (req, res) => {
 
   if (!session) {
     clearAdminSessionCookies(res);
-    res.status(401).json({ error: 'Sessao invalida ou expirada.' });
+    res.status(401).json({ error: 'Sessão inválida ou expirada.' });
     return null;
   }
 
@@ -474,7 +474,7 @@ const getValidatedAdminSession = (req, res) => {
   return session;
 };
 
-const rejectAdminSession = (res, statusCode = 403, message = 'Usuario sem acesso ao painel.') => {
+const rejectAdminSession = (res, statusCode = 403, message = 'Usuário sem acesso ao painel.') => {
   clearAdminSessionCookies(res);
   return res.status(statusCode).json({ error: message });
 };
@@ -522,7 +522,7 @@ const requireAdminSession = async (req, res, next) => {
     }
 
     if (!adminSessionVersionMatches(session, currentAdminUser)) {
-      return rejectAdminSession(res, 401, 'Sessao invalida ou expirada.');
+      return rejectAdminSession(res, 401, 'Sessão inválida ou expirada.');
     }
 
     req.adminSession = {
@@ -551,7 +551,7 @@ const requireMasterAdminSession = async (req, res, next) => {
       : null;
 
     if (!currentAdminUser || !adminSessionVersionMatches(session, currentAdminUser)) {
-      return rejectAdminSession(res, 401, 'Sessao invalida ou expirada.');
+      return rejectAdminSession(res, 401, 'Sessão inválida ou expirada.');
     }
 
     if (effectiveRole !== ADMIN_ROLE_MASTER) {
@@ -566,7 +566,7 @@ const requireMasterAdminSession = async (req, res, next) => {
 
     return next();
   } catch (error) {
-    return next(wrapError(error, { publicMessage: 'Erro ao validar permissao do admin.' }));
+    return next(wrapError(error, { publicMessage: 'Erro ao validar permissão do admin.' }));
   }
 };
 
@@ -575,7 +575,7 @@ const loginAdmin = async (req, res, next) => {
     const { username, password } = req.body || {};
 
     if (!username || !password) {
-      return res.status(400).json({ error: 'Informe usuario ou e-mail e senha.' });
+      return res.status(400).json({ error: 'Informe usuário ou e-mail e senha.' });
     }
 
     const adminUser = await getAdminUserByIdentifier(username);
@@ -649,20 +649,20 @@ const unlockAdminLoginByUser = async (req, res, next) => {
     const { username } = req.body || {};
 
     if (!normalizeAdminUsername(username)) {
-      return res.status(400).json({ error: 'Informe o usuario ou e-mail que deve ser liberado.' });
+      return res.status(400).json({ error: 'Informe o usuário ou e-mail que deve ser liberado.' });
     }
 
     const adminUser = await getAdminUserByIdentifier(username);
 
     if (!adminUser || !hasAdminPanelAccess(adminUser)) {
-      return res.status(404).json({ error: 'Usuario admin nao encontrado.' });
+      return res.status(404).json({ error: 'Usuário admin não encontrado.' });
     }
 
     await setAdminBlockState(adminUser.id, ADMIN_USER_FREE_FLAG_VALUE);
     await clearRateLimitKeysForAdminUser([username, adminUser.username, adminUser.email]);
 
     return res.json({
-      message: 'Usuario desbloqueado com sucesso. Oriente a pessoa a recarregar a pagina e tentar de novo.',
+      message: 'Usuário desbloqueado com sucesso. Oriente a pessoa a recarregar a página e tentar de novo.',
       user: serializeAdminUser({
         ...adminUser,
         bloq_user: ADMIN_USER_FREE_FLAG_VALUE
@@ -726,7 +726,7 @@ const listAdminUsers = async (_req, res, next) => {
       return next(error);
     }
 
-    return next(wrapError(error, { publicMessage: 'Erro ao listar usuarios do painel.' }));
+    return next(wrapError(error, { publicMessage: 'Erro ao listar usuários do painel.' }));
   }
 };
 
@@ -741,11 +741,11 @@ const createAdminUser = async (req, res, next) => {
     ]);
 
     if (existingUsernameUser) {
-      return res.status(409).json({ error: 'Ja existe um admin com este usuario.' });
+      return res.status(409).json({ error: 'Já existe um admin com este usuário.' });
     }
 
     if (existingEmailUser) {
-      return res.status(409).json({ error: 'Ja existe um admin com este e-mail.' });
+      return res.status(409).json({ error: 'Já existe um admin com este e-mail.' });
     }
 
     const [insertResult] = await db.query(`
@@ -763,7 +763,7 @@ const createAdminUser = async (req, res, next) => {
     const createdAdminUser = await getAdminUserById(insertResult.insertId);
 
     return res.status(201).json({
-      message: 'Usuario admin criado com sucesso.',
+      message: 'Usuário admin criado com sucesso.',
       user: serializeAdminUser(createdAdminUser)
     });
   } catch (error) {
@@ -771,7 +771,7 @@ const createAdminUser = async (req, res, next) => {
       return next(error);
     }
 
-    return next(wrapError(error, { publicMessage: 'Erro ao criar usuario do painel.' }));
+    return next(wrapError(error, { publicMessage: 'Erro ao criar usuário do painel.' }));
   }
 };
 
@@ -782,21 +782,21 @@ const updateAdminUser = async (req, res, next) => {
     const adminUserId = Number.parseInt(req.params.id, 10);
 
     if (!Number.isInteger(adminUserId) || adminUserId <= 0) {
-      return res.status(400).json({ error: 'Informe um usuario valido para atualizar.' });
+      return res.status(400).json({ error: 'Informe um usuário válido para atualizar.' });
     }
 
     const payload = validateWithSchema(updateAdminUserSchema, req.body || {});
     const adminUser = await getAdminUserById(adminUserId, { includePassword: true });
 
     if (!adminUser) {
-      return res.status(404).json({ error: 'Usuario admin nao encontrado.' });
+      return res.status(404).json({ error: 'Usuário admin não encontrado.' });
     }
 
     if (payload.username && normalizeAdminUsername(payload.username) !== normalizeAdminUsername(adminUser.username)) {
       const conflictingUsernameUser = await getAdminUserByUsername(payload.username);
 
       if (conflictingUsernameUser && conflictingUsernameUser.id !== adminUserId) {
-        return res.status(409).json({ error: 'Ja existe um admin com este usuario.' });
+        return res.status(409).json({ error: 'Já existe um admin com este usuário.' });
       }
     }
 
@@ -804,14 +804,14 @@ const updateAdminUser = async (req, res, next) => {
       const conflictingEmailUser = await getAdminUserByEmail(payload.email);
 
       if (conflictingEmailUser && conflictingEmailUser.id !== adminUserId) {
-        return res.status(409).json({ error: 'Ja existe um admin com este e-mail.' });
+        return res.status(409).json({ error: 'Já existe um admin com este e-mail.' });
       }
     }
 
     const nextRole = payload.role ? normalizeAdminRole(payload.role) : normalizeAdminRole(adminUser.role);
 
     if (req.adminSession?.id === adminUserId && nextRole !== ADMIN_ROLE_MASTER) {
-      return res.status(400).json({ error: 'O admin master logado nao pode remover a propria permissao master.' });
+      return res.status(400).json({ error: 'O admin master logado não pode remover a própria permissão master.' });
     }
 
     const updates = [];
@@ -854,7 +854,7 @@ const updateAdminUser = async (req, res, next) => {
     const updatedAdminUser = await getAdminUserById(adminUserId);
 
     return res.json({
-      message: 'Usuario admin atualizado com sucesso.',
+      message: 'Usuário admin atualizado com sucesso.',
       user: serializeAdminUser(updatedAdminUser)
     });
   } catch (error) {
@@ -862,7 +862,7 @@ const updateAdminUser = async (req, res, next) => {
       return next(error);
     }
 
-    return next(wrapError(error, { publicMessage: 'Erro ao atualizar usuario do painel.' }));
+    return next(wrapError(error, { publicMessage: 'Erro ao atualizar usuário do painel.' }));
   }
 };
 
@@ -872,7 +872,7 @@ const logoutAdmin = async (req, res, next) => {
     clearAdminSessionCookies(res);
     return res.json({ message: 'Logout realizado com sucesso.' });
   } catch (error) {
-    return next(wrapError(error, { publicMessage: 'Erro ao encerrar sessao do admin.' }));
+    return next(wrapError(error, { publicMessage: 'Erro ao encerrar sessão do admin.' }));
   }
 };
 

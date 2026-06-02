@@ -47,7 +47,7 @@ const Home = () => {
         const response = await fetch(`${API_URL}/home-services`, { signal: controller.signal });
 
         if (!response.ok) {
-          throw new Error('Falha ao carregar servicos da home');
+          throw new Error('Falha ao carregar serviços da home');
         }
 
         const data = await response.json();
@@ -57,7 +57,7 @@ const Home = () => {
           return;
         }
 
-        console.error('Erro ao carregar servicos da home:', err);
+        console.error('Erro ao carregar serviços da home:', err);
         setServices([]);
       }
     };

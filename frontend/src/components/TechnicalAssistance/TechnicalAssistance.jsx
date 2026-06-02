@@ -70,7 +70,7 @@ const CustomPagination = ({ total, current, onChange }) => {
         className="technical-assistance-pagination__arrow"
         disabled={current === 1}
         onClick={() => onChange(current - 1)}
-        aria-label="Pagina anterior"
+        aria-label="Página anterior"
       >
         <ChevronLeft size={18} />
       </button>
@@ -84,7 +84,7 @@ const CustomPagination = ({ total, current, onChange }) => {
         className="technical-assistance-pagination__arrow"
         disabled={current === total}
         onClick={() => onChange(current + 1)}
-        aria-label="Proxima pagina"
+        aria-label="Próxima página"
       >
         <ChevronRight size={18} />
       </button>
@@ -356,7 +356,7 @@ const TechnicalAssistance = () => {
         );
         setStatus('ready');
       } catch (error) {
-        console.error('Erro ao carregar cards da assistencia tecnica:', error);
+        console.error('Erro ao carregar cards da assistência técnica:', error);
 
         if (active) {
           setItems([]);
@@ -518,14 +518,14 @@ const TechnicalAssistance = () => {
       <section className="technical-assistance-directory">
         <div className="technical-assistance-directory-header" id="rede-autorizada">
           <div className="technical-assistance-directory-copy">
-            <h2>Assist&ecirc;ncia T&eacute;cnica Autorizada Talmax</h2>
-            <strong>Mais agilidade, pe&ccedil;as originais e suporte autorizado sempre ao seu alcance</strong>
+            <h2>Assistência Técnica Autorizada Talmax</h2>
+            <strong>Mais agilidade, peças originais e suporte autorizado sempre ao seu alcance</strong>
             <p>
-              Uma rede preparada para oferecer agilidade, seguran&ccedil;a e qualidade em cada atendimento.
-              Conte com pe&ccedil;as originais, manuten&ccedil;&atilde;o eficiente e t&eacute;cnicos treinados diretamente pelos fabricantes.
+              Uma rede preparada para oferecer agilidade, segurança e qualidade em cada atendimento.
+              Conte com peças originais, manutenção eficiente e técnicos treinados diretamente pelos fabricantes.
             </p>
             <p>
-              Encontre no mapa a assist&ecirc;ncia t&eacute;cnica autorizada mais pr&oacute;xima de voc&ecirc;.
+              Encontre no mapa a assistência técnica autorizada mais próxima de você.
             </p>
           </div>
 
@@ -535,8 +535,8 @@ const TechnicalAssistance = () => {
               type="search"
               value={searchTerm}
               onChange={handleSearchChange}
-              placeholder="Rua Benedito Carollo, 890, Cidade Industrial Curitiba - Paran&aacute;"
-              aria-label="Buscar assistencia tecnica autorizada"
+              placeholder="Rua Benedito Carollo, 890, Cidade Industrial Curitiba - Paraná"
+              aria-label="Buscar assistência técnica autorizada"
             />
           </label>
         </div>
@@ -544,15 +544,15 @@ const TechnicalAssistance = () => {
         {status === 'loading' ? (
           <div className="technical-assistance-empty-state">
             <Wrench size={28} />
-            <p>Carregando cards da assist&ecirc;ncia t&eacute;cnica...</p>
+            <p>Carregando cards da assistência técnica...</p>
           </div>
         ) : cards.length === 0 ? (
           <div className="technical-assistance-empty-state">
             <Globe size={28} />
             <p>
               {status === 'error'
-                ? 'N\u00e3o foi poss\u00edvel carregar os cards da assist\u00eancia t\u00e9cnica agora.'
-                : 'Nenhum card de assist\u00eancia t\u00e9cnica foi cadastrado ainda.'}
+                ? 'Não foi possível carregar os cards da assistência técnica agora.'
+                : 'Nenhum card de assistência técnica foi cadastrado ainda.'}
             </p>
           </div>
         ) : (
@@ -561,7 +561,7 @@ const TechnicalAssistance = () => {
               {visibleCards.length === 0 ? (
                 <div className="technical-assistance-empty-state technical-assistance-empty-state-wide">
                   <Search size={28} />
-                  <p>Nenhuma assist&ecirc;ncia autorizada encontrada para a busca informada.</p>
+                  <p>Nenhuma assistência autorizada encontrada para a busca informada.</p>
                 </div>
               ) : paginatedCards.map((card) => (
                 <article
@@ -571,7 +571,7 @@ const TechnicalAssistance = () => {
                   onKeyDown={(event) => handleMapCardKeyDown(event, card.mapUrl)}
                   role={card.mapUrl ? 'link' : undefined}
                   tabIndex={card.mapUrl ? 0 : undefined}
-                  aria-label={card.mapUrl ? `Abrir mapa da assistencia ${card.title}` : undefined}
+                  aria-label={card.mapUrl ? `Abrir mapa da assistência ${card.title}` : undefined}
                 >
                   <span className="technical-assistance-card-eyebrow">
                     {card.eyebrowPrefix} <strong>{card.eyebrowHighlight}</strong>
@@ -586,7 +586,7 @@ const TechnicalAssistance = () => {
                     <a
                       href={card.primaryActionHref}
                       className="technical-assistance-card-primary"
-                      aria-label={`Fale com a assistencia ${card.title}`}
+                      aria-label={`Fale com a assistência ${card.title}`}
                       target={/^(?:https?:)?\/\//i.test(card.primaryActionHref) ? '_blank' : undefined}
                       rel={/^(?:https?:)?\/\//i.test(card.primaryActionHref) ? 'noopener noreferrer' : undefined}
                     >

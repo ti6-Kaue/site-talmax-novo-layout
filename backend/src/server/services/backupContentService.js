@@ -106,7 +106,7 @@ const listBackupHomeServices = () => (
     {
       id: 'backup-mobywork',
       name: 'Moby Work',
-      description: 'Conheca a linha de moveis e projetos planejados para clinicas e laboratorios.',
+      description: 'Conheça a linha de móveis e projetos planejados para clínicas e laboratórios.',
       image_url: '/img/mobywork.png',
       logo_url: '',
       logo_size: 72,
@@ -124,7 +124,7 @@ const listBackupHomeServices = () => (
     {
       id: 'backup-talmax-digital',
       name: 'Talmax Digital',
-      description: 'Explore nossas solucoes digitais e tecnologias para fluxo CAD/CAM odontologico.',
+      description: 'Explore nossas soluções digitais e tecnologias para fluxo CAD/CAM odontológico.',
       image_url: '/img/talmaxdigita1.png',
       logo_url: '',
       logo_size: 72,
@@ -137,12 +137,12 @@ const listBackupHomeServices = () => (
       is_external: false,
       display_order: 2,
       active: true,
-      actions: [{ label: 'Ver Solucoes', href: '/categoria/talmax-digital', external: false }]
+      actions: [{ label: 'Ver Soluções', href: '/categoria/talmax-digital', external: false }]
     },
     {
       id: 'backup-cursos',
       name: 'Cursos',
-      description: 'Acesse treinamentos, atualizacoes e conteudos para evoluir com a Talmax.',
+      description: 'Acesse treinamentos, atualizações e conteúdos para evoluir com a Talmax.',
       image_url: '/img/cursostalmax.png',
       logo_url: '',
       logo_size: 72,
@@ -159,7 +159,7 @@ const listBackupHomeServices = () => (
     },
     {
       id: 'backup-servicos',
-      name: 'Servicos',
+      name: 'Serviços',
       description: 'Escolha o canal ideal para atendimento especializado e suporte da Talmax.',
       image_url: '/img/testeservicos.png',
       logo_url: '',
@@ -174,7 +174,7 @@ const listBackupHomeServices = () => (
       display_order: 4,
       active: true,
       actions: [
-        { label: 'Assistencia Tecnica', href: '/assistencia-tecnica', external: false },
+        { label: 'Assistência Técnica', href: '/assistencia-tecnica', external: false },
         { label: 'Suporte', href: '/suporte', external: false }
       ]
     }

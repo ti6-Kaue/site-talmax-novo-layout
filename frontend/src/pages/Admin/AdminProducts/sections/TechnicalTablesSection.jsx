@@ -156,26 +156,26 @@ const TechnicalTablesSection = ({
 
   return (
     <div className="admin-section-group">
-      <span className="section-label">5. Configuracao da Tabela</span>
+      <span className="section-label">5. Configuração da Tabela</span>
 
       <div className="table-title-group table-title-group--split">
         <div className="form-group">
-          <label>Nome da aba tecnica</label>
+          <label>Nome da aba técnica</label>
           <input
             value={formData.technicalTabLabel}
-            placeholder="Ex.: Informacao Tecnica, Tecnico, Especificacoes"
+            placeholder="Ex.: Informação Técnica, Técnico, Especificações"
             onChange={(e) => setFormData((current) => ({ ...current, technicalTabLabel: e.target.value }))}
           />
         </div>
 
         <div className="form-group">
-          <label>Titulo da Tabela</label>
+          <label>Título da Tabela</label>
           <p className="product-form-helper">
-            Defina o nome que sera exibido acima da tabela tecnica do produto.
+            Defina o nome que será exibido acima da tabela técnica do produto.
           </p>
           <input
             value={mainTableConfig.title || ''}
-            placeholder="Ex.: Tabela Tecnica / Modelos Disponiveis"
+            placeholder="Ex.: Tabela Técnica / Modelos Disponíveis"
             onChange={(e) => updateTechnicalTableTitle(0, e.target.value)}
           />
         </div>
@@ -189,9 +189,9 @@ const TechnicalTablesSection = ({
       >
         <div className="table-builder-toolbar">
           <div className="table-builder-toolbar-copy">
-            <span className="table-builder-kicker">Configuracao da tabela</span>
+            <span className="table-builder-kicker">Configuração da tabela</span>
             <h4>Organize colunas e linhas com mais clareza</h4>
-            <p>Cadastre os titulos principais e preencha as informacoes tecnicas que serao exibidas no site.</p>
+            <p>Cadastre os títulos principais e preencha as informações técnicas que serão exibidas no site.</p>
           </div>
 
           <div className="table-builder-toolbar-actions">
@@ -252,22 +252,22 @@ const TechnicalTablesSection = ({
             </div>
 
             <div className="form-group table-title-group">
-              <label>Titulo da Tabela</label>
+              <label>Título da Tabela</label>
               <p className="product-form-helper">
-                Defina o nome que sera exibido acima desta tabela tecnica do produto.
+                Defina o nome que será exibido acima desta tabela técnica do produto.
               </p>
               <input
                 value={tableConfig.title}
-                placeholder="Ex.: Tabela Tecnica / Modelos Disponiveis"
+                placeholder="Ex.: Tabela Técnica / Modelos Disponíveis"
                 onChange={(e) => updateTechnicalTableTitle(tableIndex, e.target.value)}
               />
             </div>
 
             <div className="table-builder-toolbar">
               <div className="table-builder-toolbar-copy">
-                <span className="table-builder-kicker">Configuracao da tabela</span>
+                <span className="table-builder-kicker">Configuração da tabela</span>
                 <h4>Organize colunas e linhas com mais clareza</h4>
-                <p>Cadastre os titulos principais e preencha as informacoes tecnicas que serao exibidas no site.</p>
+                <p>Cadastre os títulos principais e preencha as informações técnicas que serão exibidas no site.</p>
               </div>
 
               <TableSizePicker

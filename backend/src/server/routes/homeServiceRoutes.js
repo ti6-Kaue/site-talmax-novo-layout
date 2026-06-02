@@ -87,7 +87,7 @@ const ensureHomeServicesColumns = async () => {
   try {
     await ensureColumn('home_services', 'logo_size', 'INT DEFAULT 72 AFTER logo_url');
   } catch (err) {
-    logger.warn({ err }, 'Nao foi possivel garantir a coluna logo_size em home_services; salvando segmentos sem esse campo.');
+    logger.warn({ err }, 'Não foi possível garantir a coluna logo_size em home_services; salvando segmentos sem esse campo.');
   }
   cachedHomeServicesSchemaState = null;
   homeServicesColumnsReady = true;
@@ -535,7 +535,7 @@ const resolveAdminReadAccess = async (req, res) => {
   const adminSession = await getAuthenticatedAdminSession(req);
 
   if (!adminSession) {
-    res.status(401).json({ error: 'Sessao invalida ou expirada.' });
+    res.status(401).json({ error: 'Sessão inválida ou expirada.' });
     return null;
   }
 
@@ -556,7 +556,7 @@ router.get('/', async (req, res) => {
 
     res.json(isAdminView ? services : services.filter((service) => service.active));
   } catch (err) {
-    logger.error({ err }, 'Erro ao buscar servicos da home.');
+    logger.error({ err }, 'Erro ao buscar serviços da home.');
     const services = listBackupHomeServices().map(normalizeHomeServiceRow);
     const isAdminView = parseBooleanFlag(req.query.admin) && Boolean(req.adminSession);
     res.json(isAdminView ? services : services.filter((service) => service.active));
@@ -622,9 +622,9 @@ router.post('/', requireAdminSession, upload.any(), async (req, res, next) => {
 
     const [result] = await db.query(insertPayload.query, insertPayload.params);
 
-    res.status(201).json({ id: result.insertId, message: 'Servico criado com sucesso' });
+    res.status(201).json({ id: result.insertId, message: 'Serviço criado com sucesso' });
   } catch (err) {
-    return next(wrapError(err, { publicMessage: 'Erro ao criar servico da home.' }));
+    return next(wrapError(err, { publicMessage: 'Erro ao criar serviço da home.' }));
   }
 });
 
@@ -641,7 +641,7 @@ router.put('/:id', requireAdminSession, upload.any(), async (req, res, next) => 
     const [currentRows] = await db.query('SELECT image_url, logo_url, actions FROM home_services WHERE id = ? LIMIT 1', [id]);
 
     if (currentRows.length === 0) {
-      return res.status(404).json({ error: 'Servico nao encontrado.' });
+      return res.status(404).json({ error: 'Serviço não encontrado.' });
     }
 
     const previousActions = parseActionsPayload(currentRows[0].actions);
@@ -712,9 +712,9 @@ router.put('/:id', requireAdminSession, upload.any(), async (req, res, next) => 
 
     await db.query(updatePayload.query, updatePayload.params);
 
-    res.json({ message: 'Servico atualizado com sucesso' });
+    res.json({ message: 'Serviço atualizado com sucesso' });
   } catch (err) {
-    return next(wrapError(err, { publicMessage: 'Erro ao atualizar servico da home.' }));
+    return next(wrapError(err, { publicMessage: 'Erro ao atualizar serviço da home.' }));
   }
 });
 
@@ -723,9 +723,9 @@ router.delete('/:id', requireAdminSession, async (req, res, next) => {
 
   try {
     await db.query('DELETE FROM home_services WHERE id = ?', [id]);
-    res.json({ message: 'Servico removido com sucesso' });
+    res.json({ message: 'Serviço removido com sucesso' });
   } catch (err) {
-    return next(wrapError(err, { publicMessage: 'Erro ao remover servico da home.' }));
+    return next(wrapError(err, { publicMessage: 'Erro ao remover serviço da home.' }));
   }
 });
 
@@ -735,9 +735,9 @@ router.put('/:id/active', requireAdminSession, async (req, res, next) => {
   try {
     const active = parseBooleanFlag(req.body?.active) ? 1 : 0;
     await db.query('UPDATE home_services SET active = ? WHERE id = ?', [active, id]);
-    res.json({ message: `Servico ${active ? 'ativado' : 'ocultado'} com sucesso` });
+    res.json({ message: `Serviço ${active ? 'ativado' : 'ocultado'} com sucesso` });
   } catch (err) {
-    return next(wrapError(err, { publicMessage: 'Erro ao atualizar status do servico da home.' }));
+    return next(wrapError(err, { publicMessage: 'Erro ao atualizar status do serviço da home.' }));
   }
 });
 

@@ -87,8 +87,8 @@ const AdminHeaderMenu = () => {
       const data = await homeContentBlockService.getAll({ admin: true });
       setItems((Array.isArray(data) ? data : []).filter((item) => item.section_type === 'header-menu'));
     } catch (error) {
-      console.error('Erro ao carregar menu do cabecalho:', error);
-      addToast(error.message || 'Erro ao carregar menu do cabecalho', 'error');
+      console.error('Erro ao carregar menu do cabeçalho:', error);
+      addToast(error.message || 'Erro ao carregar menu do cabeçalho', 'error');
     } finally {
       setIsLoading(false);
     }
@@ -179,8 +179,8 @@ const AdminHeaderMenu = () => {
       setEditingItem(null);
       await loadItems();
     } catch (error) {
-      console.error('Erro ao salvar item do cabecalho:', error);
-      addToast(error.message || 'Erro ao salvar item do cabecalho', 'error');
+      console.error('Erro ao salvar item do cabeçalho:', error);
+      addToast(error.message || 'Erro ao salvar item do cabeçalho', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -195,11 +195,11 @@ const AdminHeaderMenu = () => {
       setTogglingId(item.id);
       const nextStatus = !item.active;
       await homeContentBlockService.updateActiveStatus(item.id, nextStatus);
-      addToast(nextStatus ? 'Item ativado no cabecalho!' : 'Item ocultado do cabecalho!');
+      addToast(nextStatus ? 'Item ativado no cabeçalho!' : 'Item ocultado do cabeçalho!');
       await loadItems();
     } catch (error) {
-      console.error('Erro ao alterar item do cabecalho:', error);
-      addToast(error.message || 'Erro ao alterar item do cabecalho', 'error');
+      console.error('Erro ao alterar item do cabeçalho:', error);
+      addToast(error.message || 'Erro ao alterar item do cabeçalho', 'error');
     } finally {
       setTogglingId(null);
     }
@@ -222,8 +222,8 @@ const AdminHeaderMenu = () => {
       await homeContentBlockService.update(item.id, buildPayload(nextForm));
       await loadItems();
     } catch (error) {
-      console.error('Erro ao alterar ordem do cabecalho:', error);
-      addToast(error.message || 'Erro ao alterar ordem do cabecalho', 'error');
+      console.error('Erro ao alterar ordem do cabeçalho:', error);
+      addToast(error.message || 'Erro ao alterar ordem do cabeçalho', 'error');
     } finally {
       setUpdatingOrderId(null);
     }
@@ -250,11 +250,11 @@ const AdminHeaderMenu = () => {
     try {
       setAddingCategoryId(category.id);
       await homeContentBlockService.create(buildPayload(nextForm));
-      addToast('Categoria adicionada ao cabecalho!');
+      addToast('Categoria adicionada ao cabeçalho!');
       await loadItems();
     } catch (error) {
-      console.error('Erro ao adicionar categoria ao cabecalho:', error);
-      addToast(error.message || 'Erro ao adicionar categoria ao cabecalho', 'error');
+      console.error('Erro ao adicionar categoria ao cabeçalho:', error);
+      addToast(error.message || 'Erro ao adicionar categoria ao cabeçalho', 'error');
     } finally {
       setAddingCategoryId(null);
     }
@@ -267,13 +267,13 @@ const AdminHeaderMenu = () => {
 
     try {
       await homeContentBlockService.remove(itemToDelete.id);
-      addToast('Item removido do cabecalho!');
+      addToast('Item removido do cabeçalho!');
       setShowDeleteModal(false);
       setItemToDelete(null);
       await loadItems();
     } catch (error) {
-      console.error('Erro ao remover item do cabecalho:', error);
-      addToast(error.message || 'Erro ao remover item do cabecalho', 'error');
+      console.error('Erro ao remover item do cabeçalho:', error);
+      addToast(error.message || 'Erro ao remover item do cabeçalho', 'error');
     }
   };
 
@@ -336,7 +336,7 @@ const AdminHeaderMenu = () => {
       <section className="admin-card admin-home-content__section">
         <div className="card-header admin-home-content__section-header">
           <div>
-            <h2><Menu size={20} /> Cabecalho do site</h2>
+            <h2><Menu size={20} /> Cabeçalho do site</h2>
             <p>Escolha quais categorias principais aparecem no dropdown Produtos.</p>
           </div>
           <button type="button" className="btn-secondary" onClick={handleCreate}>
@@ -351,7 +351,7 @@ const AdminHeaderMenu = () => {
               <div className="admin-home-content__category-picker-head">
                 <div>
                   <strong>Categorias principais</strong>
-                  <span>{filteredHeaderCategories.length} disponiveis de {availableHeaderCategories.length}</span>
+                  <span>{filteredHeaderCategories.length} disponíveis de {availableHeaderCategories.length}</span>
                 </div>
                 <div className="admin-header-menu-search">
                   <input
@@ -376,7 +376,7 @@ const AdminHeaderMenu = () => {
               ) : filteredHeaderCategories.length === 0 ? (
                 <div className="empty-state">
                   <Menu size={32} />
-                  <p>{categorySearchTerm ? 'Nenhuma categoria encontrada.' : 'Todas as categorias principais ja estao no cabecalho.'}</p>
+                  <p>{categorySearchTerm ? 'Nenhuma categoria encontrada.' : 'Todas as categorias principais já estão no cabeçalho.'}</p>
                 </div>
               ) : (
                 <div className="admin-home-content__category-list">
@@ -413,11 +413,11 @@ const AdminHeaderMenu = () => {
               </div>
 
               {isLoading ? (
-                <div className="loading-container">Carregando cabecalho...</div>
+                <div className="loading-container">Carregando cabeçalho...</div>
               ) : sortedItems.length === 0 ? (
                 <div className="empty-state">
                   <Menu size={32} />
-                  <p>Nenhum item cadastrado no cabecalho.</p>
+                  <p>Nenhum item cadastrado no cabeçalho.</p>
                 </div>
               ) : (
                 <div className="admin-home-content__header-list">
@@ -527,7 +527,7 @@ const AdminHeaderMenu = () => {
                   <AlertCircle size={32} />
                 </div>
                 <h3>Excluir item?</h3>
-                <p>Deseja remover <strong>{itemToDelete?.title}</strong> do cabecalho?</p>
+                <p>Deseja remover <strong>{itemToDelete?.title}</strong> do cabeçalho?</p>
               </div>
 
               <div className="modal-footer">

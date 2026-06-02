@@ -82,7 +82,7 @@ const requireTrustedWriteOrigin = (req, _res, next) => {
       return next();
     }
 
-    return next(createHttpError(403, 'Requisicao bloqueada por politica de origem confiavel.', {
+    return next(createHttpError(403, 'Requisição bloqueada por política de origem confiável.', {
       code: 'TRUSTED_ORIGIN_MISSING',
       expose: true,
       meta: {
@@ -96,7 +96,7 @@ const requireTrustedWriteOrigin = (req, _res, next) => {
     return next();
   }
 
-  return next(createHttpError(403, 'Requisicao bloqueada por politica de origem confiavel.', {
+  return next(createHttpError(403, 'Requisição bloqueada por política de origem confiável.', {
     code: 'TRUSTED_ORIGIN_INVALID',
     expose: true,
     meta: {

@@ -22,7 +22,7 @@ const AdminSecurity = () => {
     const normalizedUsername = username.trim();
 
     if (!normalizedUsername) {
-      setError('Informe o usuario ou e-mail do admin que pediu desbloqueio.');
+      setError('Informe o usuário ou e-mail do admin que pediu desbloqueio.');
       return;
     }
 
@@ -33,7 +33,7 @@ const AdminSecurity = () => {
       const result = await unlockAdminLoginByUser(normalizedUsername);
       setLastUnlockedUser(result.user || null);
       setUsername('');
-      addToast(result.message || 'Usuario liberado para uma nova tentativa de login.', 'success');
+      addToast(result.message || 'Usuário liberado para uma nova tentativa de login.', 'success');
     } catch (unlockError) {
       setError(unlockError.message);
       addToast(unlockError.message, 'error');
@@ -48,7 +48,7 @@ const AdminSecurity = () => {
         <div className="card-header admin-security__header">
           <div>
             <h2><ShieldCheck size={20} /> Segurança do Login</h2>
-            <p>Desbloqueie manualmente um usuario especifico do painel quando ele pedir nova tentativa.</p>
+            <p>Desbloqueie manualmente um usuário específico do painel quando ele pedir nova tentativa.</p>
           </div>
         </div>
 
@@ -62,7 +62,7 @@ const AdminSecurity = () => {
           <form className="admin-form" onSubmit={handleSubmit}>
             <div className="admin-section-group">
               <div className="form-group">
-                <label htmlFor="admin-security-username">Usuario ou e-mail do admin</label>
+                <label htmlFor="admin-security-username">Usuário ou e-mail do admin</label>
                 <input
                   id="admin-security-username"
                   type="text"
@@ -76,15 +76,15 @@ const AdminSecurity = () => {
 
               <p className="admin-security__note">
                 Regra usada pelo sistema: <code>bloq_user = 1</code> significa acesso livre e <code>bloq_user = 2</code>
-                significa bloqueio temporario. Ao liberar por aqui, o usuario volta para <code>1</code> e o bloqueio
-                atual e limpo.
+                significa bloqueio temporário. Ao liberar por aqui, o usuário volta para <code>1</code> e o bloqueio
+                atual é limpo.
               </p>
 
               {error && <div className="admin-security__feedback is-error">{error}</div>}
 
               {lastUnlockedUser && (
                 <div className="admin-security__feedback is-success">
-                  <strong>{lastUnlockedUser.username}</strong> voltou para o estado livre e ja pode tentar login novamente.
+                  <strong>{lastUnlockedUser.username}</strong> voltou para o estado livre e já pode tentar login novamente.
                 </div>
               )}
 

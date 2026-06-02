@@ -296,12 +296,12 @@ const SpecialSectionManager = ({
                     <div className="product-select-info">
                       <p className="product-select-name">{product.name}</p>
                       <span className="product-select-meta">
-                        {isSelected ? 'Selecionado para exibicao' : 'Clique para incluir nesta secao'}
+                        {isSelected ? 'Selecionado para exibição' : 'Clique para incluir nesta seção'}
                       </span>
                     </div>
                     {isSelected && (
                       <div onClick={(e) => e.stopPropagation()} className="product-order-group">
-                        <label className="product-order-label">Ordem de exibicao</label>
+                        <label className="product-order-label">Ordem de exibição</label>
                         <input
                           type="number"
                           value={selected.order}

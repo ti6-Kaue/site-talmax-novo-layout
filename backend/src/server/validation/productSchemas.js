@@ -61,15 +61,15 @@ const productFeaturesSchema = z.array(productFeatureSchema)
   .transform((items) => items.filter(Boolean));
 
 const techSpecSchema = z.object({
-  label: optionalTextValueSchema('O rotulo da especificacao tecnica', 160).default(''),
-  value: optionalTextValueSchema('O valor da especificacao tecnica', 2000).default('')
+  label: optionalTextValueSchema('O rótulo da especificação técnica', 160).default(''),
+  value: optionalTextValueSchema('O valor da especificação técnica', 2000).default('')
 }).strict().transform((item) => ({
   label: item.label,
   value: item.value
 }));
 
 const techSpecsSchema = z.array(techSpecSchema)
-  .max(50, 'extra_data.techSpecs deve ter no maximo 50 itens.')
+  .max(50, 'extra_data.techSpecs deve ter no máximo 50 itens.')
   .transform((items) => items.filter((item) => item.label || item.value));
 
 const productTabSchema = z.object({
@@ -77,8 +77,8 @@ const productTabSchema = z.object({
     integerLike('O id da aba', { min: 1 }),
     textValueSchema('O id da aba', 120)
   ]).optional(),
-  title: stringField('O titulo da aba', { minLength: 1, maxLength: 255 }),
-  content: stringField('O conteudo da aba', { minLength: 0, maxLength: 25000, preserveNewlines: true, optional: true }),
+  title: stringField('O título da aba', { minLength: 1, maxLength: 255 }),
+  content: stringField('O conteúdo da aba', { minLength: 0, maxLength: 25000, preserveNewlines: true, optional: true }),
   contentAsList: booleanLike('O indicador contentAsList', { optional: true }),
   content_as_list: booleanLike('O indicador content_as_list', { optional: true }),
   showContentWithVideo: booleanLike('O indicador showContentWithVideo', { optional: true }),
@@ -106,7 +106,7 @@ const mergeRangeSchema = z.object({
   if (range.endRow < range.startRow) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: 'mergeRanges.endRow nao pode ser menor que mergeRanges.startRow.',
+      message: 'mergeRanges.endRow não pode ser menor que mergeRanges.startRow.',
       path: ['endRow']
     });
   }
@@ -114,21 +114,21 @@ const mergeRangeSchema = z.object({
   if (range.endCol < range.startCol) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: 'mergeRanges.endCol nao pode ser menor que mergeRanges.startCol.',
+      message: 'mergeRanges.endCol não pode ser menor que mergeRanges.startCol.',
       path: ['endCol']
     });
   }
 });
 
 const modelTableSchema = z.object({
-  headers: z.array(optionalTextValueSchema('Cada cabecalho da tabela', 200))
-    .min(1, 'A tabela tecnica precisa ter pelo menos uma coluna.')
-    .max(20, 'A tabela tecnica pode ter no maximo 20 colunas.'),
+  headers: z.array(optionalTextValueSchema('Cada cabeçalho da tabela', 200))
+    .min(1, 'A tabela técnica precisa ter pelo menos uma coluna.')
+    .max(20, 'A tabela técnica pode ter no máximo 20 colunas.'),
   rows: z.array(
-    z.array(optionalTextValueSchema('Cada celula da tabela', 4000))
-  ).max(50, 'A tabela tecnica pode ter no maximo 50 linhas.'),
+    z.array(optionalTextValueSchema('Cada célula da tabela', 4000))
+  ).max(50, 'A tabela técnica pode ter no máximo 50 linhas.'),
   mergeRanges: z.array(mergeRangeSchema)
-    .max(100, 'A tabela tecnica pode ter no maximo 100 mesclas.')
+    .max(100, 'A tabela técnica pode ter no máximo 100 mesclas.')
     .optional()
     .default([]),
   mergedHeader: booleanLike('mergedHeader', { optional: true }).optional(),
@@ -141,7 +141,7 @@ const modelTableSchema = z.object({
     if (row.length !== columnCount) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Cada linha da tabela tecnica precisa ter a mesma quantidade de colunas do cabecalho.',
+        message: 'Cada linha da tabela técnica precisa ter a mesma quantidade de colunas do cabeçalho.',
         path: ['rows', rowIndex]
       });
     }
@@ -151,7 +151,7 @@ const modelTableSchema = z.object({
     if (range.startCol >= columnCount || range.endCol >= columnCount) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Uma mescla da tabela tecnica referencia uma coluna inexistente.',
+        message: 'Uma mescla da tabela técnica referencia uma coluna inexistente.',
         path: ['mergeRanges', rangeIndex]
       });
     }
@@ -159,7 +159,7 @@ const modelTableSchema = z.object({
     if (range.startRow > rowCount || range.endRow > rowCount) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Uma mescla da tabela tecnica referencia uma linha inexistente.',
+        message: 'Uma mescla da tabela técnica referencia uma linha inexistente.',
         path: ['mergeRanges', rangeIndex]
       });
     }
@@ -167,12 +167,12 @@ const modelTableSchema = z.object({
 });
 
 const modelTableConfigSchema = z.object({
-  title: optionalTextValueSchema('O titulo da tabela tecnica', 255).default(''),
+  title: optionalTextValueSchema('O título da tabela técnica', 255).default(''),
   modelTable: modelTableSchema
 }).strict();
 
 const modelTablesSchema = z.array(modelTableConfigSchema)
-  .max(10, 'extra_data.modelTables deve ter no maximo 10 tabelas.');
+  .max(10, 'extra_data.modelTables deve ter no máximo 10 tabelas.');
 
 const specialSectionDisplaySchema = z.object({
   upcera: z.enum(VALID_SPECIAL_SECTION_MODES).optional(),
@@ -224,7 +224,7 @@ const selectedSpecialProductSchema = z.object({
 
 const specialSectionPayloadSchema = z.object({
   selected_products: z.array(selectedSpecialProductSchema)
-    .max(100, 'selected_products deve ter no maximo 100 itens.')
+    .max(100, 'selected_products deve ter no máximo 100 itens.')
     .superRefine((items, ctx) => {
       const seenIds = new Set();
 
@@ -232,7 +232,7 @@ const specialSectionPayloadSchema = z.object({
         if (seenIds.has(item.id)) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: 'selected_products nao pode conter ids duplicados.',
+            message: 'selected_products não pode conter ids duplicados.',
             path: [index, 'id']
           });
         }

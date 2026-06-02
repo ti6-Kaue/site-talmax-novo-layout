@@ -74,7 +74,7 @@ const getCategorySchemaState = async () => {
       await db.query('ALTER TABLE categorias ADD COLUMN background_url VARCHAR(500) DEFAULT NULL AFTER icon_url');
       categoryColumns.add('background_url');
     } catch (err) {
-      logger.warn({ err }, 'Nao foi possivel garantir a coluna background_url em categorias.');
+      logger.warn({ err }, 'Não foi possível garantir a coluna background_url em categorias.');
     }
   }
 
@@ -87,7 +87,7 @@ const getCategorySchemaState = async () => {
         await db.query(`UPDATE categorias SET ${CATEGORY_PAGE_BANNER_COLUMN} = ${LEGACY_CATEGORY_PAGE_BANNER_COLUMN} WHERE ${CATEGORY_PAGE_BANNER_COLUMN} IS NULL AND ${LEGACY_CATEGORY_PAGE_BANNER_COLUMN} IS NOT NULL`);
       }
     } catch (err) {
-      logger.warn({ err }, `Nao foi possivel garantir a coluna ${CATEGORY_PAGE_BANNER_COLUMN} em categorias.`);
+      logger.warn({ err }, `Não foi possível garantir a coluna ${CATEGORY_PAGE_BANNER_COLUMN} em categorias.`);
     }
   }
 
@@ -96,7 +96,7 @@ const getCategorySchemaState = async () => {
       await db.query('ALTER TABLE sub_categorias ADD COLUMN background_url VARCHAR(500) DEFAULT NULL AFTER slug');
       subCategoryColumns.add('background_url');
     } catch (err) {
-      logger.warn({ err }, 'Nao foi possivel garantir a coluna background_url em sub_categorias.');
+      logger.warn({ err }, 'Não foi possível garantir a coluna background_url em sub_categorias.');
     }
   }
 
@@ -327,7 +327,7 @@ router.delete('/:id', requireAdminSession, async (req, res, next) => {
     await db.query('DELETE FROM sub_categorias WHERE id = ?', [id]);
     await db.query('DELETE FROM categorias WHERE id = ?', [id]);
 
-    return res.json({ message: 'Categoria/Subcategoria excluida com sucesso!' });
+    return res.json({ message: 'Categoria/Subcategoria excluída com sucesso!' });
   } catch (err) {
     return next(wrapError(err, { publicMessage: 'Erro ao excluir categoria.' }));
   }

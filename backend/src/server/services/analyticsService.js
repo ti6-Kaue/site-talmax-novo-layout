@@ -97,11 +97,11 @@ const validateAnalyticsEventPayload = (payload) => {
   const details = [];
 
   if (!payload.visitorId) {
-    details.push({ field: 'visitor_id', message: 'Identificador anonimo ausente.' });
+    details.push({ field: 'visitor_id', message: 'Identificador anônimo ausente.' });
   }
 
   if (!ALLOWED_EVENT_TYPES.has(payload.eventType)) {
-    details.push({ field: 'event_type', message: 'Evento de analytics invalido.' });
+    details.push({ field: 'event_type', message: 'Evento de analytics inválido.' });
   }
 
   return details;
