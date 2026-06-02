@@ -3,40 +3,29 @@
  * Uso: pagina Home
  * Responsabilidade: banner principal da pagina inicial
  */
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, EffectFade, Pagination, Navigation } from 'swiper/modules';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { slides as staticSlides } from '../../data';
 import API_URL from '../../services/api';
 import { apiAssetPath } from '../../utils/assets';
 import { isExternalNavigationTarget, sanitizeNavigationTarget } from '../../utils/contentSafety';
 
-import 'swiper/css';
-import 'swiper/css/effect-fade';
-import 'swiper/css/pagination';
-import 'swiper/css/navigation';
 import './HeroSlider.css';
 
-const LOADER_DELAY_MS = 1000;
+const AUTOPLAY_DELAY_MS = 5000;
 
 const HeroSlider = () => {
-  const [banners, setBanners] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showLoadingIndicator, setShowLoadingIndicator] = useState(false);
+  const [banners, setBanners] = useState(staticSlides);
+  const [activeIndex, setActiveIndex] = useState(0);
   const [sliderHeight, setSliderHeight] = useState(null);
-  const swiperRef = useRef(null);
   const containerRef = useRef(null);
+  const activeImageRef = useRef(null);
   const navigate = useNavigate();
 
   const measureActiveBanner = () => {
-    const swiper = swiperRef.current;
     const container = containerRef.current;
-    if (!swiper || !container) return;
-
-    const activeSlide = swiper.slides?.[swiper.activeIndex];
-    const activeImage = activeSlide?.querySelector('.banner-img');
+    const activeImage = activeImageRef.current;
     if (!activeImage) return;
 
     const updateHeight = () => {
@@ -59,6 +48,22 @@ const HeroSlider = () => {
     }
   };
 
+  const goToSlide = useCallback((nextIndex) => {
+    setActiveIndex((currentIndex) => {
+      const totalBanners = banners.length;
+
+      if (totalBanners <= 0) {
+        return 0;
+      }
+
+      if (typeof nextIndex === 'function') {
+        return (nextIndex(currentIndex) + totalBanners) % totalBanners;
+      }
+
+      return (nextIndex + totalBanners) % totalBanners;
+    });
+  }, [banners.length]);
+
   const handleBannerClick = (linkUrl) => {
     const safeTarget = sanitizeNavigationTarget(linkUrl, { allowExternal: true, allowRelative: true });
 
@@ -73,41 +78,33 @@ const HeroSlider = () => {
   };
 
   useEffect(() => {
-    if (!loading) {
-      setShowLoadingIndicator(false);
-      return undefined;
-    }
+    const controller = new AbortController();
 
-    const timeoutId = window.setTimeout(() => {
-      setShowLoadingIndicator(true);
-    }, LOADER_DELAY_MS);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [loading]);
-
-  useEffect(() => {
     const fetchBanners = async () => {
       try {
-        const response = await fetch(`${API_URL}/banners`);
+        const response = await fetch(`${API_URL}/banners`, { signal: controller.signal });
 
         if (response.ok) {
           const data = await response.json();
           const activeBanners = data.filter((banner) => banner.active);
-          setBanners(activeBanners.length > 0 ? activeBanners : staticSlides);
-        } else {
-          setBanners(staticSlides);
+
+          if (activeBanners.length > 0) {
+            setBanners(activeBanners);
+            setActiveIndex(0);
+          }
         }
       } catch (error) {
+        if (error.name === 'AbortError') {
+          return;
+        }
+
         console.error('Erro ao buscar banners:', error);
-        setBanners(staticSlides);
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchBanners();
+
+    return () => controller.abort();
   }, []);
 
   useEffect(() => {
@@ -117,21 +114,29 @@ const HeroSlider = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  if (loading) {
-    if (!showLoadingIndicator) {
-      return null;
+  useEffect(() => {
+    window.requestAnimationFrame(measureActiveBanner);
+  }, [activeIndex, banners]);
+
+  useEffect(() => {
+    if (banners.length <= 1) {
+      return undefined;
     }
 
-    return (
-      <section className="hero-slider-container hero-slider-loading">
-        <div className="spinner"></div>
-      </section>
-    );
-  }
+    const intervalId = window.setInterval(() => {
+      goToSlide((currentIndex) => currentIndex + 1);
+    }, AUTOPLAY_DELAY_MS);
+
+    return () => window.clearInterval(intervalId);
+  }, [banners.length, goToSlide]);
 
   if (banners.length === 0) {
     return null;
   }
+
+  const activeBanner = banners[activeIndex] || banners[0];
+  const safeLinkUrl = sanitizeNavigationTarget(activeBanner.link_url, { allowExternal: true, allowRelative: true });
+  const activeBannerImageSrc = activeBanner.image_url ? apiAssetPath(activeBanner.image_url) : activeBanner.image;
 
   return (
     <section
@@ -139,69 +144,73 @@ const HeroSlider = () => {
       className="hero-slider-container hero-slider-container--with-actions"
       style={sliderHeight ? { height: `${sliderHeight}px` } : undefined}
     >
-      <Swiper
-        onSwiper={(swiper) => {
-          swiperRef.current = swiper;
-          window.requestAnimationFrame(measureActiveBanner);
-        }}
-        onAfterInit={measureActiveBanner}
-        onSlideChangeTransitionEnd={measureActiveBanner}
-        onResize={measureActiveBanner}
-        spaceBetween={0}
-        autoHeight={true}
-        observer={true}
-        observeParents={true}
-        updateOnWindowResize={true}
-        effect="fade"
-        fadeEffect={{ crossFade: true }}
-        speed={1200}
-        loop={banners.length > 1}
-        autoplay={{
-          delay: 5000,
-          disableOnInteraction: false,
-        }}
-        pagination={{
-          clickable: true,
-          dynamicBullets: false,
-        }}
-        navigation={banners.length > 1}
-        modules={[Autoplay, EffectFade, Pagination, Navigation]}
+      <div
         className="hero-swiper"
         style={sliderHeight ? { height: `${sliderHeight}px` } : undefined}
       >
-        {banners.map((slide, index) => {
-          const safeLinkUrl = sanitizeNavigationTarget(slide.link_url, { allowExternal: true, allowRelative: true });
+        <div
+          className="slide-content"
+          style={{ cursor: safeLinkUrl ? 'pointer' : 'default' }}
+          onClick={() => handleBannerClick(activeBanner.link_url)}
+        >
+          <img
+            key={activeBannerImageSrc}
+            ref={activeImageRef}
+            src={activeBannerImageSrc}
+            alt={activeBanner.title}
+            className="banner-img"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            onError={(event) => {
+              event.currentTarget.style.display = 'none';
+            }}
+            onLoad={(event) => {
+              event.currentTarget.style.display = 'block';
+              measureActiveBanner();
+            }}
+          />
+          <span className="hero-slide-action-corner" aria-hidden="true">
+            <span className="hero-slide-cta">
+              Saiba Mais
+              <ChevronRight size={30} strokeWidth={1.8} />
+            </span>
+          </span>
+        </div>
 
-          return (
-            <SwiperSlide key={slide.id}>
-              <div
-                className="slide-content"
-                style={{ cursor: safeLinkUrl ? 'pointer' : 'default' }}
-                onClick={() => handleBannerClick(slide.link_url)}
-              >
-                <img
-                  src={slide.image_url ? apiAssetPath(slide.image_url) : slide.image}
-                  alt={slide.title}
-                  className="banner-img"
-                  loading={index === 0 ? 'eager' : 'lazy'}
-                  fetchPriority={index === 0 ? 'high' : 'low'}
-                  decoding="async"
-                  onError={(event) => {
-                    event.currentTarget.style.display = 'none';
-                  }}
-                  onLoad={measureActiveBanner}
+        {banners.length > 1 && (
+          <>
+            <button
+              type="button"
+              className="hero-slider-button hero-slider-button--prev"
+              onClick={() => goToSlide((currentIndex) => currentIndex - 1)}
+              aria-label="Banner anterior"
+            >
+              <ChevronLeft size={44} strokeWidth={1.8} />
+            </button>
+            <button
+              type="button"
+              className="hero-slider-button hero-slider-button--next"
+              onClick={() => goToSlide((currentIndex) => currentIndex + 1)}
+              aria-label="Proximo banner"
+            >
+              <ChevronRight size={44} strokeWidth={1.8} />
+            </button>
+            <div className="hero-slider-pagination" aria-label="Selecionar banner">
+              {banners.map((slide, index) => (
+                <button
+                  type="button"
+                  key={slide.id || `banner-${index}`}
+                  className={`hero-slider-bullet${index === activeIndex ? ' is-active' : ''}`}
+                  onClick={() => goToSlide(index)}
+                  aria-label={`Ir para banner ${index + 1}`}
+                  aria-current={index === activeIndex ? 'true' : undefined}
                 />
-                <span className="hero-slide-action-corner" aria-hidden="true">
-                  <span className="hero-slide-cta">
-                    Saiba Mais
-                    <ChevronRight size={30} strokeWidth={1.8} />
-                  </span>
-                </span>
-              </div>
-            </SwiperSlide>
-          );
-        })}
-      </Swiper>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
     </section>
   );
 };

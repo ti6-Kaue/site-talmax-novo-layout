@@ -1,7 +1,5 @@
 import React, { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate, Navigate } from 'react-router-dom';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay } from 'swiper/modules';
 import {
   Facebook,
   Youtube,
@@ -18,7 +16,6 @@ import {
 } from 'lucide-react';
 
 import Home from './components/Home/Home';
-import AdminLogin from './components/AdminLogin/AdminLogin';
 import CookieBanner from './components/CookieBanner/CookieBanner';
 import PagePlaceholder from './components/PagePlaceholder/PagePlaceholder';
 import SearchBar from './components/SearchBar/SearchBar';
@@ -32,9 +29,7 @@ import {
   subscribeToCookieConsentStatus
 } from './services/cookieConsent';
 import { subscribeToAdminSessionExpired } from './services/adminSessionEvents';
-import { apiAssetPath, assetPath } from './utils/assets';
-import 'swiper/css';
-import 'swiper/css/pagination';
+import { assetPath } from './utils/assets';
 import './App.css';
 
 const QuemSomos = lazy(() => import('./components/QuemSomos/QuemSomos'));
@@ -48,7 +43,9 @@ const Scanners = lazy(() => import('./components/Scanners/Scanners'));
 const Impressoras3D = lazy(() => import('./components/Impressoras3D/Impressoras3D'));
 const CustomPage = lazy(() => import('./components/CustomPage/CustomPage'));
 const TechnicalAssistance = lazy(() => import('./components/TechnicalAssistance/TechnicalAssistance'));
+const AdminLogin = lazy(() => import('./components/AdminLogin/AdminLogin'));
 const Admin = lazy(() => import('./pages/Admin/AdminDashboard'));
+const FooterAdCarousel = lazy(() => import('./components/FooterAdCarousel/FooterAdCarousel'));
 
 const THEME_STORAGE_KEY = 'talmax-theme';
 const LOADER_DELAY_MS = 1000;
@@ -167,56 +164,6 @@ const withRouteLoader = (element, label) => (
 );
 
 const isExternalFooterAdTarget = (value = '') => /^(?:https?:|mailto:|tel:)/i.test(String(value || '').trim());
-
-const FooterAdStrip = ({ ad }) => {
-  const href = String(ad.link_url || '').trim();
-  const isExternal = Boolean(ad.is_external) || isExternalFooterAdTarget(href);
-  const hasLogo = Boolean(ad.logo_image_url || ad.logo_text);
-  const style = {
-    '--moby-strip-bg': ad.background_color || '#f06400',
-    '--moby-strip-text-color': ad.text_color || '#ffffff',
-    '--moby-strip-button-bg': ad.button_color || '#374c92',
-    '--moby-strip-button-text': ad.button_text_color || '#ffffff'
-  };
-  const buttonContent = (
-    <>
-      {ad.button_label || 'Conheca'}
-      <ChevronRight size={20} strokeWidth={1.75} />
-    </>
-  );
-
-  return (
-    <section className="moby-footer-strip" aria-label={ad.logo_text || ad.title || 'Propaganda'} style={style}>
-      <div className={`moby-footer-strip__inner ${hasLogo ? '' : 'moby-footer-strip__inner--no-logo'}`}>
-        {ad.logo_image_url ? (
-          <img
-            src={apiAssetPath(ad.logo_image_url)}
-            alt={ad.logo_text || 'Logo da propaganda'}
-            className="moby-footer-strip__logo-image"
-          />
-        ) : ad.logo_text ? (
-          <span className="moby-footer-strip__logo">{ad.logo_text}</span>
-        ) : null}
-        <p>{ad.title}</p>
-        {href && ad.button_label && isExternal && (
-          <a
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="moby-footer-strip__button"
-          >
-            {buttonContent}
-          </a>
-        )}
-        {href && ad.button_label && !isExternal && (
-          <Link to={href} className="moby-footer-strip__button">
-            {buttonContent}
-          </Link>
-        )}
-      </div>
-    </section>
-  );
-};
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -995,7 +942,7 @@ const AppContent = ({ appReady, menuOpen, setMenuOpen, theme, onToggleTheme }) =
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
-          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/login" element={withRouteLoader(<AdminLogin />, 'Carregando login...')} />
           <Route
             path="/admin/painel"
             element={
@@ -1040,23 +987,9 @@ const AppContent = ({ appReady, menuOpen, setMenuOpen, theme, onToggleTheme }) =
       {!isAdmin && (
         <>
           {footerAds.length > 0 && (
-            <div className="moby-footer-strips">
-              <Swiper
-                modules={[Autoplay]}
-                className="moby-footer-strips__swiper"
-                slidesPerView={1}
-                loop={footerAds.length > 1}
-                autoHeight
-                autoplay={footerAds.length > 1 ? { delay: 4200, disableOnInteraction: false } : false}
-                pagination={false}
-              >
-                {footerAds.map((ad, index) => (
-                  <SwiperSlide key={ad.id || `footer-ad-${index}`}>
-                    <FooterAdStrip ad={ad} />
-                  </SwiperSlide>
-                ))}
-              </Swiper>
-            </div>
+            <Suspense fallback={null}>
+              <FooterAdCarousel ads={footerAds} />
+            </Suspense>
           )}
 
           {false && (

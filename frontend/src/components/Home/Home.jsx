@@ -10,7 +10,6 @@ import homeContentBlockService from '../../services/homeContentBlockService';
 import { apiAssetPath } from '../../utils/assets';
 import { parseSafeExtraData } from '../../utils/contentSafety';
 import useDeferredSection from '../../hooks/useDeferredSection';
-import '../ProductCatalog/ProductCatalog.css';
 import './Home.css';
 
 const HomeServicesSection = lazy(() => import('./sections/HomeServicesSection'));
