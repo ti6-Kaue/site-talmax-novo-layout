@@ -45,6 +45,7 @@ const buildProductEditorState = (initialData) => {
 
   return {
     formData: {
+      sku: initialData.sku || '',
       name: initialData.name || '',
       is_active: initialData.is_active !== false,
       category_ids: initialData.category_ids || [],
@@ -90,9 +91,13 @@ const ProductForm = ({
   initialData,
   mainCategories,
   subCategories,
+  products = [],
   onSubmit,
   onCancel,
   isSubmitting = false,
+  onExistingSkuFound,
+  onSkuNotFound,
+  onSkuAlreadyLoaded,
   onValidationError
 }) => {
   const initialEditorState = useMemo(() => buildProductEditorState(initialData), [initialData]);
@@ -110,6 +115,34 @@ const ProductForm = ({
   const [activeSheetCell, setActiveSheetCell] = useState(null);
   const cellInputRefs = useRef({});
   const previews = [...existingImages, ...newImagePreviews];
+
+  const handleSkuLookup = (sku) => {
+    const normalizedSku = String(sku || '').trim().toLocaleLowerCase('pt-BR');
+
+    if (!normalizedSku) {
+      return;
+    }
+
+    if (
+      initialData?.id
+      && String(initialData.sku || '').trim().toLocaleLowerCase('pt-BR') === normalizedSku
+    ) {
+      onSkuAlreadyLoaded?.(sku);
+      return;
+    }
+
+    const matchedProduct = products.find((product) => (
+      String(product.sku || '').trim().toLocaleLowerCase('pt-BR') === normalizedSku
+      && product.id !== initialData?.id
+    ));
+
+    if (matchedProduct) {
+      onExistingSkuFound?.(matchedProduct);
+      return;
+    }
+
+    onSkuNotFound?.(sku);
+  };
 
   useEffect(() => {
     const handlePointerUp = () => {
@@ -803,6 +836,7 @@ const ProductForm = ({
     const primaryImageIndex = previews.findIndex((preview) => preview === primaryPreview);
 
     const data = new FormData();
+    data.append('sku', formData.sku);
     data.append('name', formData.name);
     data.append('is_active', String(formData.is_active));
     data.append('description', formData.description);
@@ -876,6 +910,7 @@ const ProductForm = ({
         setIsCategoryDropdownOpen={setIsCategoryDropdownOpen}
         isSubCategoryDropdownOpen={isSubCategoryDropdownOpen}
         setIsSubCategoryDropdownOpen={setIsSubCategoryDropdownOpen}
+        onSkuLookup={handleSkuLookup}
       />
 
       <DescriptionFeaturesSection

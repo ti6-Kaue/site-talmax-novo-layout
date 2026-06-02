@@ -30,16 +30,34 @@ const getNextQuoteButtonValue = (product) => (
   !shouldShowQuoteButton(parseSafeExtraData(product.extra_data).showQuoteButton)
 );
 
+const hasImageAndDescription = (product) => (
+  String(product.main_image || '').trim()
+  && String(product.description || '').trim()
+);
+
 const STATUS_OPTIONS = [
-  { value: 'all', label: 'Ver Todos' },
+  { value: 'complete', label: 'Completos' },
+  { value: 'catalog', label: 'No Catálogo' },
   { value: 'active', label: 'Somente Ativos' },
   { value: 'hidden', label: 'Somente Ocultos' }
 ];
 
+const getListDescription = (filterStatus, count) => {
+  if (filterStatus === 'complete') {
+    return `${count} produto(s) com foto principal e descrição.`;
+  }
+
+  if (filterStatus === 'catalog') {
+    return `${count} produto(s) aparecendo no catálogo.`;
+  }
+
+  return `${count} produto(s) encontrados no painel.`;
+};
+
 const AdminProductsList = ({ onOpenRegister, onEditProduct }) => {
   const { products, productsHook, addToast } = useAdmin();
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterStatus, setFilterStatus] = useState('complete');
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
   const [togglingId, setTogglingId] = useState(null);
   const statusDropdownRef = useRef(null);
@@ -61,9 +79,10 @@ const AdminProductsList = ({ onOpenRegister, onEditProduct }) => {
   const filteredProducts = useMemo(() => {
     const normalizedSearch = normalizeSearchText(searchTerm);
 
-    let result = products.filter((product) => {
+    let result = products.filter((product) => hasImageAndDescription(product)).filter((product) => {
       const searchableText = [
         product.name,
+        product.sku,
         product.id,
         product.category_names
       ]
@@ -74,7 +93,9 @@ const AdminProductsList = ({ onOpenRegister, onEditProduct }) => {
       return !normalizedSearch || searchableText.includes(normalizedSearch);
     });
 
-    if (filterStatus === 'active') {
+    if (filterStatus === 'catalog') {
+      result = result.filter((product) => product.is_active);
+    } else if (filterStatus === 'active') {
       result = result.filter((product) => product.is_active);
     } else if (filterStatus === 'hidden') {
       result = result.filter((product) => !product.is_active);
@@ -125,7 +146,7 @@ const AdminProductsList = ({ onOpenRegister, onEditProduct }) => {
         <div className="card-header admin-products-list-header">
           <div>
             <h2><Package size={20} /> Todos os Produtos</h2>
-            <p>{filteredProducts.length} produto(s) encontrados no painel.</p>
+            <p>{getListDescription(filterStatus, filteredProducts.length)}</p>
           </div>
           <div className="admin-products-list-header-actions">
             <div className="filter-group">
@@ -181,7 +202,7 @@ const AdminProductsList = ({ onOpenRegister, onEditProduct }) => {
               <Search size={16} className="product-search-icon" />
               <input
                 type="text"
-                placeholder="Buscar por nome, ID ou categoria..."
+              placeholder="Buscar por nome, SKU, ID ou categoria..."
                 className="product-search-input"
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}

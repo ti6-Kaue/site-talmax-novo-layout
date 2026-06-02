@@ -8,6 +8,7 @@ import ProductForm from './ProductForm';
 import './AdminProducts.css';
 
 const normalizeProductName = (value) => (value || '').trim().toLocaleLowerCase('pt-BR');
+const normalizeProductSku = (value) => (value || '').trim().toLocaleLowerCase('pt-BR');
 
 const AdminProducts = ({ productToEdit = null, onProductEditHandled }) => {
   const { products, categories, mainCategories, subCategories, productsHook, addToast } = useAdmin();
@@ -54,6 +55,20 @@ const AdminProducts = ({ productToEdit = null, onProductEditHandled }) => {
   const handleEdit = (product) => {
     setEditingProduct(product);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleExistingSkuFound = (product) => {
+    setEditingProduct(product);
+    setFormSessionKey((current) => current + 1);
+    addToast(`SKU encontrado. Carregando "${product.name}" para edição.`, 'success');
+  };
+
+  const handleSkuNotFound = (sku) => {
+    addToast(`Produto com SKU "${sku}" não encontrado.`, 'error');
+  };
+
+  const handleSkuAlreadyLoaded = (sku) => {
+    addToast(`Produto com SKU "${sku}" já está carregado no formulário.`, 'success');
   };
 
   const handleDeleteClick = (product) => {
@@ -122,9 +137,14 @@ const AdminProducts = ({ productToEdit = null, onProductEditHandled }) => {
     if (isSubmitting) return;
 
     const incomingName = normalizeProductName(formData.get('name'));
+    const incomingSku = normalizeProductSku(formData.get('sku'));
+    const existingSkuProduct = incomingSku
+      ? products.find((product) => normalizeProductSku(product.sku) === incomingSku)
+      : null;
+    const targetProduct = editingProduct || existingSkuProduct || null;
     const duplicateProduct = activeProducts.find((product) => (
       normalizeProductName(product.name) === incomingName
-      && product.id !== editingProduct?.id
+      && product.id !== targetProduct?.id
     ));
 
     if (duplicateProduct) {
@@ -138,6 +158,8 @@ const AdminProducts = ({ productToEdit = null, onProductEditHandled }) => {
     try {
       if (editingProduct) {
         result = await productsHook.updateProduct(editingProduct.id, formData);
+      } else if (existingSkuProduct) {
+        result = await productsHook.updateProduct(existingSkuProduct.id, formData);
       } else {
         result = await productsHook.createProduct(formData);
       }
@@ -146,9 +168,9 @@ const AdminProducts = ({ productToEdit = null, onProductEditHandled }) => {
     }
 
     if (result.success) {
-      addToast(editingProduct ? 'Produto atualizado com sucesso!' : 'Produto cadastrado com sucesso!');
+      addToast(targetProduct ? 'Produto atualizado com sucesso!' : 'Produto cadastrado com sucesso!');
 
-      if (editingProduct) {
+      if (targetProduct) {
         setEditingProduct(null);
         setFormSessionKey((current) => current + 1);
       } else {
@@ -222,9 +244,13 @@ const AdminProducts = ({ productToEdit = null, onProductEditHandled }) => {
                 categories={categories}
                 mainCategories={mainCategories}
                 subCategories={subCategories}
+                products={products}
                 onSubmit={handleSubmit}
                 onCancel={handleCancel}
                 isSubmitting={isSubmitting}
+                onExistingSkuFound={handleExistingSkuFound}
+                onSkuNotFound={handleSkuNotFound}
+                onSkuAlreadyLoaded={handleSkuAlreadyLoaded}
                 onValidationError={(message) => addToast(message, 'error')}
               />
             </div>

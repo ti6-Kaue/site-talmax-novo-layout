@@ -203,6 +203,7 @@ const productExtraDataInputSchema = z.object({
 }).strict();
 
 const productWritePayloadSchema = z.object({
+  sku: optionalTextValueSchema('O SKU do produto', 120).default(''),
   name: stringField('O nome do produto', { minLength: 1, maxLength: 255 }),
   description: optionalTextValueSchema('A descricao do produto', 50000, { preserveNewlines: true }).default(''),
   category_ids: idListSchema('Cada categoria principal', { minItems: 1 }),
@@ -468,6 +469,7 @@ const validateProductWritePayload = (payload) => validateWithSchema(productWrite
 const validateQuoteButtonPayload = (payload) => validateWithSchema(quoteButtonPayloadSchema, payload);
 const validateSpecialSectionPayload = (payload) => validateWithSchema(specialSectionPayloadSchema, payload);
 const parseProductWriteRequest = (body = {}) => validateProductWritePayload({
+  sku: body.sku,
   name: body.name,
   description: body.description,
   category_ids: parseJsonField(body.category_ids, idListSchema('Cada categoria principal', { minItems: 1 }), 'category_ids'),

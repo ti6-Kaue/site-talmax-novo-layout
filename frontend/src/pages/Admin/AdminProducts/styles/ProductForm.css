@@ -126,6 +126,32 @@
   line-height: 1.55;
 }
 
+.sku-search-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.sku-search-button {
+  min-height: 42px;
+  white-space: nowrap;
+}
+
+.admin-products-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 18px;
+}
+
+.admin-products-pagination span {
+  color: var(--admin-text-light);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
 .product-banner-manager {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;

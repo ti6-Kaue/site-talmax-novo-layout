@@ -1,4 +1,5 @@
 export const createInitialFormState = () => ({
+  sku: '',
   name: '',
   is_active: true,
   category_ids: [],

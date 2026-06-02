@@ -20,6 +20,7 @@ const ProductTable = ({ products, onCreate, onEdit, onDelete, onToggleActive, on
     return products.filter((product) => {
       const searchableText = [
         product.name,
+        product.sku,
         product.id,
         product.category_names
       ]
@@ -47,7 +48,7 @@ const ProductTable = ({ products, onCreate, onEdit, onDelete, onToggleActive, on
         <Search size={16} className="product-search-icon" />
         <input
           type="text"
-          placeholder="Buscar por nome, ID ou categoria..."
+          placeholder="Buscar por nome, SKU, ID ou categoria..."
           className="product-search-input"
           value={searchTerm}
           onChange={(event) => setSearchTerm(event.target.value)}
@@ -73,7 +74,7 @@ const ProductTable = ({ products, onCreate, onEdit, onDelete, onToggleActive, on
               )}
               <div className="product-info">
                 <h4>{product.name}</h4>
-                <p>ID: #{product.id}</p>
+                <p>{product.sku ? `SKU: ${product.sku}` : `ID: #${product.id}`}</p>
               </div>
             </div>
 

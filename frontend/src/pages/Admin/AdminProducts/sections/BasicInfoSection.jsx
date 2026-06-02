@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle, ChevronRight, X } from 'lucide-react';
+import { CheckCircle, ChevronRight, Search, X } from 'lucide-react';
 
 const BasicInfoSection = ({
   formData,
@@ -10,10 +10,38 @@ const BasicInfoSection = ({
   isCategoryDropdownOpen,
   setIsCategoryDropdownOpen,
   isSubCategoryDropdownOpen,
-  setIsSubCategoryDropdownOpen
+  setIsSubCategoryDropdownOpen,
+  onSkuLookup
 }) => (
   <div className="admin-section-group">
     <span className="section-label">1. Informacoes Basicas</span>
+
+    <div className="form-group">
+      <label>SKU</label>
+      <div className="sku-search-field">
+        <input
+          type="text"
+          value={formData.sku}
+          onChange={(e) => setFormData((current) => ({ ...current, sku: e.target.value }))}
+          onBlur={(e) => onSkuLookup?.(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              onSkuLookup?.(e.currentTarget.value);
+            }
+          }}
+        />
+        <button
+          type="button"
+          className="btn-secondary sku-search-button"
+          onClick={() => onSkuLookup?.(formData.sku)}
+          title="Buscar SKU"
+        >
+          <Search size={16} />
+          Buscar
+        </button>
+      </div>
+    </div>
 
     <div className="form-group">
       <label>Nome Comercial</label>

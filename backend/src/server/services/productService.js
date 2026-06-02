@@ -246,6 +246,7 @@ const attachTabsToProducts = async (db, products = []) => {
 
 const formatProductRow = (row) => ({
   ...row,
+  sku: sanitizeTextInput(row.sku || '', { preserveNewlines: false }),
   name: sanitizeTextInput(row.name || '', { preserveNewlines: false }),
   description: sanitizeTextInput(row.description || '', { preserveNewlines: true }),
   main_image: sanitizeAssetReference(row.main_image || ''),
@@ -280,6 +281,13 @@ const normalizeSlugList = (value = []) => (
 
 const buildProductGroupByClause = () => ' GROUP BY p.id';
 
+const buildPublicCompleteProductCondition = () => `
+  p.main_image IS NOT NULL
+  AND TRIM(p.main_image) <> ''
+  AND p.description IS NOT NULL
+  AND TRIM(p.description) <> ''
+`;
+
 const buildProductListWhereClause = (options = {}) => {
   const {
     includeInactive = false,
@@ -294,6 +302,7 @@ const buildProductListWhereClause = (options = {}) => {
 
   if (!includeInactive) {
     conditions.push('p.is_active = 1');
+    conditions.push(buildPublicCompleteProductCondition());
   }
 
   if (normalizedSearch) {
@@ -302,6 +311,7 @@ const buildProductListWhereClause = (options = {}) => {
     conditions.push(`
       (
         LOWER(TRIM(p.name)) LIKE ?
+        OR LOWER(TRIM(COALESCE(p.sku, ''))) LIKE ?
         OR EXISTS (
           SELECT 1
           FROM categorias c
@@ -325,7 +335,7 @@ const buildProductListWhereClause = (options = {}) => {
       )
     `);
 
-    params.push(searchWildcard, searchWildcard, searchWildcard);
+    params.push(searchWildcard, searchWildcard, searchWildcard, searchWildcard);
   }
 
   if (filteredCategorySlugs.length > 0) {
@@ -367,7 +377,7 @@ const buildProductListWhereClause = (options = {}) => {
 const listProducts = async (db, options = {}) => {
   await ensureProductDatabaseTables(db);
   const { includeInactive = false, includeTabs = false } = options;
-  const whereClause = includeInactive ? '' : ' WHERE p.is_active = 1';
+  const whereClause = includeInactive ? '' : ` WHERE p.is_active = 1 AND ${buildPublicCompleteProductCondition()}`;
   const [rows] = await db.query(`${PRODUCT_SELECT_QUERY}${whereClause}${buildProductGroupByClause()} ORDER BY p.id DESC`);
   const products = rows.map(formatProductRow);
   return includeTabs ? attachTabsToProducts(db, products) : products;

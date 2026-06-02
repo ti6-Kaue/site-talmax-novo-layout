@@ -33,6 +33,7 @@ import './AdminBase.css';
 
 const AdminProducts = lazy(() => import('./AdminProducts/AdminProducts'));
 const AdminProductsList = lazy(() => import('./AdminProducts/AdminProductsList'));
+const AdminProductQuickSearch = lazy(() => import('./AdminProducts/AdminProductQuickSearch'));
 const AdminCategories = lazy(() => import('./AdminCategories/AdminCategories'));
 const AdminCategoryPages = lazy(() => import('./AdminCategoryPages/AdminCategoryPages'));
 const AdminBanners = lazy(() => import('./AdminBanners/AdminBanners'));
@@ -105,6 +106,7 @@ const AdminDashboardContent = () => {
   const catalogItems = [
     { id: 'products', label: 'Cadastro de Produtos', icon: <Package size={18} /> },
     { id: 'products-list', label: 'Lista de Produtos', icon: <Search size={18} /> },
+    { id: 'products-quick-search', label: 'Busca Rápida', icon: <Search size={18} /> },
     { id: 'category-pages', label: 'Pagina de Categoria', icon: <ImageIcon size={18} /> },
   ];
   const homeItems = [
@@ -152,6 +154,16 @@ const AdminDashboardContent = () => {
             }}
           />,
           'Carregando lista de produtos...'
+        );
+      case 'products-quick-search':
+        return withAdminSectionLoader(
+          <AdminProductQuickSearch
+            onEditProduct={(product) => {
+              setProductToEdit(product);
+              setActiveTab('products');
+            }}
+          />,
+          'Carregando busca rápida...'
         );
       case 'categories':
         return withAdminSectionLoader(<AdminCategories />, 'Carregando categorias...');

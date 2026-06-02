@@ -224,9 +224,18 @@ const buildPublicProductPagination = (query = {}) => {
 const filterBackupProducts = (products, categories, options = {}) => {
   const normalizedSearch = normalizeSearchableText(options.search || '');
   const normalizedCategorySlugs = parseStringArray(options.categorySlugs).map(normalizeSearchableText);
+  const visibleProducts = products.filter((product) => (
+    options.includeInactive
+    || (
+      product.is_active !== false
+      && product.is_active !== 0
+      && safe(product.main_image).trim()
+      && safe(product.description).trim()
+    )
+  ));
 
   if (!normalizedSearch && normalizedCategorySlugs.length === 0) {
-    return products;
+    return visibleProducts;
   }
 
   const categoriesBySlug = new Map(
@@ -254,7 +263,7 @@ const filterBackupProducts = (products, categories, options = {}) => {
     }
   });
 
-  return products.filter((product) => {
+  return visibleProducts.filter((product) => {
     const searchableText = normalizeSearchableText([
       product.name,
       product.category_names
@@ -346,18 +355,24 @@ router.get('/', async (req, res, next) => {
   } catch (err) {
     try {
       const backupProducts = listBackupProducts({ includeInactive });
+      const visibleBackupProducts = includeInactive
+        ? backupProducts
+        : backupProducts.filter((product) => (
+          safe(product.main_image).trim()
+          && safe(product.description).trim()
+        ));
 
       if (shouldPaginate) {
         const filteredBackupProducts = filterBackupProducts(
-          backupProducts,
+          visibleBackupProducts,
           listBackupCategories(),
-          publicPagination
+          { ...publicPagination, includeInactive }
         );
 
         return res.json(paginateProducts(filteredBackupProducts, publicPagination));
       }
 
-      return res.json(backupProducts);
+      return res.json(visibleBackupProducts);
     } catch (backupError) {
       return next(wrapError(err, {
         publicMessage: 'Erro ao listar produtos.',
@@ -408,6 +423,7 @@ router.post('/', requireAdminSession, productUpload, async (req, res, next) => {
     await connection.beginTransaction();
 
     const payload = parseProductWriteRequest(req.body);
+    const normalizedSku = normalizeProductText(payload.sku);
     const normalizedName = normalizeProductText(payload.name);
     const normalizedDescription = normalizeProductText(payload.description);
     const parsedCategoryIds = payload.category_ids;
@@ -454,8 +470,8 @@ router.post('/', requireAdminSession, productUpload, async (req, res, next) => {
     const isActive = payload.is_active === false ? 0 : 1;
 
     const [result] = await connection.query(
-      `INSERT INTO ${PRODUCTS_TABLE_NAME} (name, description, main_image, extra_data, is_active) VALUES (?, ?, ?, ?, ?)`,
-      [normalizedName, normalizedDescription, safe(mergedImagePaths[0]), JSON.stringify(extra), isActive]
+      `INSERT INTO ${PRODUCTS_TABLE_NAME} (sku, name, description, main_image, extra_data, is_active) VALUES (?, ?, ?, ?, ?, ?)`,
+      [normalizedSku || null, normalizedName, normalizedDescription, safe(mergedImagePaths[0]), JSON.stringify(extra), isActive]
     );
 
     const productId = result.insertId;
@@ -485,6 +501,7 @@ router.put('/:id', requireAdminSession, productUpload, async (req, res, next) =>
     await connection.beginTransaction();
 
     const payload = parseProductWriteRequest(req.body);
+    const sku = normalizeProductText(payload.sku);
     const name = normalizeProductText(payload.name);
     const description = normalizeProductText(payload.description);
     const parsedCategoryIds = payload.category_ids;
@@ -546,8 +563,8 @@ router.put('/:id', requireAdminSession, productUpload, async (req, res, next) =>
     extra.images = mergedImagePaths;
     applyProductBannerToExtraData(extra, newBannerPaths);
 
-    let query = `UPDATE ${PRODUCTS_TABLE_NAME} SET name=?, description=?, extra_data=?, main_image=?, is_active=?`;
-    const params = [name, description, JSON.stringify(extra), safe(mergedImagePaths[0]), isActive];
+    let query = `UPDATE ${PRODUCTS_TABLE_NAME} SET sku=?, name=?, description=?, extra_data=?, main_image=?, is_active=?`;
+    const params = [sku || null, name, description, JSON.stringify(extra), safe(mergedImagePaths[0]), isActive];
 
     query += ' WHERE id=?';
     params.push(productId);
