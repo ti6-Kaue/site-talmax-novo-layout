@@ -36,19 +36,19 @@ const hasImageAndDescription = (product) => (
 );
 
 const STATUS_OPTIONS = [
+  { value: 'active', label: 'Ativos' },
+  { value: 'all', label: 'Ver Todos' },
   { value: 'complete', label: 'Completos' },
-  { value: 'catalog', label: 'No Catálogo' },
-  { value: 'active', label: 'Somente Ativos' },
   { value: 'hidden', label: 'Somente Ocultos' }
 ];
 
 const getListDescription = (filterStatus, count) => {
-  if (filterStatus === 'complete') {
-    return `${count} produto(s) com foto principal e descrição.`;
+  if (filterStatus === 'active') {
+    return `${count} item(ns) encontrados`;
   }
 
-  if (filterStatus === 'catalog') {
-    return `${count} produto(s) aparecendo no catálogo.`;
+  if (filterStatus === 'complete') {
+    return `${count} produto(s) com foto principal e descrição.`;
   }
 
   return `${count} produto(s) encontrados no painel.`;
@@ -57,7 +57,7 @@ const getListDescription = (filterStatus, count) => {
 const AdminProductsList = ({ onOpenRegister, onEditProduct }) => {
   const { products, productsHook, addToast } = useAdmin();
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('complete');
+  const [filterStatus, setFilterStatus] = useState('active');
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
   const [togglingId, setTogglingId] = useState(null);
   const statusDropdownRef = useRef(null);
@@ -79,7 +79,7 @@ const AdminProductsList = ({ onOpenRegister, onEditProduct }) => {
   const filteredProducts = useMemo(() => {
     const normalizedSearch = normalizeSearchText(searchTerm);
 
-    let result = products.filter((product) => hasImageAndDescription(product)).filter((product) => {
+    let result = products.filter((product) => {
       const searchableText = [
         product.name,
         product.sku,
@@ -93,10 +93,10 @@ const AdminProductsList = ({ onOpenRegister, onEditProduct }) => {
       return !normalizedSearch || searchableText.includes(normalizedSearch);
     });
 
-    if (filterStatus === 'catalog') {
+    if (filterStatus === 'active') {
       result = result.filter((product) => product.is_active);
-    } else if (filterStatus === 'active') {
-      result = result.filter((product) => product.is_active);
+    } else if (filterStatus === 'complete') {
+      result = result.filter((product) => hasImageAndDescription(product));
     } else if (filterStatus === 'hidden') {
       result = result.filter((product) => !product.is_active);
     }

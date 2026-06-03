@@ -95,6 +95,13 @@ const createApp = () => {
   applySecurityHeaders(app);
   app.use(attachRequestId);
   app.use(corsMiddleware);
+  app.use((req, res, next) => {
+    if (req.method === 'OPTIONS') {
+      return res.sendStatus(204);
+    }
+
+    return next();
+  });
   app.use(createCompressionMiddleware());
   app.use(express.json());
   app.use('/api', requireTrustedWriteOrigin);

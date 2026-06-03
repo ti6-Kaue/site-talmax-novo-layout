@@ -25,6 +25,7 @@ const {
   listProducts,
   listProductsPage,
   findProductById,
+  findProductBySku,
   attachProductCategories,
   replaceProductTabs,
   ensureProductDatabaseTables,
@@ -513,16 +514,26 @@ router.put('/:id', requireAdminSession, productUpload, async (req, res, next) =>
     const requestedExtraData = payload.extra_data;
     const extra = normalizeProductExtraDataForStorage(requestedExtraData);
     const productTabs = Array.isArray(extra.product_tabs) ? extra.product_tabs : [];
-    const duplicateProduct = await findDuplicateProductByName(connection, name, productId);
     const retainedImagePaths = normalizeImageList(extra.images);
     const removedImagePaths = normalizeImageList(requestedExtraData.removedImages);
-    const currentProduct = await findProductById(connection, productId);
+    let resolvedProductId = productId;
+    let currentProduct = await findProductById(connection, productId, { includeInactive: true });
+    const productBySku = sku ? await findProductBySku(connection, sku, { includeInactive: true }) : null;
+
+    if (productBySku && Number(productBySku.id) !== productId) {
+      currentProduct = productBySku;
+      resolvedProductId = Number(productBySku.id);
+    } else if (!currentProduct && productBySku) {
+      currentProduct = productBySku;
+      resolvedProductId = Number(productBySku.id);
+    }
 
     if (!currentProduct) {
       await rollbackIfPossible(connection);
       return res.status(404).json({ error: 'Produto não encontrado.' });
     }
 
+    const duplicateProduct = await findDuplicateProductByName(connection, name, resolvedProductId);
     const currentExtra = normalizeStoredProductExtraData(currentProduct.extra_data);
     const storedImagePaths = buildStoredImageList(currentProduct.main_image, currentExtra.images);
     const preservedImagePaths = [
@@ -567,11 +578,11 @@ router.put('/:id', requireAdminSession, productUpload, async (req, res, next) =>
     const params = [sku || null, name, description, JSON.stringify(extra), safe(mergedImagePaths[0]), isActive];
 
     query += ' WHERE id=?';
-    params.push(productId);
+    params.push(resolvedProductId);
 
     await connection.query(query, params.map(safe));
-    await attachProductCategories(connection, productId, parsedCategoryIds, parsedSubCategoryIds);
-    await replaceProductTabs(connection, productId, productTabs);
+    await attachProductCategories(connection, resolvedProductId, parsedCategoryIds, parsedSubCategoryIds);
+    await replaceProductTabs(connection, resolvedProductId, productTabs);
 
     await connection.commit();
     return res.json({ message: 'Produto atualizado!' });

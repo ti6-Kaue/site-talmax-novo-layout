@@ -9,7 +9,7 @@ export const productService = {
   },
 
   getById: async (id) => {
-    const res = await fetch(`${API_URL}/products/${id}`, createAdminRequestOptions());
+    const res = await fetch(`${API_URL}/products/${id}?include_inactive=true`, createAdminRequestOptions());
     if (!res.ok) throw new Error('Erro ao carregar produto');
     return res.json();
   },
@@ -24,7 +24,7 @@ export const productService = {
   },
 
   update: async (id, formData) => {
-    const res = await fetch(`${API_URL}/products/${id}`, createAdminRequestOptions({
+    const res = await fetch(`${API_URL}/products/${id}?include_inactive=true`, createAdminRequestOptions({
       method: 'PUT',
       body: formData
     }));

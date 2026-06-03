@@ -24,11 +24,21 @@ const isAllowedOrigin = (origin) => {
   return allowedOrigins.has(normalizedOrigin) || isAllowedDevelopmentOrigin(normalizedOrigin);
 };
 
-const isAllowedDevelopmentOrigin = (origin) => {
-  if (isProduction) {
+const isLocalhostOrigin = (origin) => {
+  try {
+    const parsedOrigin = new URL(origin);
+    const hostname = parsedOrigin.hostname.toLowerCase();
+
+    return hostname === 'localhost'
+      || hostname === '127.0.0.1'
+      || hostname === '::1'
+      || hostname === '[::1]';
+  } catch (error) {
     return false;
   }
+};
 
+const isAllowedDevelopmentOrigin = (origin) => {
   try {
     const parsedOrigin = new URL(origin);
     const normalizedHostname = parsedOrigin.hostname.toLowerCase();
@@ -36,7 +46,15 @@ const isAllowedDevelopmentOrigin = (origin) => {
     const isLoopbackHost = normalizedHostname === 'localhost' || normalizedHostname === '127.0.0.1' || normalizedHostname === '[::1]';
     const isPrivateNetworkHost = privateNetworkHostnamePattern.test(normalizedHostname) || normalizedHostname.endsWith('.local');
 
-    return developmentPorts.has(normalizedPort) && (isLoopbackHost || isPrivateNetworkHost);
+    if (isLoopbackHost) {
+      return true;
+    }
+
+    if (isProduction) {
+      return false;
+    }
+
+    return developmentPorts.has(normalizedPort) && isPrivateNetworkHost;
   } catch (error) {
     return false;
   }
@@ -75,7 +93,7 @@ const corsMiddleware = cors({
       return callback(null, true);
     }
 
-    if (isAllowedOrigin(origin)) {
+    if (isAllowedOrigin(origin) || isLocalhostOrigin(origin)) {
       return callback(null, true);
     }
 
@@ -83,7 +101,8 @@ const corsMiddleware = cors({
   },
   credentials: true,
   allowedHeaders,
-  methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
+  methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  optionsSuccessStatus: 204
 });
 
 module.exports = corsMiddleware;

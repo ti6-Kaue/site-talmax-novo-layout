@@ -10,7 +10,7 @@ const envPath = path.resolve(__dirname, '.env');
 const envFileLoaded = fs.existsSync(envPath);
 
 if (envFileLoaded) {
-  dotenv.config({ path: envPath });
+  dotenv.config({ path: envPath, override: true });
 }
 
 dotenv.config();

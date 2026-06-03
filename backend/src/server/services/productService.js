@@ -121,6 +121,7 @@ const ensureProductIndexes = async (db) => {
   await addIndexIfNeeded(db, `ALTER TABLE ${PRODUCTS_TABLE_NAME} ADD INDEX idx_produtos_active_id (is_active, id)`);
   await addIndexIfNeeded(db, `ALTER TABLE ${PRODUCTS_TABLE_NAME} ADD INDEX idx_produtos_featured_active (is_featured, is_active)`);
   await addIndexIfNeeded(db, `ALTER TABLE ${PRODUCTS_TABLE_NAME} ADD INDEX idx_produtos_name (name)`);
+  await addIndexIfNeeded(db, `ALTER TABLE ${PRODUCTS_TABLE_NAME} ADD INDEX idx_produtos_sku (sku)`);
   await addIndexIfNeeded(db, `ALTER TABLE ${PRODUCTS_TABLE_NAME} ADD INDEX idx_produtos_upcera_order (is_upcera, upcera_order)`);
   await addIndexIfNeeded(db, `ALTER TABLE ${PRODUCTS_TABLE_NAME} ADD INDEX idx_produtos_scanner_order (is_scanner, scanner_order)`);
   await addIndexIfNeeded(db, `ALTER TABLE ${PRODUCTS_TABLE_NAME} ADD INDEX idx_produtos_printer_order (is_3d_printer, printer_order)`);
@@ -440,6 +441,28 @@ const findProductById = async (db, productId, options = {}) => {
   return product || null;
 };
 
+const findProductBySku = async (db, sku, options = {}) => {
+  await ensureProductDatabaseTables(db);
+  const normalizedSku = sanitizeTextInput(sku || '', { preserveNewlines: false }).trim();
+
+  if (!normalizedSku) {
+    return null;
+  }
+
+  const { includeInactive = false } = options;
+  const [rows] = await db.query(
+    `${PRODUCT_SELECT_QUERY} WHERE LOWER(TRIM(COALESCE(p.sku, ''))) = LOWER(TRIM(?))${includeInactive ? '' : ' AND p.is_active = 1'}${buildProductGroupByClause()} LIMIT 1`,
+    [normalizedSku]
+  );
+
+  if (!rows[0]) {
+    return null;
+  }
+
+  const [product] = await attachTabsToProducts(db, [formatProductRow(rows[0])]);
+  return product || null;
+};
+
 const attachProductCategories = async (connection, productId, mainCategoryIds, subCategoryIds) => {
   await ensureProductDatabaseTables(connection);
   const validMainIds = Array.from(new Set(
@@ -531,6 +554,7 @@ module.exports = {
   listProducts,
   listProductsPage,
   findProductById,
+  findProductBySku,
   attachProductCategories,
   replaceProductTabs,
   ensureProductDatabaseTables,

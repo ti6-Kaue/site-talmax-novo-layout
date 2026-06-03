@@ -141,7 +141,7 @@ const AdminProducts = ({ productToEdit = null, onProductEditHandled }) => {
     const existingSkuProduct = incomingSku
       ? products.find((product) => normalizeProductSku(product.sku) === incomingSku)
       : null;
-    const targetProduct = editingProduct || existingSkuProduct || null;
+    const targetProduct = existingSkuProduct || editingProduct || null;
     const duplicateProduct = activeProducts.find((product) => (
       normalizeProductName(product.name) === incomingName
       && product.id !== targetProduct?.id
@@ -156,10 +156,10 @@ const AdminProducts = ({ productToEdit = null, onProductEditHandled }) => {
     let result;
 
     try {
-      if (editingProduct) {
-        result = await productsHook.updateProduct(editingProduct.id, formData);
-      } else if (existingSkuProduct) {
+      if (existingSkuProduct) {
         result = await productsHook.updateProduct(existingSkuProduct.id, formData);
+      } else if (editingProduct) {
+        result = await productsHook.updateProduct(editingProduct.id, formData);
       } else {
         result = await productsHook.createProduct(formData);
       }

@@ -16,6 +16,18 @@ export default defineConfig(({ mode }) => {
 
   return {
     base: normalizeBasePath(env.VITE_PUBLIC_BASE_PATH),
-    plugins: [react()]
+    plugins: [react()],
+    server: {
+      proxy: {
+        '/api': {
+          target: env.VITE_API_PROXY_TARGET || 'http://localhost:5000',
+          changeOrigin: true
+        },
+        '/img': {
+          target: env.VITE_API_PROXY_TARGET || 'http://localhost:5000',
+          changeOrigin: true
+        }
+      }
+    }
   };
 });
