@@ -27,6 +27,7 @@ export const AdminProvider = ({ children }) => {
   const bannersHook = useBanners();
   const [sessionUser, setSessionUser] = useState(null);
   const [isSessionLoading, setIsSessionLoading] = useState(true);
+  const [hasCompletedInitialLoad, setHasCompletedInitialLoad] = useState(false);
 
   // Toasts sao avisos temporarios exibidos na interface, como:
   // "Produto salvo com sucesso" ou "Erro ao excluir banner".
@@ -74,6 +75,14 @@ export const AdminProvider = ({ children }) => {
     }, 3000);
   };
 
+  const isLoadingAdminData = isSessionLoading || productsHook.loading || categoriesHook.loading || bannersHook.loading;
+
+  useEffect(() => {
+    if (!isLoadingAdminData) {
+      setHasCompletedInitialLoad(true);
+    }
+  }, [isLoadingAdminData]);
+
   // Este objeto e o "pacote" que o contexto entrega para quem usar `useAdmin()`.
   //
   // Ele contem:
@@ -91,8 +100,8 @@ export const AdminProvider = ({ children }) => {
     sessionUser,
     isMasterAdmin: sessionUser?.role === 'master',
 
-    // Se qualquer area estiver carregando, o admin inteiro pode considerar loading.
-    loading: isSessionLoading || productsHook.loading || categoriesHook.loading || bannersHook.loading,
+    // Mostra a tela cheia somente na primeira carga do painel.
+    loading: !hasCompletedInitialLoad && isLoadingAdminData,
 
     // O mesmo raciocinio vale para erro:
     // se qualquer hook falhar, o contexto expoe esse erro para a interface.

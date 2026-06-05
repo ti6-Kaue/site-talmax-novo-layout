@@ -34,7 +34,7 @@ export const useProducts = () => {
   const createProduct = async (formData) => {
     try {
       await productService.create(formData);
-      await fetchProducts();
+      await fetchProducts({ silent: true });
       return { success: true };
     } catch (err) {
       return { success: false, error: err.message };
@@ -44,7 +44,7 @@ export const useProducts = () => {
   const updateProduct = async (id, formData) => {
     try {
       await productService.update(id, formData);
-      await fetchProducts();
+      await fetchProducts({ silent: true });
       return { success: true };
     } catch (err) {
       return { success: false, error: err.message };
