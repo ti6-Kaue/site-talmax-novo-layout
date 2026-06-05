@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAdmin } from '../../../context/useAdmin';
 import SpecialSectionManager from '../AdminSpecialSection/SpecialSectionManager';
+import '../AdminProducts/AdminProducts.css';
 import '../AdminSpecialSection/SpecialSectionManager.css';
 
 const AdminFeatured = () => {
