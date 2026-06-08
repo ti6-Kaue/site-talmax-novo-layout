@@ -752,19 +752,17 @@
 
 .table-container {
   overflow-x: auto;
-  border-radius: 22px;
-  border: 1px solid #dbe5f1;
-  background:
-    linear-gradient(180deg, rgba(248, 250, 252, 0.96), rgba(255, 255, 255, 1)),
-    radial-gradient(circle at top right, rgba(55, 76, 146, 0.08), transparent 42%);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+  border-radius: 8px;
+  border: 1px solid #94a3b8;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
 }
 
 .models-table {
   width: 100%;
-  border-collapse: separate;
+  border-collapse: collapse;
   border-spacing: 0;
-  background: transparent;
+  background: #ffffff;
   overflow: hidden;
   box-shadow: none;
 }
@@ -803,26 +801,27 @@
 }
 
 .models-table th {
-  background: linear-gradient(135deg, #eef5ff 0%, #dbeafe 100%);
-  padding: 1.15rem 1.25rem;
-  font-weight: 700;
-  color: #1e3a5f;
-  text-transform: none;
+  background: #d8e7f8;
+  padding: 0.95rem 1.1rem;
+  font-weight: 800;
+  color: #08244a;
   font-size: 0.84rem;
   letter-spacing: 0.04em;
-  border-bottom: 1px solid #cfe0f5;
+  border-right: 1px solid #a9bdd4;
+  border-bottom: 2px solid #8aa7c8;
   text-align: center;
   white-space: nowrap;
 }
 
 .models-table td {
-  padding: 1.15rem 1.25rem;
-  color: #334155;
-  border-bottom: 1px solid #e2e8f0;
+  padding: 0.9rem 1.1rem;
+  color: #1e293b;
+  border-right: 1px solid #b8c4d2;
+  border-bottom: 1px solid #b8c4d2;
   font-size: 1rem;
   font-weight: 600;
   text-align: center;
-  background: rgba(255,255,255,0.96);
+  background: #ffffff;
 }
 
 .models-table__single-cell-row {
@@ -840,11 +839,16 @@
 }
 
 .models-table tbody tr:nth-child(even) td {
-  background: #f8fbff;
+  background: #ffffff;
 }
 
 .models-table tbody tr:last-child td {
   border-bottom: none;
+}
+
+.models-table th:last-child,
+.models-table td:last-child {
+  border-right: none;
 }
 
 .models-table:not(.strip-mode) tr td:first-child, 
@@ -859,8 +863,8 @@
 }
 
 .models-table tr:hover td {
-  background: #edf6ff;
-  color: #1d4f80;
+  background: #ffffff;
+  color: #1e293b;
 }
 
 /* Related Products Section */
